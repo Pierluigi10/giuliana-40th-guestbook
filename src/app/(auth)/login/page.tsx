@@ -1,0 +1,31 @@
+import { LoginForm } from '@/components/auth/LoginForm'
+import Link from 'next/link'
+import { Suspense } from 'react'
+
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent">
+            Accedi
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Benvenuto al guestbook di Giuliana
+          </p>
+        </div>
+
+        <Suspense fallback={<div>Caricamento...</div>}>
+          <LoginForm />
+        </Suspense>
+
+        <p className="text-center text-sm text-muted-foreground">
+          Non hai un account?{' '}
+          <Link href="/register" className="font-medium text-birthday-purple hover:underline">
+            Registrati
+          </Link>
+        </p>
+      </div>
+    </div>
+  )
+}
