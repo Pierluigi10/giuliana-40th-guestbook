@@ -1,0 +1,964 @@
+{
+  "project": {
+    "name": "Guestbook 40° Compleanno Giuliana",
+    "version": "1.0.0",
+    "timeline": "2 settimane",
+    "target_users": "20-50 amici + 1 admin + 1 VIP",
+    "stack": "Next.js 14 (TypeScript) + Supabase + Shadcn/ui"
+  },
+  "requirements": [
+    {
+      "category": "Authentication & Authorization",
+      "id": "AUTH-001",
+      "description": "Implementare sistema di registrazione per guest con email e nome completo. Gli utenti registrati devono avere stato 'pending' fino ad approvazione admin.",
+      "acceptance_criteria": [
+        "Form registrazione con campi: email (validato), full_name, password",
+        "Dopo submit, utente creato in Supabase Auth con role='guest' e is_approved=false",
+        "Redirect a pagina 'Pending Approval' con messaggio esplicativo",
+        "Email di conferma registrazione inviata automaticamente"
+      ],
+      "steps_to_verify": [
+        "1. Aprire /register",
+        "2. Compilare form con email test@example.com, nome 'Mario Rossi', password",
+        "3. Submit form",
+        "4. Verificare redirect a /pending-approval",
+        "5. Controllare Supabase Dashboard → Authentication → Users: trovare utente con role='guest', is_approved=false",
+        "6. Verificare email ricevuta (check inbox o Supabase logs)"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Authentication & Authorization",
+      "id": "AUTH-002",
+      "description": "Implementare login per tutti i ruoli (admin, vip, guest) con validazione stato approvazione per guest.",
+      "acceptance_criteria": [
+        "Form login con email e password",
+        "Autenticazione tramite Supabase Auth",
+        "Guest non approvati (is_approved=false) vedono messaggio 'In attesa di approvazione' e non possono accedere alle aree protette",
+        "Guest approvati accedono a /guest/upload",
+        "Admin accede a /admin/dashboard",
+        "VIP accede a /vip/gallery"
+      ],
+      "steps_to_verify": [
+        "1. Aprire /login",
+        "2. Login come guest non approvato → verificare redirect a /pending-approval",
+        "3. Admin approva guest da dashboard",
+        "4. Logout e login nuovamente come guest → verificare accesso a /guest/upload",
+        "5. Login come admin → verificare accesso a /admin/*",
+        "6. Login come VIP (Giuliana) → verificare accesso a /vip/gallery"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Authentication & Authorization",
+      "id": "AUTH-003",
+      "description": "Implementare middleware Next.js per protezione route basata su ruoli. Le route devono essere protette lato server (non solo UI).",
+      "acceptance_criteria": [
+        "File middleware.ts che intercetta tutte le richieste",
+        "Route /admin/* accessibili solo a role='admin'",
+        "Route /vip/* accessibili solo a role='vip'",
+        "Route /guest/* accessibili solo a guest con is_approved=true",
+        "Accesso non autorizzato → redirect a /login con messaggio errore",
+        "Protezione lato server (non bypassabile da client)"
+      ],
+      "steps_to_verify": [
+        "1. Logout completo (cancellare sessione)",
+        "2. Tentare accesso diretto a /admin/approve-users → verificare redirect a /login",
+        "3. Login come guest approvato → tentare /admin/approve-users → verificare redirect/403",
+        "4. Login come guest approvato → tentare /vip/gallery → verificare redirect/403",
+        "5. Login come VIP → tentare /admin/approve-users → verificare redirect/403",
+        "6. Testare bypass con cURL o Postman → verificare 401/403"
+      ],
+      "passes": false
+    },
+    {
+      "category": "User Management - Admin",
+      "id": "ADMIN-001",
+      "description": "Dashboard admin per visualizzare lista di guest pending approvazione con informazioni utente (email, nome, data registrazione).",
+      "acceptance_criteria": [
+        "Page /admin/approve-users accessibile solo ad admin",
+        "Tabella/lista guest con is_approved=false",
+        "Colonne: email, full_name, created_at",
+        "Ordinamento per data registrazione (più recenti prima)",
+        "UI responsive (mobile-friendly)",
+        "Loading state durante fetch",
+        "Empty state se nessun guest pending"
+      ],
+      "steps_to_verify": [
+        "1. Registrare 3 guest differenti (non approvati)",
+        "2. Login come admin",
+        "3. Navigare a /admin/approve-users",
+        "4. Verificare lista con 3 guest visibili",
+        "5. Verificare colonne email, nome, data",
+        "6. Verificare ordinamento cronologico",
+        "7. Approvare tutti → verificare empty state 'Nessun utente da approvare'"
+      ],
+      "passes": false
+    },
+    {
+      "category": "User Management - Admin",
+      "id": "ADMIN-002",
+      "description": "Funzionalità per approvare o rifiutare guest dalla dashboard admin con aggiornamento real-time dello stato.",
+      "acceptance_criteria": [
+        "Bottone 'Approve' per ogni guest pending",
+        "Bottone 'Reject' per ogni guest pending",
+        "Click Approve → is_approved=true in database, guest rimosso da lista",
+        "Click Reject → guest eliminato da database (DELETE)",
+        "Animazione UI durante azione (loading spinner su bottone)",
+        "Toast notification successo/errore",
+        "Email notification a guest approvato (opzionale)"
+      ],
+      "steps_to_verify": [
+        "1. Login admin → /admin/approve-users",
+        "2. Click 'Approve' su guest1 → verificare toast successo",
+        "3. Verificare guest1 rimosso da lista pending",
+        "4. Controllare Supabase: guest1 has is_approved=true",
+        "5. Login come guest1 → verificare accesso a /guest/upload",
+        "6. Registrare guest2, admin click 'Reject'",
+        "7. Verificare guest2 eliminato da Supabase Auth",
+        "8. Tentare login come guest2 → errore 'Invalid credentials'"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Content Upload - Guest",
+      "id": "UPLOAD-001",
+      "description": "Form upload messaggio di testo per guest approvati. Il contenuto deve essere salvato con status 'pending'.",
+      "acceptance_criteria": [
+        "Page /guest/upload con form textarea",
+        "Campo testo obbligatorio, min 10 caratteri, max 1000 caratteri",
+        "Bottone submit disabilitato se validazione fallisce",
+        "Submit → INSERT in table content (type='text', text_content=value, status='pending')",
+        "Toast successo 'Messaggio inviato, in attesa di approvazione'",
+        "Form reset dopo submit",
+        "Counter caratteri real-time sotto textarea"
+      ],
+      "steps_to_verify": [
+        "1. Login come guest approvato → /guest/upload",
+        "2. Tab 'Messaggio di testo'",
+        "3. Scrivere 5 caratteri → verificare submit disabilitato",
+        "4. Scrivere 50 caratteri → verificare submit abilitato",
+        "5. Submit → verificare toast successo",
+        "6. Verificare form vuoto (reset)",
+        "7. Controllare Supabase: content table ha nuovo record con type='text', status='pending'",
+        "8. Scrivere 1001 caratteri → verificare errore validazione"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Content Upload - Guest",
+      "id": "UPLOAD-002",
+      "description": "Upload foto con drag & drop, preview e validazione. Supporta formati immagine comuni (JPG, PNG, GIF, WEBP).",
+      "acceptance_criteria": [
+        "Tab 'Carica Foto' in /guest/upload",
+        "Drag & drop zone con visual feedback (border animato on hover/drag)",
+        "Click zone → apre file picker",
+        "Validazione: solo image/* accepted, max 10MB",
+        "Preview immagine dopo selezione (thumbnail)",
+        "Bottone 'Rimuovi' per cancellare selezione",
+        "Submit → upload a Supabase Storage bucket 'content-media', path {userId}/{uuid}.{ext}",
+        "INSERT in content table (type='image', media_url=storageURL, status='pending')",
+        "Progress bar durante upload",
+        "Compressione client-side se > 5MB (opzionale)"
+      ],
+      "steps_to_verify": [
+        "1. Login guest → /guest/upload → Tab 'Foto'",
+        "2. Drag immagine 2MB JPG nella drop zone → verificare border highlight",
+        "3. Drop → verificare preview thumbnail",
+        "4. Click 'Rimuovi' → verificare preview cancellata",
+        "5. Re-select immagine tramite file picker → verificare preview",
+        "6. Submit → verificare progress bar durante upload",
+        "7. Verificare toast successo",
+        "8. Controllare Supabase Storage: file presente in content-media/{userId}/",
+        "9. Controllare content table: type='image', media_url popolato, status='pending'",
+        "10. Tentare upload file 15MB → verificare errore 'File troppo grande'"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Content Upload - Guest",
+      "id": "UPLOAD-003",
+      "description": "Upload video con validazione formato e dimensione. Supporta MP4 e MOV.",
+      "acceptance_criteria": [
+        "Tab 'Carica Video' in /guest/upload",
+        "File picker per video (accept: video/mp4, video/quicktime)",
+        "Validazione: max 10MB, durata max 60 secondi (opzionale)",
+        "Preview video player dopo selezione",
+        "Submit → upload a Supabase Storage, INSERT content (type='video', status='pending')",
+        "Progress bar upload con percentuale",
+        "Warning se video > 5MB: 'Video grande, upload potrebbe richiedere tempo'"
+      ],
+      "steps_to_verify": [
+        "1. Login guest → /guest/upload → Tab 'Video'",
+        "2. Selezionare video 3MB MP4 → verificare preview player",
+        "3. Play video in preview → verificare funzionamento",
+        "4. Submit → verificare progress bar (0% → 100%)",
+        "5. Verificare toast successo",
+        "6. Controllare Supabase Storage: video presente",
+        "7. Controllare content table: type='video', media_url popolato",
+        "8. Tentare upload video 15MB → verificare errore dimensione",
+        "9. Tentare upload file .avi → verificare errore formato non supportato"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Content Moderation - Admin",
+      "id": "MODERATE-001",
+      "description": "Dashboard admin per visualizzare coda contenuti pending con preview completo (testo leggibile, immagini visibili, video riproducibili).",
+      "acceptance_criteria": [
+        "Page /admin/approve-content accessibile solo ad admin",
+        "Lista contenuti con status='pending', ordinati per created_at DESC",
+        "Ogni item mostra: autore (full_name), tipo, data caricamento, preview",
+        "Preview testo: mostra text_content completo",
+        "Preview foto: thumbnail cliccabile per full-size",
+        "Preview video: player embedded con controlli",
+        "Filtri: Tutti / Solo Testo / Solo Foto / Solo Video",
+        "Counter: 'X contenuti in attesa'",
+        "Loading state, empty state"
+      ],
+      "steps_to_verify": [
+        "1. Creare 5 contenuti pending: 2 testo, 2 foto, 1 video (da guest differenti)",
+        "2. Login admin → /admin/approve-content",
+        "3. Verificare counter '5 contenuti in attesa'",
+        "4. Verificare lista con 5 item visibili",
+        "5. Verificare preview testo: leggibile per intero",
+        "6. Click preview foto → verificare apertura full-size (lightbox)",
+        "7. Play video → verificare riproduzione",
+        "8. Filtro 'Solo Foto' → verificare 2 item visibili",
+        "9. Filtro 'Tutti' → verificare 5 item visibili",
+        "10. Approvare tutti → verificare empty state 'Nessun contenuto da approvare'"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Content Moderation - Admin",
+      "id": "MODERATE-002",
+      "description": "Funzionalità per approvare o rifiutare contenuti con aggiornamento status e rimozione da coda pending.",
+      "acceptance_criteria": [
+        "Bottone 'Approve' verde per ogni contenuto pending",
+        "Bottone 'Reject' rosso per ogni contenuto pending",
+        "Click Approve → UPDATE content SET status='approved', approved_at=NOW()",
+        "Click Reject → UPDATE content SET status='rejected'",
+        "Contenuto approvato/rifiutato rimosso da coda pending immediatamente",
+        "Animazione fade-out item dalla lista",
+        "Toast notification 'Contenuto approvato' / 'Contenuto rifiutato'",
+        "Bulk actions: checkbox + 'Approva selezionati' (opzionale)"
+      ],
+      "steps_to_verify": [
+        "1. Login admin → /admin/approve-content con 5 contenuti pending",
+        "2. Click 'Approve' su primo contenuto → verificare animazione fade-out",
+        "3. Verificare toast 'Contenuto approvato'",
+        "4. Verificare counter aggiornato a '4 contenuti in attesa'",
+        "5. Controllare Supabase: content ha status='approved', approved_at popolato",
+        "6. Click 'Reject' su secondo contenuto",
+        "7. Verificare rimozione da lista",
+        "8. Controllare Supabase: content ha status='rejected'",
+        "9. (Opzionale) Selezionare 2 checkbox → Click 'Approva selezionati' → verificare bulk approval"
+      ],
+      "passes": false
+    },
+    {
+      "category": "VIP Gallery - Giuliana",
+      "id": "GALLERY-001",
+      "description": "Gallery page per VIP (Giuliana) che mostra SOLO contenuti approvati in griglia responsive masonry layout.",
+      "acceptance_criteria": [
+        "Page /vip/gallery accessibile solo a role='vip'",
+        "Fetch contenuti con status='approved' ordinati per approved_at DESC",
+        "Layout masonry grid responsive (3 col desktop, 2 tablet, 1 mobile)",
+        "Ogni ContentCard mostra: autore, tipo, timestamp, contenuto/thumbnail",
+        "Card testo: gradient background colorato, testo leggibile",
+        "Card foto: thumbnail con aspect ratio mantenuto",
+        "Card video: thumbnail con play icon overlay",
+        "Lazy loading immagini (Next.js Image component)",
+        "Infinite scroll o pagination (se > 50 contenuti)",
+        "Loading skeleton durante fetch"
+      ],
+      "steps_to_verify": [
+        "1. Admin approva 10 contenuti (mix testo/foto/video)",
+        "2. Login come VIP (Giuliana) → /vip/gallery",
+        "3. Verificare 10 ContentCard visibili in griglia",
+        "4. Verificare layout responsive: desktop 3 col, ridimensionare a tablet → 2 col, mobile → 1 col",
+        "5. Verificare card testo: background colorato, testo completo visibile",
+        "6. Verificare card foto: immagine caricata, aspect ratio corretto",
+        "7. Verificare card video: thumbnail con play icon",
+        "8. Scroll to bottom → verificare lazy loading (controllare Network tab)",
+        "9. Admin approva nuovo contenuto → refresh gallery → verificare nuovo item in cima"
+      ],
+      "passes": false
+    },
+    {
+      "category": "VIP Gallery - Giuliana",
+      "id": "GALLERY-002",
+      "description": "Lightbox per visualizzazione full-screen di foto e video con navigazione tra contenuti media.",
+      "acceptance_criteria": [
+        "Click su ContentCard foto → apre lightbox full-screen",
+        "Lightbox mostra immagine ad alta risoluzione",
+        "Controlli: freccia next, freccia prev, bottone close (X), overlay cliccabile per chiudere",
+        "Navigazione keyboard: arrow left/right, ESC per chiudere",
+        "Click su ContentCard video → apre lightbox con video player",
+        "Video player: play/pause, volume, fullscreen, timeline",
+        "Sfondo overlay semi-trasparente scuro",
+        "Animazione fade-in lightbox",
+        "Pinch-to-zoom su mobile (opzionale)"
+      ],
+      "steps_to_verify": [
+        "1. Login VIP → /vip/gallery con almeno 3 foto e 2 video approvati",
+        "2. Click su prima foto → verificare apertura lightbox full-screen",
+        "3. Verificare immagine centrata, alta qualità",
+        "4. Click freccia next → verificare passaggio a foto successiva",
+        "5. Premere ESC → verificare chiusura lightbox",
+        "6. Riaprire lightbox → premere arrow key left → verificare navigazione indietro",
+        "7. Click overlay esterno → verificare chiusura",
+        "8. Click su ContentCard video → verificare apertura lightbox con player",
+        "9. Play video → verificare riproduzione corretta",
+        "10. Fullscreen video → verificare funzionamento"
+      ],
+      "passes": false
+    },
+    {
+      "category": "VIP Gallery - Giuliana",
+      "id": "GALLERY-003",
+      "description": "Sistema di reactions emoji per permettere a VIP di reagire ai contenuti (cuori, festa, risate, etc).",
+      "acceptance_criteria": [
+        "Ogni ContentCard ha sezione reactions sotto il contenuto",
+        "Emoji picker popup con almeno 5 emoji: ❤️ 🎉 😂 🥰 👏",
+        "Click emoji → INSERT in table reactions (content_id, user_id, emoji)",
+        "Visualizzazione count per ogni emoji: '❤️ 5' se 5 persone hanno messo cuore",
+        "Emoji già selezionata da VIP evidenziata (background colorato)",
+        "Click su emoji già selezionata → DELETE reaction (toggle)",
+        "Aggiornamento real-time count dopo azione",
+        "Animazione emoji bounce al click"
+      ],
+      "steps_to_verify": [
+        "1. Login VIP → /vip/gallery",
+        "2. Click emoji ❤️ su primo contenuto → verificare INSERT in reactions table",
+        "3. Verificare count aggiornato: '❤️ 1'",
+        "4. Verificare emoji evidenziata (background diverso)",
+        "5. Click nuovamente ❤️ → verificare DELETE reaction, count → '❤️ 0'",
+        "6. Aggiungere 3 emoji diverse (🎉 😂 🥰) → verificare tutti count visibili",
+        "7. Controllare Supabase reactions table: 3 record presenti",
+        "8. Refresh pagina → verificare reactions persistite (emoji evidenziate)",
+        "9. Verificare animazione bounce al click emoji"
+      ],
+      "passes": false
+    },
+    {
+      "category": "VIP Gallery - Giuliana",
+      "id": "GALLERY-004",
+      "description": "Filtri per tipo di contenuto (Tutti / Testo / Foto / Video) con aggiornamento dinamico della gallery.",
+      "acceptance_criteria": [
+        "Filter bar sopra la gallery con 4 bottoni: Tutti, Testo, Foto, Video",
+        "Default: 'Tutti' selezionato (active state visibile)",
+        "Click 'Testo' → mostra solo ContentCard con type='text'",
+        "Click 'Foto' → mostra solo ContentCard con type='image'",
+        "Click 'Video' → mostra solo ContentCard con type='video'",
+        "Click 'Tutti' → mostra tutti i ContentCard",
+        "Transizione animata (fade-out/fade-in) quando cambio filtro",
+        "Counter: 'Mostrando X di Y contenuti'"
+      ],
+      "steps_to_verify": [
+        "1. Login VIP → /vip/gallery con 3 testo, 4 foto, 2 video approvati (totale 9)",
+        "2. Verificare filtro 'Tutti' active, counter 'Mostrando 9 di 9 contenuti'",
+        "3. Click 'Testo' → verificare solo 3 card visibili (tipo testo)",
+        "4. Verificare counter 'Mostrando 3 di 9 contenuti'",
+        "5. Verificare animazione fade durante cambio filtro",
+        "6. Click 'Foto' → verificare solo 4 card (tipo foto)",
+        "7. Click 'Video' → verificare solo 2 card (tipo video)",
+        "8. Click 'Tutti' → verificare tutte 9 card visibili"
+      ],
+      "passes": false
+    },
+    {
+      "category": "UI/UX - Theme & Animations",
+      "id": "UI-001",
+      "description": "Implementare theme colorato e festoso con palette definita (pink, purple, gold, sky) e gradient backgrounds.",
+      "acceptance_criteria": [
+        "File tailwind.config.ts con custom colors: birthday-pink (#FF69B4), birthday-purple (#9D4EDD), birthday-gold (#FFD700), birthday-sky (#87CEEB)",
+        "ContentCard con gradient background (es: from-birthday-pink to-birthday-purple)",
+        "Bottoni primary con colori festosi (non grigio/neutral)",
+        "Header/navbar con gradient o colore brand",
+        "Hover effects su card: scale(1.02) + shadow increase",
+        "Global style festoso ma elegante (non troppo kitsch)"
+      ],
+      "steps_to_verify": [
+        "1. Aprire /vip/gallery",
+        "2. Verificare ContentCard hanno gradient background colorato (non bianco/grigio)",
+        "3. Hover su card → verificare scale e shadow animation",
+        "4. Verificare header/navbar usa colori brand (non default)",
+        "5. Verificare bottoni primary colorati (es: pink, purple)",
+        "6. Controllare tailwind.config.ts: custom colors definiti",
+        "7. Verificare palette coerente in tutte le pagine (login, dashboard, gallery)"
+      ],
+      "passes": false
+    },
+    {
+      "category": "UI/UX - Theme & Animations",
+      "id": "UI-002",
+      "description": "Animazioni entrata per ContentCard con stagger effect (apparizione progressiva) usando Framer Motion.",
+      "acceptance_criteria": [
+        "ContentCard usa <motion.div> di Framer Motion",
+        "Animazione initial: opacity 0, translateY(20px)",
+        "Animazione animate: opacity 1, translateY(0)",
+        "Stagger effect: delay incrementale per ogni card (index * 0.1s)",
+        "Durata transizione: 0.5s",
+        "Easing: ease-out",
+        "Animazione attiva solo al primo caricamento pagina (non ad ogni re-render)"
+      ],
+      "steps_to_verify": [
+        "1. Logout → Login VIP → Navigare a /vip/gallery (primo accesso)",
+        "2. Verificare ContentCard appaiono progressivamente (non tutti insieme)",
+        "3. Verificare movimento verticale (dal basso verso alto) durante apparizione",
+        "4. Verificare fade-in opacity (da trasparente a opaco)",
+        "5. Verificare stagger: prima card appare prima, poi seconda, terza, etc.",
+        "6. Refresh pagina → verificare animazione si ripete",
+        "7. Cambiare filtro (Testo/Foto) → verificare animazione su nuove card visibili"
+      ],
+      "passes": false
+    },
+    {
+      "category": "UI/UX - Theme & Animations",
+      "id": "UI-003",
+      "description": "Confetti animation al primo accesso di VIP alla gallery usando canvas-confetti library.",
+      "acceptance_criteria": [
+        "Al primo accesso VIP a /vip/gallery → confetti explosion",
+        "Confetti colorati (match palette: pink, purple, gold)",
+        "Esplosione al centro schermo, particelle si disperdono",
+        "Durata: 3-4 secondi",
+        "Salvare flag in localStorage: 'confetti_shown=true'",
+        "Accessi successivi: NO confetti (già visto)",
+        "Admin può resettare localStorage per rivedere confetti (dev only)"
+      ],
+      "steps_to_verify": [
+        "1. Cancellare localStorage (DevTools → Application → Local Storage → Clear)",
+        "2. Login VIP → Navigare a /vip/gallery",
+        "3. Verificare confetti explosion al caricamento pagina",
+        "4. Verificare colori confetti matching palette (pink, purple, gold)",
+        "5. Verificare durata ~3s poi spariscono",
+        "6. Controllare localStorage: 'confetti_shown' = true",
+        "7. Refresh pagina → verificare NO confetti (già mostrato)",
+        "8. Cancellare localStorage → Refresh → verificare confetti di nuovo"
+      ],
+      "passes": false
+    },
+    {
+      "category": "UI/UX - Responsive",
+      "id": "RESPONSIVE-001",
+      "description": "Tutte le pagine devono essere completamente responsive e usabili su mobile (iOS Safari, Android Chrome).",
+      "acceptance_criteria": [
+        "Breakpoints: mobile (<640px), tablet (640-1024px), desktop (>1024px)",
+        "Gallery grid: 1 col mobile, 2 col tablet, 3 col desktop",
+        "Forms responsive: input full-width mobile, max-width desktop",
+        "Navbar responsive: hamburger menu mobile, full navbar desktop",
+        "Lightbox responsive: full-screen mobile, centered desktop",
+        "Touch-friendly: bottoni min 44x44px (Apple guidelines)",
+        "No scroll orizzontale su nessun breakpoint",
+        "Text leggibile senza zoom (min 16px font-size)"
+      ],
+      "steps_to_verify": [
+        "1. Aprire Chrome DevTools → Toggle device toolbar (iPhone 14 Pro)",
+        "2. Testare /login: verificare form full-width, input touch-friendly",
+        "3. Testare /vip/gallery: verificare 1 col grid mobile",
+        "4. Resize a tablet (iPad) → verificare 2 col grid",
+        "5. Resize a desktop → verificare 3 col grid",
+        "6. Testare navbar mobile: hamburger menu funzionante",
+        "7. Testare lightbox mobile: full-screen, controlli accessibili con pollice",
+        "8. Verificare NO scroll orizzontale su tutte le pagine",
+        "9. Testare su device reale (iPhone/Android) se possibile"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Database & Security",
+      "id": "DB-001",
+      "description": "Creare schema database Supabase con tabelle profiles, content, reactions e indici performance.",
+      "acceptance_criteria": [
+        "Tabella profiles: id (UUID FK auth.users), email, full_name, role, is_approved, created_at",
+        "Tabella content: id (UUID), user_id (FK profiles), type, text_content, media_url, status, approved_at, created_at",
+        "Tabella reactions: id (UUID), content_id (FK content), user_id (FK profiles), emoji, created_at",
+        "UNIQUE constraint: reactions (content_id, user_id, emoji) per evitare duplicati",
+        "CHECK constraint: content type IN ('text', 'image', 'video')",
+        "CHECK constraint: content.text_content NOT NULL se type='text', media_url NOT NULL se type IN ('image', 'video')",
+        "Indici: idx_content_status, idx_content_user, idx_reactions_content",
+        "Trigger: auto-create profile on auth.users INSERT"
+      ],
+      "steps_to_verify": [
+        "1. Aprire Supabase Dashboard → SQL Editor",
+        "2. Eseguire migration 001_initial_schema.sql",
+        "3. Verificare tabelle create: Table Editor → profiles, content, reactions visibili",
+        "4. Verificare colonne e tipi corretti per ogni tabella",
+        "5. Verificare constraints: tentare INSERT content type='invalid' → errore CHECK violation",
+        "6. Verificare unique constraint reactions: INSERT stesso (content_id, user_id, emoji) 2 volte → errore seconda volta",
+        "7. Verificare trigger: creare user in Authentication → verificare profile auto-creato",
+        "8. Verificare indici: controllare Indexes tab per ogni tabella"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Database & Security",
+      "id": "DB-002",
+      "description": "Implementare Row Level Security (RLS) policies per proteggere accesso dati a livello database.",
+      "acceptance_criteria": [
+        "RLS enabled su tutte le tabelle (profiles, content, reactions)",
+        "Policy profiles SELECT: tutti gli authenticated users possono leggere profiles",
+        "Policy content SELECT approved: VIP e Admin possono leggere content status='approved'",
+        "Policy content SELECT pending: solo Admin può leggere content status='pending'",
+        "Policy content INSERT: solo Guest approvati possono inserire content",
+        "Policy content UPDATE: solo Admin può aggiornare content.status",
+        "Policy reactions INSERT/DELETE: authenticated users possono gestire proprie reactions",
+        "Nessun accesso diretto al database senza authentication (JWT required)"
+      ],
+      "steps_to_verify": [
+        "1. Supabase Dashboard → Authentication → Policies",
+        "2. Verificare RLS enabled su profiles, content, reactions",
+        "3. Verificare policies elencate per ogni tabella (almeno 6 policies totali)",
+        "4. Test policy: provare query SQL diretta senza JWT → errore permission denied",
+        "5. Test policy: autenticare come guest → SELECT content status='approved' → successo",
+        "6. Test policy: autenticare come guest → SELECT content status='pending' → nessun risultato (solo admin)",
+        "7. Test policy: autenticare come guest → UPDATE content status → errore permission denied",
+        "8. Test policy: autenticare come admin → UPDATE content status → successo",
+        "9. Test policy: guest approvato → INSERT content → successo, guest non approvato → errore"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Storage & File Management",
+      "id": "STORAGE-001",
+      "description": "Creare Supabase Storage bucket 'content-media' per upload foto e video con policies accesso.",
+      "acceptance_criteria": [
+        "Bucket name: 'content-media', public=false (private, solo authenticated)",
+        "File path structure: {userId}/{contentId}.{ext}",
+        "Policy SELECT: authenticated users possono leggere file",
+        "Policy INSERT: authenticated guest approvati possono caricare file",
+        "Policy DELETE: solo Admin può eliminare file (opzionale)",
+        "Max file size: 10MB (configurato a livello bucket)",
+        "Allowed MIME types: image/jpeg, image/png, image/gif, image/webp, video/mp4, video/quicktime",
+        "Automatic image optimization (Supabase transform API)"
+      ],
+      "steps_to_verify": [
+        "1. Supabase Dashboard → Storage → Create bucket 'content-media'",
+        "2. Verificare bucket settings: public=false, max file size=10MB",
+        "3. Configurare allowed MIME types nella UI",
+        "4. Storage → Policies → verificare policies SELECT e INSERT",
+        "5. Test upload: autenticare come guest → caricare foto 5MB → successo",
+        "6. Verificare file salvato in path corretto: {userId}/{uuid}.jpg",
+        "7. Test URL signed: generare signed URL → verificare immagine accessibile",
+        "8. Test upload file >10MB → errore 'File too large'",
+        "9. Test upload file .exe → errore 'Invalid MIME type'"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Performance & Optimization",
+      "id": "PERF-001",
+      "description": "Ottimizzare caricamento immagini in gallery usando Next.js Image component con lazy loading.",
+      "acceptance_criteria": [
+        "Usare <Image> di next/image invece di <img> per tutte le immagini",
+        "Lazy loading automatico (loading='lazy')",
+        "Placeholder blur (placeholder='blur' con blurDataURL)",
+        "Responsive sizes: ottimizzare per mobile/tablet/desktop",
+        "Formato ottimizzato: WebP automatic conversion",
+        "Supabase Image Transform API per resize server-side",
+        "Max 10 immagini caricate inizialmente, resto lazy load on scroll"
+      ],
+      "steps_to_verify": [
+        "1. Aprire /vip/gallery con 20 foto approvate",
+        "2. Aprire DevTools → Network tab → filtro Img",
+        "3. Verificare solo ~10 immagini caricate al page load iniziale",
+        "4. Scroll down → verificare nuove immagini caricate progressivamente (lazy)",
+        "5. Verificare formato WebP nelle richieste (non JPG originale)",
+        "6. Verificare query params Supabase transform: ?width=800 (resize)",
+        "7. Verificare placeholder blur durante caricamento",
+        "8. Lighthouse audit → Performance score >90"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Performance & Optimization",
+      "id": "PERF-002",
+      "description": "Implementare loading states e skeleton screens per migliorare perceived performance.",
+      "acceptance_criteria": [
+        "Skeleton screen per gallery durante fetch contenuti (griglia placeholder)",
+        "Loading spinner per form submit (upload, approve)",
+        "Skeleton cards: grigio animato pulse",
+        "Disable bottoni durante azioni async (loading state)",
+        "Toast notifications per feedback immediato azioni",
+        "Transizioni smooth (no flash of unstyled content)"
+      ],
+      "steps_to_verify": [
+        "1. Aprire /vip/gallery (network throttling: Fast 3G)",
+        "2. Verificare skeleton cards visibili durante fetch",
+        "3. Verificare skeleton animato (pulse effect)",
+        "4. Quando dati arrivano → fade-in smooth da skeleton a ContentCard",
+        "5. Upload foto → verificare bottone submit disabled + spinner",
+        "6. Admin approve content → verificare bottone disabled durante API call",
+        "7. Verificare toast notification immediata dopo azione",
+        "8. Verificare NO flash/jump durante loading (layout stabile)"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Error Handling & Edge Cases",
+      "id": "ERROR-001",
+      "description": "Implementare error handling globale con error boundaries React e fallback UI.",
+      "acceptance_criteria": [
+        "Error boundary component che wrappa app",
+        "Catch JavaScript errors in componenti",
+        "Fallback UI: messaggio user-friendly + bottone 'Riprova' o 'Torna alla home'",
+        "Log errori in console per debugging",
+        "Error boundary specifici per sezioni critiche (upload, gallery)",
+        "Graceful degradation: se feature fallisce, resto app funziona"
+      ],
+      "steps_to_verify": [
+        "1. Simulare errore: modificare component per throw new Error('Test')",
+        "2. Verificare error boundary cattura errore",
+        "3. Verificare fallback UI visibile con messaggio chiaro",
+        "4. Click 'Riprova' → verificare reset error boundary",
+        "5. Verificare errore logged in console",
+        "6. Simulare errore in upload → verificare solo sezione upload fallisce, navbar/footer OK",
+        "7. Simulare network error (offline) → verificare messaggio errore rete"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Error Handling & Edge Cases",
+      "id": "ERROR-002",
+      "description": "Validazione client-side e server-side per tutti i form con messaggi errore user-friendly.",
+      "acceptance_criteria": [
+        "Validazione client: email format, password min 8 char, text min/max length",
+        "Validazione server: duplicare validazione client + business rules",
+        "Messaggi errore sotto campo (inline), non solo toast",
+        "Errori in italiano, chiari e azionabili (es: 'Password troppo corta, minimo 8 caratteri')",
+        "Highlight campo con errore (border rosso)",
+        "Disabled submit se validazione client fallisce",
+        "Handle API errors: 400, 401, 403, 500 con messaggi specifici"
+      ],
+      "steps_to_verify": [
+        "1. Form login: email invalida 'test@' → verificare messaggio 'Email non valida'",
+        "2. Form register: password '123' → verificare 'Password troppo corta, minimo 8 caratteri'",
+        "3. Upload testo: 5 caratteri → verificare 'Minimo 10 caratteri' + submit disabled",
+        "4. Upload foto: file 15MB → verificare 'File troppo grande, max 10MB'",
+        "5. Tentare registrazione email duplicata → verificare server error 'Email già registrata'",
+        "6. Tentare azione senza autenticazione → verificare redirect a login + messaggio",
+        "7. Simulare 500 error → verificare messaggio 'Errore del server, riprova più tardi'"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Deployment & DevOps",
+      "id": "DEPLOY-001",
+      "description": "Deploy applicazione Next.js su Vercel con environment variables configurate e dominio custom (opzionale).",
+      "acceptance_criteria": [
+        "Repository GitHub pubblico o privato connesso a Vercel",
+        "Auto-deploy su push a branch main",
+        "Environment variables configurate: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY",
+        "Build production senza errori TypeScript",
+        "HTTPS automatico (Vercel SSL)",
+        "Dominio custom configurato (es: giuliana40.vercel.app o custom domain)",
+        "Preview deploy per branch non-main (opzionale)"
+      ],
+      "steps_to_verify": [
+        "1. Push codice a GitHub repository",
+        "2. Vercel → Import repository → Deploy",
+        "3. Vercel → Settings → Environment Variables → aggiungere 3 env vars",
+        "4. Trigger deploy → verificare build successo (no errors)",
+        "5. Verificare deploy URL funzionante: https://{project}.vercel.app",
+        "6. Aprire URL → verificare app caricata correttamente",
+        "7. Test funzionalità: login, upload, gallery → verificare tutto OK in produzione",
+        "8. (Opzionale) Configurare custom domain → verificare DNS + SSL"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Deployment & DevOps",
+      "id": "DEPLOY-002",
+      "description": "Configurare Supabase production project con migrations applicate, seed data (admin, VIP), e backup automatici.",
+      "acceptance_criteria": [
+        "Progetto Supabase production (non local dev)",
+        "Database schema applicato tramite migration SQL",
+        "Seed data: 1 admin user (Pierluigi), 1 VIP user (Giuliana)",
+        "Supabase Auth configurato: email provider enabled",
+        "Storage bucket 'content-media' creato con policies",
+        "Backup automatici enabled (Supabase Pro o manual export)",
+        "API keys salvate in Vercel env vars (non hardcoded)"
+      ],
+      "steps_to_verify": [
+        "1. Supabase Dashboard → Create new project 'guestbook-40-prod'",
+        "2. SQL Editor → eseguire migration 001_initial_schema.sql",
+        "3. SQL Editor → eseguire seed.sql (INSERT admin e VIP users)",
+        "4. Verificare Authentication → Users: 2 users presenti (admin, VIP)",
+        "5. Verificare Table Editor: profiles, content, reactions esistono",
+        "6. Verificare Storage: bucket 'content-media' esiste",
+        "7. Project Settings → API → copiare URL e ANON_KEY",
+        "8. Vercel → Environment Variables → incollare Supabase keys",
+        "9. Redeploy Vercel → verificare connessione Vercel ↔ Supabase production"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Documentation & Training",
+      "id": "DOC-001",
+      "description": "Creare documentazione per Pierluigi (admin) su come usare dashboard: approvare utenti, moderare contenuti, invitare amici.",
+      "acceptance_criteria": [
+        "File README.md o ADMIN_GUIDE.md nel repo",
+        "Sezioni: Come approvare utenti, Come moderare contenuti, Come invitare amici, FAQ, Emergenze",
+        "Screenshot o screencast (video breve) delle operazioni chiave",
+        "Contatti supporto in caso di problemi",
+        "Checklist pre-evento: cosa fare 3 giorni prima, 1 giorno prima, giorno del compleanno",
+        "Link diretti: /login, /admin/approve-users, /admin/approve-content"
+      ],
+      "steps_to_verify": [
+        "1. Aprire file ADMIN_GUIDE.md",
+        "2. Verificare sezione 'Come approvare utenti' con step-by-step",
+        "3. Verificare sezione 'Come moderare contenuti' con esempi",
+        "4. Verificare screenshot dashboard admin presenti",
+        "5. Verificare sezione 'Emergenze': cosa fare se storage pieno, bug critico, etc.",
+        "6. Verificare checklist pre-evento chiara e azionabile",
+        "7. Seguire guida come utente non-tech → verificare comprensibile"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Testing - End-to-End",
+      "id": "TEST-001",
+      "description": "Eseguire test end-to-end completo del flusso utente: registrazione guest → approvazione admin → upload contenuto → approvazione contenuto → visualizzazione VIP.",
+      "acceptance_criteria": [
+        "Test case completo eseguito manualmente (o con Playwright/Cypress se tempo permette)",
+        "Ogni step verificato e documentato (screenshot o video)",
+        "Nessun bug blocker: flusso completo funzionante senza errori",
+        "Test su browser multipli: Chrome, Safari, Firefox",
+        "Test su mobile: iOS Safari, Android Chrome",
+        "Test performance: Lighthouse score >80 su mobile e desktop"
+      ],
+      "steps_to_verify": [
+        "1. Guest: Registrare nuovo utente 'Mario Rossi' → verificare email conferma",
+        "2. Guest: Tentare login → verificare 'Pending approval' page",
+        "3. Admin: Login → /admin/approve-users → approvare Mario",
+        "4. Guest: Login Mario → verificare accesso a /guest/upload",
+        "5. Guest: Caricare 1 testo, 1 foto, 1 video → verificare successo",
+        "6. Admin: /admin/approve-content → verificare 3 contenuti pending",
+        "7. Admin: Approvare tutti 3 contenuti",
+        "8. VIP: Login Giuliana → /vip/gallery → verificare 3 contenuti visibili",
+        "9. VIP: Click foto → verificare lightbox, aggiungere reaction ❤️",
+        "10. VIP: Verificare confetti animation al primo accesso",
+        "11. Ripetere test su Safari mobile → verificare tutto funzionante",
+        "12. Lighthouse audit → verificare score >80"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Testing - Security",
+      "id": "TEST-002",
+      "description": "Eseguire security testing per verificare protezione route, RLS policies, e validazione input contro XSS/SQL injection.",
+      "acceptance_criteria": [
+        "Test unauthorized access: tentare accesso /admin senza login → redirect",
+        "Test privilege escalation: guest tentare approvare contenuti → 403",
+        "Test RLS bypass: query SQL diretta senza JWT → permission denied",
+        "Test XSS: inserire <script>alert('XSS')</script> in text_content → sanitizzato",
+        "Test SQL injection: inserire ' OR '1'='1 in form → nessun effetto (parametrizzato)",
+        "Test file upload malicious: tentare upload .exe rinominato .jpg → rifiutato",
+        "Test JWT tampering: modificare JWT token → invalidato, 401 error"
+      ],
+      "steps_to_verify": [
+        "1. Logout → tentare URL diretto /admin/approve-users → verificare redirect a /login",
+        "2. Login guest → modificare URL a /admin/* → verificare 403 Forbidden",
+        "3. Supabase SQL Editor → tentare SELECT * FROM content (senza auth) → errore RLS",
+        "4. Upload testo con <script>alert('XSS')</script> → submit → verificare script NON eseguito in gallery",
+        "5. Controllare HTML renderizzato: script escapato (mostrato come testo, non eseguito)",
+        "6. Form login: email=\"admin' OR '1'='1\" → verificare login fallisce (no SQL injection)",
+        "7. Upload file virus.exe rinominato virus.jpg → verificare reject (MIME validation)",
+        "8. DevTools → Application → Cookies → modificare JWT → refresh → verificare logout automatico"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Polish & Final Touches",
+      "id": "POLISH-001",
+      "description": "Aggiungere meta tags SEO, favicon personalizzato, e Open Graph tags per condivisione social.",
+      "acceptance_criteria": [
+        "Meta tags in <head>: title, description, keywords",
+        "Favicon.ico personalizzato (non default Next.js)",
+        "Open Graph tags: og:title, og:description, og:image per preview link WhatsApp/Facebook",
+        "Twitter Card tags per preview Twitter",
+        "Apple touch icon per iOS home screen",
+        "Manifest.json per PWA (opzionale)"
+      ],
+      "steps_to_verify": [
+        "1. Aprire /vip/gallery → view page source",
+        "2. Verificare <title>Compleanno Giuliana - 40 anni</title>",
+        "3. Verificare <meta name='description' content='...'> popolato",
+        "4. Verificare <meta property='og:title'> presente",
+        "5. Verificare <meta property='og:image'> con URL immagine",
+        "6. Verificare favicon visibile nel browser tab (non icona default)",
+        "7. Condividere link su WhatsApp → verificare preview con titolo, descrizione, immagine",
+        "8. iOS: Aggiungere a Home Screen → verificare icon personalizzato"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Polish & Final Touches",
+      "id": "POLISH-002",
+      "description": "Implementare toast notifications library (sonner o react-hot-toast) per feedback azioni utente.",
+      "acceptance_criteria": [
+        "Toast library installata e configurata (sonner consigliato)",
+        "Toast successo (verde): 'Contenuto caricato', 'Utente approvato', 'Reaction aggiunta'",
+        "Toast errore (rosso): 'Errore caricamento', 'File troppo grande', 'Permesso negato'",
+        "Toast info (blu): 'In attesa di approvazione', 'Sessione scaduta'",
+        "Posizione: top-right o bottom-center",
+        "Auto-dismiss dopo 3-5 secondi",
+        "Dismissible manualmente (X button)",
+        "Animazione slide-in/fade-out"
+      ],
+      "steps_to_verify": [
+        "1. Upload contenuto → verificare toast verde 'Contenuto caricato con successo'",
+        "2. Verificare toast appare top-right (o bottom-center)",
+        "3. Verificare auto-dismiss dopo ~4 secondi",
+        "4. Admin approva utente → toast 'Utente approvato'",
+        "5. Tentare upload file 15MB → toast rosso 'File troppo grande, max 10MB'",
+        "6. Click X su toast → verificare dismiss manuale",
+        "7. VIP aggiunge reaction → toast verde 'Reaction aggiunta'",
+        "8. Tentare azione non autorizzata → toast rosso 'Permesso negato'"
+      ],
+      "passes": false
+    }
+  ],
+  "non_functional_requirements": [
+    {
+      "category": "Performance",
+      "description": "L'applicazione deve caricare la gallery con 50 contenuti in meno di 3 secondi su connessione 3G.",
+      "acceptance_criteria": [
+        "Lighthouse Performance score >80 mobile, >90 desktop",
+        "Time to Interactive (TTI) <5s su 3G",
+        "Lazy loading immagini attivo",
+        "Code splitting per route",
+        "Compressione gzip/brotli attiva su Vercel"
+      ],
+      "steps_to_verify": [
+        "1. Chrome DevTools → Network → Throttling Fast 3G",
+        "2. Aprire /vip/gallery con 50 contenuti",
+        "3. Misurare tempo caricamento completo",
+        "4. Lighthouse audit → verificare Performance score >80",
+        "5. Verificare TTI <5s",
+        "6. Network tab → verificare lazy loading (non tutte immagini caricate subito)",
+        "7. Verificare response headers: Content-Encoding: br (brotli)"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Accessibility",
+      "description": "L'applicazione deve essere navigabile da tastiera e avere contrasto colori sufficiente (WCAG AA).",
+      "acceptance_criteria": [
+        "Navigazione completa solo con Tab + Enter (no mouse)",
+        "Focus visible su tutti elementi interattivi",
+        "Contrast ratio >4.5:1 per testo normale, >3:1 per testo grande",
+        "Alt text su tutte le immagini",
+        "ARIA labels su icon buttons",
+        "Screen reader friendly (testato con VoiceOver)"
+      ],
+      "steps_to_verify": [
+        "1. Aprire /login → navigare form solo con Tab → verificare focus visibile",
+        "2. Submit form con Enter → verificare funzionamento",
+        "3. Gallery: Tab attraverso ContentCard → verificare focus su ogni card",
+        "4. Lighthouse audit → Accessibility score >90",
+        "5. Chrome DevTools → Inspect → Accessibility tree → verificare labels corretti",
+        "6. Contrast checker: verificare testo su background >4.5:1",
+        "7. Attivare VoiceOver (Mac) → navigare app → verificare annunci chiari"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Browser Compatibility",
+      "description": "L'applicazione deve funzionare correttamente su Chrome, Safari, Firefox (ultime 2 versioni) e mobile browsers.",
+      "acceptance_criteria": [
+        "Chrome 120+ (desktop + Android)",
+        "Safari 17+ (desktop + iOS)",
+        "Firefox 120+",
+        "Edge 120+",
+        "No polyfill richiesti per features moderne",
+        "Graceful degradation per browser vecchi (messaggio upgrade)"
+      ],
+      "steps_to_verify": [
+        "1. Testare app su Chrome desktop → verificare funzionamento completo",
+        "2. Testare su Safari desktop → verificare animazioni, upload, lightbox",
+        "3. Testare su Firefox → verificare nessun errore console",
+        "4. Testare su iPhone Safari → verificare touch interactions, upload foto",
+        "5. Testare su Android Chrome → verificare funzionamento",
+        "6. (Opzionale) Testare su browser vecchio (Safari 15) → verificare messaggio upgrade o degradazione graziosa"
+      ],
+      "passes": false
+    },
+    {
+      "category": "Data Privacy & GDPR",
+      "description": "L'applicazione deve rispettare privacy utenti: no tracking, dati crittografati, possibilità eliminazione account.",
+      "acceptance_criteria": [
+        "No Google Analytics o tracker esterni (evento privato)",
+        "Password hashate (Supabase Auth bcrypt)",
+        "Connessioni HTTPS only",
+        "Possibilità admin eliminare utente e suoi contenuti (GDPR right to erasure)",
+        "Privacy policy semplice (opzionale ma consigliato)"
+      ],
+      "steps_to_verify": [
+        "1. Ispezionare Network tab → verificare NO richieste a analytics.google.com, facebook.com, etc.",
+        "2. Verificare URL sempre HTTPS (Vercel SSL)",
+        "3. Supabase Dashboard → Authentication → verificare password mai in chiaro (hashed)",
+        "4. Admin: funzionalità 'Elimina utente' → verificare DELETE cascade (user + content + reactions)",
+        "5. (Opzionale) Link privacy policy in footer"
+      ],
+      "passes": false
+    }
+  ],
+  "success_criteria": {
+    "minimum_viable_product": [
+      "Almeno 30 amici registrati e approvati",
+      "Almeno 50 contenuti totali caricati (mix testo/foto/video)",
+      "Giuliana vede gallery popolata il giorno del compleanno",
+      "Zero bug critici (crash, data loss, security breach)",
+      "App accessibile da mobile (50%+ utenti useranno smartphone)"
+    ],
+    "timeline": {
+      "day_1_3": "Setup completo + Auth + Approvazione utenti",
+      "day_4_7": "Upload contenuti + Approvazione contenuti",
+      "day_8_11": "Gallery VIP + Reactions + Filtri + UI polish",
+      "day_12_13": "Testing + Deploy produzione",
+      "day_14": "Buffer + Training Pierluigi + Soft launch con 2-3 amici test"
+    },
+    "quality_gates": [
+      "Lighthouse Performance >80 mobile",
+      "Lighthouse Accessibility >90",
+      "Zero errori TypeScript in build production",
+      "Test E2E completo passato su Chrome + Safari",
+      "Security test passato (no XSS, SQL injection, unauthorized access)"
+    ]
+  },
+  "risks": [
+    {
+      "risk": "Storage Supabase esaurito (500MB free tier)",
+      "probability": "Media",
+      "impact": "Alto",
+      "mitigation": "Compressione immagini automatica, resize 1080p max, limite 10MB upload, monitor storage usage, avviso admin 80%"
+    },
+    {
+      "risk": "50 utenti caricano video pesanti simultaneamente vicino al compleanno",
+      "probability": "Media",
+      "impact": "Alto",
+      "mitigation": "Rate limiting (1 upload/minuto/user), tutorial 'Come creare video corti', limite 10MB, compressione suggerita"
+    },
+    {
+      "risk": "Bug critico scoperto 1 giorno prima del compleanno",
+      "probability": "Bassa",
+      "impact": "Critico",
+      "mitigation": "Deploy 3 giorni prima, feature freeze 2 giorni prima, soft launch con amici stretti, rollback veloce Vercel"
+    },
+    {
+      "risk": "Pierluigi non approva contenuti in tempo",
+      "probability": "Media",
+      "impact": "Alto",
+      "mitigation": "Email notification ogni nuovo contenuto, dashboard mobile-friendly, bulk approve, reminder 2 giorni prima"
+    },
+    {
+      "risk": "Contenuto inappropriato caricato",
+      "probability": "Bassa",
+      "impact": "Medio",
+      "mitigation": "Moderazione manuale (approvazione obbligatoria), reject content, possibilità eliminare dopo approvazione se necessario"
+    }
+  ]
+}

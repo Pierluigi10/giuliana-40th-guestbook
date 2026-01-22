@@ -1,0 +1,41 @@
+RALPH LOOP INSTRUCTIONS - Giuliana's 40th Birthday Guestbook
+================================================================
+
+TASK:
+Implement and test all 42 requirements from specs/PRD.json for the birthday guestbook application.
+
+COMPLETION CRITERIA:
+1. All 42 requirements in specs/PRD.json have "passes": true
+2. All tests pass (npm test)
+3. Application builds successfully (npm run build)
+4. No TypeScript errors (npm run type-check)
+5. Code follows architecture defined in specs/architecture.md
+
+COMPLETION PROMISE:
+When all criteria are met, output:
+<promise>GUESTBOOK_COMPLETE</promise>
+
+WORKING APPROACH:
+1. Read specs/PRD.json to identify requirements with "passes": false
+2. Implement one requirement at a time
+3. Write tests for each requirement
+4. Update "passes": true in PRD.json when requirement is verified
+5. Commit changes after each working requirement
+6. Move to next requirement
+7. When all requirements pass, run full regression
+8. Output completion promise
+
+PRIORITY ORDER:
+1. Core authentication (REQ-001 to REQ-005)
+2. Message submission (REQ-006 to REQ-010)
+3. Admin features (REQ-011 to REQ-020)
+4. Media handling (REQ-021 to REQ-030)
+5. Polish and optimization (REQ-031 to REQ-042)
+
+EXIT CONDITIONS:
+- All requirements passing
+- Build successful
+- Tests green
+- Completion promise output
+
+DO NOT EXIT UNTIL ALL CRITERIA ARE MET.
