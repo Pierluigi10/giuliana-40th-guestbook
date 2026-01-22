@@ -1,0 +1,90 @@
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+import type { Database } from '@/types/database'
+
+export async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // IMPORTANT: Avoid writing any logic between createServerClient and
+  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // issues with users being randomly logged out.
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Get user profile with role
+  let profile: { role: string; is_approved: boolean } | null = null
+  if (user) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('role, is_approved')
+      .eq('id', user.id)
+      .single()
+    profile = data as { role: string; is_approved: boolean } | null
+  }
+
+  const path = request.nextUrl.pathname
+
+  // Public routes - allow access
+  if (
+    path === '/login' ||
+    path === '/register' ||
+    path === '/pending-approval' ||
+    path === '/'
+  ) {
+    return supabaseResponse
+  }
+
+  // Require authentication for all other routes
+  if (!user) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    redirectUrl.searchParams.set('redirect', path)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // Check role-based access
+  if (path.startsWith('/admin')) {
+    if (profile?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
+  if (path.startsWith('/vip')) {
+    if (profile?.role !== 'vip') {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
+  if (path.startsWith('/guest')) {
+    if (profile?.role !== 'guest' || !profile?.is_approved) {
+      return NextResponse.redirect(new URL('/pending-approval', request.url))
+    }
+  }
+
+  return supabaseResponse
+}
