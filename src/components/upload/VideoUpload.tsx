@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { uploadVideoContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
+import { checkUploadRateLimit } from '@/lib/utils'
 
 interface VideoUploadProps {
   userId: string
@@ -52,6 +53,13 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
     if (!file) {
       toast.error('Seleziona un video')
+      return
+    }
+
+    // Check client-side rate limit
+    const rateLimitCheck = checkUploadRateLimit(userId)
+    if (!rateLimitCheck.allowed) {
+      toast.error(`Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto`)
       return
     }
 
@@ -180,7 +188,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Il tuo video sarà visibile a Giuliana dopo l'approvazione dell'admin
+        Facciamo un rapido check e il tuo video è in galleria 😊
       </p>
     </form>
   )

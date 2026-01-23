@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { approveContent, rejectContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import Image from 'next/image'
+import DOMPurify from 'isomorphic-dompurify'
 
 interface Content {
   id: string
@@ -133,10 +134,16 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="font-bold text-lg">
-                    {item.profiles?.full_name || 'Utente sconosciuto'}
+                    {DOMPurify.sanitize(item.profiles?.full_name || 'Utente sconosciuto', {
+                      ALLOWED_TAGS: [],
+                      ALLOWED_ATTR: []
+                    })}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {item.profiles?.email}
+                    {DOMPurify.sanitize(item.profiles?.email || '', {
+                      ALLOWED_TAGS: [],
+                      ALLOWED_ATTR: []
+                    })}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {new Date(item.created_at).toLocaleString('it-IT')}
@@ -151,7 +158,12 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
               <div className="mb-4">
                 {item.type === 'text' && (
                   <div className="bg-gradient-to-r from-birthday-pink/10 to-birthday-purple/10 rounded-lg p-4 border border-gray-200">
-                    <p className="whitespace-pre-wrap">{item.text_content}</p>
+                    <p className="whitespace-pre-wrap">
+                      {DOMPurify.sanitize(item.text_content || '', {
+                        ALLOWED_TAGS: [],
+                        ALLOWED_ATTR: []
+                      })}
+                    </p>
                   </div>
                 )}
 

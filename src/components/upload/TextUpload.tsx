@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { uploadTextContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
+import { checkUploadRateLimit } from '@/lib/utils'
 
 interface TextUploadProps {
   userId: string
@@ -22,6 +23,13 @@ export function TextUpload({ userId }: TextUploadProps) {
 
     if (!isValid) {
       toast.error('Il messaggio deve essere tra 10 e 1000 caratteri')
+      return
+    }
+
+    // Check client-side rate limit
+    const rateLimitCheck = checkUploadRateLimit(userId)
+    if (!rateLimitCheck.allowed) {
+      toast.error(`Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto`)
       return
     }
 
@@ -85,7 +93,7 @@ export function TextUpload({ userId }: TextUploadProps) {
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Il tuo messaggio sarà visibile a Giuliana dopo l'approvazione dell'admin
+        Facciamo un rapido check e il tuo messaggio è in galleria 😊
       </p>
     </form>
   )

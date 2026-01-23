@@ -3,9 +3,11 @@
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
+import imageCompression from 'browser-image-compression'
 import { uploadImageContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import Image from 'next/image'
+import { checkUploadRateLimit } from '@/lib/utils'
 
 interface ImageUploadProps {
   userId: string
@@ -26,6 +28,11 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     if (file.size > maxSize) {
       toast.error('File troppo grande! Massimo 10MB')
       return
+    }
+
+    const sizeMB = file.size / 1024 / 1024
+    if (sizeMB > 2) {
+      toast.info('Immagine grande, verrà compressa automaticamente prima dell\'upload')
     }
 
     setFile(file)
@@ -57,12 +64,50 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       return
     }
 
+    // Check client-side rate limit
+    const rateLimitCheck = checkUploadRateLimit(userId)
+    if (!rateLimitCheck.allowed) {
+      toast.error(`Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto`)
+      return
+    }
+
     setLoading(true)
-    setProgress(10)
+    setProgress(0)
 
     try {
+      let fileToUpload = file
+
+      // Image compression if file > 2MB
+      const fileSizeMB = file.size / 1024 / 1024
+      if (fileSizeMB > 2) {
+        toast.info('Compressione immagine in corso...')
+
+        const options = {
+          maxSizeMB: 1,          // max 1MB after compression
+          maxWidthOrHeight: 1920, // max 1920px (Full HD)
+          useWebWorker: true,     // use Web Worker for performance
+          fileType: 'image/jpeg', // convert to optimized JPEG
+        }
+
+        try {
+          const compressedFile = await imageCompression(file, options)
+          fileToUpload = compressedFile
+
+          const originalSize = fileSizeMB.toFixed(2)
+          const compressedSize = (compressedFile.size / 1024 / 1024).toFixed(2)
+
+          toast.success(`Immagine compressa: ${originalSize}MB → ${compressedSize}MB`)
+        } catch (compressionError) {
+          console.error('Compression failed:', compressionError)
+          toast.warning('Compressione fallita, upload immagine originale')
+          // Use original file as fallback
+        }
+      }
+
+      setProgress(10)
+
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', fileToUpload)
 
       setProgress(30)
       const result = await uploadImageContent(formData)
@@ -182,7 +227,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
-        La tua foto sarà visibile a Giuliana dopo l'approvazione dell'admin
+        Facciamo un rapido check e la tua foto è in galleria 😊
       </p>
     </form>
   )

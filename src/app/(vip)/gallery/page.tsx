@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { GalleryView } from '@/components/gallery/GalleryView'
 import { ContentErrorBoundary } from '@/components/errors/ContentErrorBoundary'
+import { Header } from '@/components/layout/Header'
 
 export const metadata: Metadata = {
   title: 'Galleria VIP',
@@ -23,14 +24,14 @@ export default async function GalleryPage() {
     redirect('/login')
   }
 
-  // Check if user is VIP
+  // Get user profile - all authenticated users can view gallery
   const { data: profile } = await supabase
     .from('profiles')
     .select('role, full_name')
     .eq('id', user.id)
     .single() as { data: { role: string; full_name: string } | null }
 
-  if (profile?.role !== 'vip') {
+  if (!profile) {
     redirect('/login')
   }
 
@@ -51,7 +52,8 @@ export default async function GalleryPage() {
       reactions (
         id,
         emoji,
-        user_id
+        user_id,
+        profiles (full_name)
       )
     `)
     .eq('status', 'approved')
@@ -59,6 +61,8 @@ export default async function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-birthday-pink/5 via-birthday-purple/5 to-birthday-gold/5">
+      <Header userName={profile?.full_name} userRole={profile?.role} />
+
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8 text-center">
           <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent">
@@ -70,7 +74,11 @@ export default async function GalleryPage() {
         </div>
 
         <ContentErrorBoundary>
-          <GalleryView initialContent={approvedContent || []} userId={user.id} />
+          <GalleryView
+            initialContent={approvedContent || []}
+            userId={user.id}
+            userRole={profile.role}
+          />
         </ContentErrorBoundary>
       </div>
     </div>

@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ContentModerationQueue } from '@/components/admin/ContentModerationQueue'
+import { StorageMonitor } from '@/components/admin/StorageMonitor'
+import { Header } from '@/components/layout/Header'
 
 export const metadata: Metadata = {
   title: 'Approva Contenuti',
@@ -29,9 +31,9 @@ export default async function ApproveContentPage() {
   // Check if user is admin
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, full_name')
     .eq('id', user.id)
-    .single() as { data: { role: string } | null }
+    .single() as { data: { role: string; full_name: string } | null }
 
   if (profile?.role !== 'admin') {
     redirect('/login')
@@ -57,12 +59,19 @@ export default async function ApproveContentPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header userName={profile?.full_name} userRole={profile?.role} />
+
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Approva Contenuti</h1>
           <p className="text-muted-foreground">
             Modera i contenuti caricati dagli ospiti prima che siano visibili a Giuliana
           </p>
+        </div>
+
+        {/* Storage Monitor */}
+        <div className="mb-6">
+          <StorageMonitor />
         </div>
 
         <ContentModerationQueue initialContent={pendingContent || []} />
