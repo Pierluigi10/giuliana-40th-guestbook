@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { approveContent, rejectContent } from '@/actions/content'
+import { Spinner } from '@/components/loading/Spinner'
 import Image from 'next/image'
 
 interface Content {
@@ -192,16 +193,18 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
                 <button
                   onClick={() => handleApprove(item.id)}
                   disabled={loadingId === item.id}
-                  className="flex-1 rounded-md bg-green-500 px-4 py-3 text-sm font-medium text-white hover:bg-green-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 rounded-md bg-green-500 px-4 py-3 text-sm font-medium text-white hover:bg-green-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
-                  {loadingId === item.id ? '⏳ Approvazione...' : '✅ Approva'}
+                  {loadingId === item.id && <Spinner size="sm" className="text-white" />}
+                  {loadingId === item.id ? 'Approvazione...' : '✅ Approva'}
                 </button>
                 <button
                   onClick={() => handleReject(item.id)}
                   disabled={loadingId === item.id}
-                  className="flex-1 rounded-md bg-red-500 px-4 py-3 text-sm font-medium text-white hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 rounded-md bg-red-500 px-4 py-3 text-sm font-medium text-white hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
-                  {loadingId === item.id ? '⏳ Rifiuto...' : '❌ Rifiuta'}
+                  {loadingId === item.id && <Spinner size="sm" className="text-white" />}
+                  {loadingId === item.id ? 'Rifiuto...' : '❌ Rifiuta'}
                 </button>
               </div>
             </div>

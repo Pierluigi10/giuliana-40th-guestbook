@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { uploadVideoContent } from '@/actions/content'
+import { Spinner } from '@/components/loading/Spinner'
 
 interface VideoUploadProps {
   userId: string
@@ -172,9 +173,10 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       <button
         type="submit"
         disabled={!file || loading}
-        className="w-full rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        className="w-full rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
       >
-        {loading ? '📤 Caricamento...' : '🎬 Carica Video'}
+        {loading && <Spinner size="sm" className="text-white" />}
+        {loading ? 'Caricamento...' : '🎬 Carica Video'}
       </button>
 
       <p className="text-xs text-muted-foreground text-center">

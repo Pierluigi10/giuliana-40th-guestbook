@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { approveUser, rejectUser } from '@/actions/users'
 import { useRouter } from 'next/navigation'
+import { Spinner } from '@/components/loading/Spinner'
 
 type Guest = {
   id: string
@@ -99,15 +100,17 @@ export function UserApprovalQueue({ initialGuests }: { initialGuests: Guest[] })
             <button
               onClick={() => handleReject(guest.id)}
               disabled={loading === guest.id}
-              className="px-4 py-2 text-sm font-medium rounded-md border border-border hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium rounded-md border border-border hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
+              {loading === guest.id && <Spinner size="sm" />}
               Rifiuta
             </button>
             <button
               onClick={() => handleApprove(guest.id)}
               disabled={loading === guest.id}
-              className="px-4 py-2 text-sm font-medium rounded-md bg-birthday-purple text-white hover:bg-birthday-purple/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium rounded-md bg-birthday-purple text-white hover:bg-birthday-purple/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
+              {loading === guest.id && <Spinner size="sm" className="text-white" />}
               {loading === guest.id ? 'Approvazione...' : 'Approva'}
             </button>
           </div>

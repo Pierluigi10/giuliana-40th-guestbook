@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { uploadTextContent } from '@/actions/content'
+import { Spinner } from '@/components/loading/Spinner'
 
 interface TextUploadProps {
   userId: string
@@ -77,9 +78,10 @@ export function TextUpload({ userId }: TextUploadProps) {
       <button
         type="submit"
         disabled={!isValid || loading}
-        className="w-full rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        className="w-full rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
       >
-        {loading ? '📤 Invio in corso...' : '📨 Invia Messaggio'}
+        {loading && <Spinner size="sm" className="text-white" />}
+        {loading ? 'Invio in corso...' : '📨 Invia Messaggio'}
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
