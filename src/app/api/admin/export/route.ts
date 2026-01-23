@@ -61,7 +61,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Return file as download
-    return new NextResponse(buffer, {
+    // Convert Buffer to Uint8Array for NextResponse compatibility
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         'Content-Type': contentType,
