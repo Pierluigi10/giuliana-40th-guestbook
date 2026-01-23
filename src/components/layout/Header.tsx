@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { LogOut, User, Menu } from 'lucide-react'
+import confetti from 'canvas-confetti'
 import {
   Sheet,
   SheetContent,
@@ -42,6 +43,42 @@ export function Header({ userName, userRole }: HeaderProps) {
     }
   }
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    // Festive confetti colors matching the theme
+    const colors = ['#FF69B4', '#9D4EDD', '#FFD700', '#FF6B9D', '#C44569']
+    
+    // Center burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { x: 0.5, y: 0.5 },
+      colors,
+    })
+    
+    // Side bursts for extra celebration
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors,
+        startVelocity: 30,
+      })
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors,
+        startVelocity: 30,
+      })
+    }, 200)
+  }
+
   return (
     <header
       className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50"
@@ -49,15 +86,16 @@ export function Header({ userName, userRole }: HeaderProps) {
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo - Left */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-          aria-label="Vai alla homepage del Guestbook Giuliana"
+        <button
+          type="button"
+          onClick={handleLogoClick}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none p-0"
+          aria-label="Spara coriandoli festosi"
         >
           <h2 className="text-xl font-semibold bg-gradient-to-r from-birthday-pink to-birthday-purple bg-clip-text text-transparent">
             Guestbook Giuliana
           </h2>
-        </Link>
+        </button>
 
         {/* Mobile Simple Navigation - Only on upload/gallery pages */}
         {userName && (isUploadPage || isGalleryPage) && (

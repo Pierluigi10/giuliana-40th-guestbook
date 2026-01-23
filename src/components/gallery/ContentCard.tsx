@@ -164,7 +164,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
         {content.type === 'image' && content.media_url && (
           <motion.div
-            className="relative overflow-hidden cursor-pointer group bg-black"
+            className="relative overflow-hidden cursor-pointer group bg-black min-h-[300px] flex items-center justify-center"
             onClick={onOpenLightbox}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
@@ -174,7 +174,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
               alt="Content"
               width={800}
               height={600}
-              className="w-full h-auto transition-transform duration-300 group-hover:brightness-110"
+              className="w-full h-[300px] object-cover transition-transform duration-300 group-hover:brightness-110"
             />
             <motion.div 
               className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center"
@@ -196,14 +196,14 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
         {content.type === 'video' && content.media_url && (
           <motion.div
-            className="relative overflow-hidden cursor-pointer bg-black"
+            className="relative overflow-hidden cursor-pointer bg-black min-h-[300px] flex items-center justify-center"
             onClick={onOpenLightbox}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
           >
             <video
               src={content.media_url}
-              className="w-full h-auto transition-transform duration-300"
+              className="w-full h-[300px] object-cover transition-transform duration-300"
               preload="metadata"
             />
             <motion.div 
