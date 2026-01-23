@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 import { addReaction, removeReaction } from '@/actions/reactions'
 import { deleteContent } from '@/actions/content'
 import Image from 'next/image'
@@ -94,10 +95,20 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         toast.error('Errore durante la rimozione della reaction')
       }
     } else {
-      // Add reaction
+      // Add reaction with celebration!
       const result = await addReaction(content.id, emoji)
       if (result.success && result.reaction) {
         setReactions(prev => [...prev, result.reaction!])
+        
+        // Small confetti burst for reaction
+        const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+        confetti({
+          particleCount: 20,
+          spread: 30,
+          origin: { x: 0.5, y: 0.5 },
+          colors,
+          startVelocity: 20,
+        })
       } else {
         toast.error('Errore durante l\'aggiunta della reaction')
       }
@@ -302,10 +313,15 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
             {Object.entries(reactionCounts).map(([emoji, count]) => (
               <HoverCard key={emoji}>
                 <HoverCardTrigger asChild>
-                  <button
+                  <motion.button
                     onClick={() => handleReactionClick(emoji)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.15, y: -2 }}
+                    whileTap={{ scale: 0.9 }}
+                    animate={hasUserReacted(emoji) ? {
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 5, -5, 0],
+                    } : {}}
+                    transition={{ duration: 0.3 }}
                     className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-1 ${
                       hasUserReacted(emoji)
                         ? 'bg-gradient-to-r from-birthday-pink to-birthday-purple text-white shadow-md'
@@ -320,7 +336,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                       {emoji}
                     </span>
                     <span className="font-medium text-[10px]">{count}</span>
-                  </button>
+                  </motion.button>
                 </HoverCardTrigger>
                 <HoverCardContent side="top" className="w-auto max-w-xs p-3" sideOffset={5} role="tooltip">
                   <div className="space-y-1">

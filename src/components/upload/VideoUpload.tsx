@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 import { uploadVideoContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import { checkUploadRateLimit } from '@/lib/utils'
@@ -113,6 +114,15 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         const countMessage = count === 1 
           ? 'Questo è il tuo primo video! 🎊' 
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
+        
+        // Celebration confetti!
+        const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { x: 0.5, y: 0.5 },
+          colors,
+        })
         
         toast.success('🎉 Il tuo video è stato caricato!', {
           description: `Giuliana lo vedrà presto! ${countMessage}`,

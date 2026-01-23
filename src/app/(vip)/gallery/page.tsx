@@ -5,6 +5,8 @@ import { GalleryView } from '@/components/gallery/GalleryView'
 import { ContentErrorBoundary } from '@/components/errors/ContentErrorBoundary'
 import { Header } from '@/components/layout/Header'
 import { StatsDashboard } from '@/components/vip/StatsDashboard'
+import { BirthdayCountdown } from '@/components/vip/BirthdayCountdown'
+import { FloatingParticles } from '@/components/ui/FloatingParticles'
 import { getVIPStats } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
@@ -46,7 +48,8 @@ export default async function GalleryPage() {
   const { data: vipStats } = await getVIPStats(supabase)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-birthday-pink/5 via-birthday-purple/5 to-birthday-gold/5">
+    <div className="min-h-screen bg-gradient-to-br from-birthday-pink/5 via-birthday-purple/5 to-birthday-gold/5 relative">
+      <FloatingParticles count={25} />
       <Header userName={profile?.full_name} userRole={profile?.role} />
 
       <div className="container mx-auto py-8 px-4">
@@ -58,6 +61,13 @@ export default async function GalleryPage() {
             Messaggi, foto e video dai tuoi amici ✨
           </p>
         </div>
+
+        {/* Birthday Countdown */}
+        <ContentErrorBoundary>
+          <div className="mb-8">
+            <BirthdayCountdown />
+          </div>
+        </ContentErrorBoundary>
 
         {/* Statistics Dashboard */}
         <ContentErrorBoundary>

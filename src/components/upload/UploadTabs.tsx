@@ -5,6 +5,7 @@ import { TextUpload } from './TextUpload'
 import { ImageUpload } from './ImageUpload'
 import { VideoUpload } from './VideoUpload'
 import { FirstTimeTutorial } from '@/components/onboarding/FirstTimeTutorial'
+import { MotivationalMessages } from './MotivationalMessages'
 
 type Tab = 'text' | 'image' | 'video'
 
@@ -24,6 +25,11 @@ export function UploadTabs({ userId }: UploadTabsProps) {
 
   return (
     <>
+      {/* Motivational Messages */}
+      <div className="mb-6">
+        <MotivationalMessages />
+      </div>
+
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Tab Headers */}
         <div className="flex border-b" data-tutorial-tabs>

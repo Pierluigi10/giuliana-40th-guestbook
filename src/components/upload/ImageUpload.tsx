@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 import imageCompression from 'browser-image-compression'
 import { uploadImageContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
@@ -193,6 +194,15 @@ export function ImageUpload({ userId }: ImageUploadProps) {
         const countMessage = count === 1 
           ? 'Questa è la tua prima foto! 🎊' 
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
+        
+        // Celebration confetti!
+        const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { x: 0.5, y: 0.5 },
+          colors,
+        })
         
         toast.success('🎉 La tua foto è stata caricata!', {
           description: `Giuliana la vedrà presto! ${countMessage}`,

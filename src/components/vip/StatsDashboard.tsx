@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { VIPStats } from '@/lib/supabase/queries'
 import { Card } from '@/components/ui/card'
+import { MilestoneCelebrations } from './MilestoneCelebrations'
 
 interface StatsDashboardProps {
   initialStats: VIPStats | null
@@ -11,6 +12,7 @@ interface StatsDashboardProps {
 export function StatsDashboard({ initialStats }: StatsDashboardProps) {
   const [stats, setStats] = useState<VIPStats | null>(initialStats)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const previousStats = useRef<VIPStats | null>(initialStats)
 
   // Refresh stats periodically (every 30 seconds)
   useEffect(() => {
@@ -20,6 +22,7 @@ export function StatsDashboard({ initialStats }: StatsDashboardProps) {
         const response = await fetch('/api/vip/stats')
         if (response.ok) {
           const data = await response.json()
+          previousStats.current = stats
           setStats(data)
         }
       } catch (error) {
@@ -51,8 +54,35 @@ export function StatsDashboard({ initialStats }: StatsDashboardProps) {
   const imagePercentage = totalForChart > 0 ? (contentByType.image / totalForChart) * 100 : 0
   const videoPercentage = totalForChart > 0 ? (contentByType.video / totalForChart) * 100 : 0
 
+  // Get personalized message based on stats
+  const getPersonalizedMessage = () => {
+    if (!stats) return null
+    
+    if (stats.totalFriends === 0) {
+      return 'I tuoi amici stanno arrivando... 🎈'
+    } else if (stats.totalFriends < 10) {
+      return `Wow! ${stats.totalFriends} ${stats.totalFriends === 1 ? 'amico ha' : 'amici hanno'} già partecipato! 🎉`
+    } else if (stats.totalFriends < 20) {
+      return `Fantastico! ${stats.totalFriends} amici stanno condividendo i loro ricordi! ✨`
+    } else {
+      return `Incredibile! ${stats.totalFriends} amici ti stanno facendo gli auguri! 🎊`
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {/* Milestone Celebrations */}
+      <MilestoneCelebrations stats={stats} previousStats={previousStats.current} />
+
+      {/* Personalized Message */}
+      {getPersonalizedMessage() && (
+        <div className="bg-gradient-to-r from-birthday-pink/20 to-birthday-purple/20 rounded-lg p-4 text-center border border-birthday-purple/30">
+          <p className="text-lg font-semibold text-gray-800">
+            {getPersonalizedMessage()}
+          </p>
+        </div>
+      )}
+
       {/* Main Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Friends Count */}

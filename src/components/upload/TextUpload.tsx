@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 import { uploadTextContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import { checkUploadRateLimit } from '@/lib/utils'
@@ -47,6 +48,15 @@ export function TextUpload({ userId }: TextUploadProps) {
         const countMessage = count === 1 
           ? 'Questo è il tuo primo messaggio! 🎊' 
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
+        
+        // Celebration confetti!
+        const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { x: 0.5, y: 0.5 },
+          colors,
+        })
         
         toast.success('🎉 Il tuo messaggio è stato inviato!', {
           description: `Giuliana lo vedrà presto! ${countMessage}`,
