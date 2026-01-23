@@ -3,7 +3,7 @@
  * This prevents build errors when canvas-confetti tries to access DOM/Canvas APIs
  */
 
-export async function triggerConfetti(options?: Parameters<typeof import('canvas-confetti').default>[0]) {
+export async function triggerConfetti(options?: any) {
   if (typeof window === 'undefined') {
     return // Server-side: do nothing
   }

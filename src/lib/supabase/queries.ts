@@ -44,7 +44,6 @@ export async function selectFullProfileById(supabase: TypedSupabaseClient, userI
 }
 
 export async function getUserContentCount(supabase: TypedSupabaseClient, userId: string) {
-  // @ts-expect-error - Supabase generic inference limitation
   return supabase
     .from('content')
     .select('*', { count: 'exact', head: true })
@@ -79,7 +78,7 @@ export async function getVIPStats(supabase: TypedSupabaseClient): Promise<{ data
       .from('content')
       .select('user_id')
       .eq('status', 'approved')
-      .not('user_id', 'is', null)
+      .not('user_id', 'is', null) as { data: Array<{ user_id: string }> | null; error: any }
 
     if (friendsError) {
       return { data: null, error: friendsError }
@@ -92,7 +91,7 @@ export async function getVIPStats(supabase: TypedSupabaseClient): Promise<{ data
     const { data: contentData, error: contentError } = await supabase
       .from('content')
       .select('type')
-      .eq('status', 'approved')
+      .eq('status', 'approved') as { data: Array<{ type: 'text' | 'image' | 'video' }> | null; error: any }
 
     if (contentError) {
       return { data: null, error: contentError }
@@ -320,7 +319,7 @@ export async function getAdminStats(supabase: TypedSupabaseClient): Promise<{ da
 
     const { data: allUsers, error: usersError } = await supabase
       .from('profiles')
-      .select('role, is_approved')
+      .select('role, is_approved') as { data: Array<{ role: 'admin' | 'vip' | 'guest'; is_approved: boolean }> | null; error: any }
 
     if (usersError) {
       return { data: null, error: usersError }
@@ -348,7 +347,7 @@ export async function getAdminStats(supabase: TypedSupabaseClient): Promise<{ da
 
     const { data: allContent, error: contentError } = await supabase
       .from('content')
-      .select('status, type, created_at, approved_at')
+      .select('status, type, created_at, approved_at') as { data: Array<{ status: 'pending' | 'approved' | 'rejected'; type: 'text' | 'image' | 'video'; created_at: string; approved_at: string | null }> | null; error: any }
 
     if (contentError) {
       return { data: null, error: contentError }

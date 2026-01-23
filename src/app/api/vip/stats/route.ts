@@ -17,7 +17,7 @@ export async function GET() {
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
+      .single() as { data: { role: 'admin' | 'vip' | 'guest' } | null; error: any }
 
     if (!profile || (profile.role !== 'vip' && profile.role !== 'admin')) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
