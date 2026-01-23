@@ -1,58 +1,150 @@
--- Seed data for initial setup
--- Creates admin and VIP users
-
 -- ============================================================================
--- ADMIN USER (Pierluigi)
+-- SEED DATA: Admin and VIP Users
 -- ============================================================================
--- Note: You need to create this user manually in Supabase Dashboard first:
--- 1. Go to Authentication → Users → Add User
--- 2. Email: your-admin-email@example.com
--- 3. Password: (set a strong password)
--- 4. Confirm email automatically
--- 5. Copy the user ID and replace 'ADMIN_USER_ID' below
-
--- After creating the admin user, run this to set role:
--- UPDATE profiles
--- SET role = 'admin', is_approved = true
--- WHERE email = 'your-admin-email@example.com';
-
--- ============================================================================
--- VIP USER (Giuliana)
--- ============================================================================
--- Note: You need to create this user manually in Supabase Dashboard first:
--- 1. Go to Authentication → Users → Add User
--- 2. Email: giuliana-email@example.com
--- 3. Password: (set a strong password)
--- 4. Confirm email automatically
--- 5. Copy the user ID and replace 'VIP_USER_ID' below
-
--- After creating the VIP user, run this to set role:
--- UPDATE profiles
--- SET role = 'vip', is_approved = true
--- WHERE email = 'giuliana-email@example.com';
-
--- ============================================================================
--- INSTRUCTIONS FOR MANUAL SETUP
+-- This script provides helper functions to promote users to admin/vip roles.
+--
+-- IMPORTANT: Supabase requires users to be created via Authentication UI or API first,
+-- then profiles are automatically created via trigger (see 001_initial_schema.sql).
+-- After user creation, use the helper functions below to promote them.
+--
+-- See full instructions in: docs/SUPABASE_SETUP.md (Step 3)
 -- ============================================================================
 
--- 1. Create Admin User:
---    - Supabase Dashboard → Authentication → Users → Add User
---    - Email: pierluigi@example.com (or your real email)
---    - Auto-confirm email: YES
---    - After creation, run:
---      UPDATE profiles SET role = 'admin', is_approved = true
---      WHERE email = 'pierluigi@example.com';
+-- ============================================================================
+-- METHOD 1: MANUAL USER CREATION (Recommended - Most Secure)
+-- ============================================================================
+-- This is the recommended approach for production environments.
+--
+-- Step 1: Create users via Supabase Dashboard
+--   1. Go to: Supabase Dashboard → Authentication → Users
+--   2. Click "Add user" → "Create new user"
+--   3. For ADMIN (Pierluigi):
+--      - Email: your-real-admin-email@example.com
+--      - Password: Generate a strong password (min 12 chars)
+--      - Auto Confirm User: YES (check this!)
+--      - Click "Create user"
+--   4. For VIP (Giuliana):
+--      - Email: giuliana-real-email@example.com
+--      - Password: Generate a strong password (min 12 chars)
+--      - Auto Confirm User: YES (check this!)
+--      - Click "Create user"
+--
+-- Step 2: Promote users using helper functions (see below)
+--   Execute in SQL Editor:
+--     SELECT promote_to_admin('your-real-admin-email@example.com');
+--     SELECT promote_to_vip('giuliana-real-email@example.com');
+--
+-- Step 3: Verify users were promoted correctly
+--   Execute in SQL Editor:
+--     SELECT email, role, is_approved FROM profiles
+--     WHERE role IN ('admin', 'vip');
+--
+-- SECURITY NOTE: Store passwords in a password manager (1Password, Bitwarden, etc.)
+-- DO NOT commit real credentials to Git!
 
--- 2. Create VIP User (Giuliana):
---    - Supabase Dashboard → Authentication → Users → Add User
---    - Email: giuliana@example.com (or her real email)
---    - Auto-confirm email: YES
---    - After creation, run:
---      UPDATE profiles SET role = 'vip', is_approved = true
---      WHERE email = 'giuliana@example.com';
+-- ============================================================================
+-- METHOD 2: AUTOMATED SEED (Development/Testing Only)
+-- ============================================================================
+-- WARNING: This method stores passwords in plaintext in this file.
+-- ONLY use for local development/testing. NEVER use in production.
+-- NEVER commit this file with real passwords to Git.
+--
+-- Uncomment and modify the section below if you want automated seeding:
 
--- 3. Test Users (Optional):
---    Create a few test guest users to verify the approval flow works.
+/*
+-- DEVELOPMENT SEED DATA (Uncomment to use)
+-- Replace emails and passwords with your test credentials
+
+-- Create admin user (development only)
+DO $$
+DECLARE
+  admin_user_id UUID;
+BEGIN
+  -- Insert into auth.users
+  INSERT INTO auth.users (
+    id,
+    instance_id,
+    email,
+    encrypted_password,
+    email_confirmed_at,
+    raw_app_meta_data,
+    raw_user_meta_data,
+    aud,
+    role,
+    created_at,
+    updated_at,
+    confirmation_token,
+    recovery_token
+  )
+  VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000000',
+    'pierluigi.dev@example.com', -- CHANGE THIS
+    crypt('DevPassword123!', gen_salt('bf')), -- CHANGE THIS
+    now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"full_name":"Pierluigi"}',
+    'authenticated',
+    'authenticated',
+    now(),
+    now(),
+    '',
+    ''
+  )
+  ON CONFLICT (email) DO NOTHING
+  RETURNING id INTO admin_user_id;
+
+  -- Promote to admin (profile created automatically via trigger)
+  IF admin_user_id IS NOT NULL THEN
+    PERFORM promote_to_admin('pierluigi.dev@example.com');
+  END IF;
+END $$;
+
+-- Create VIP user (development only)
+DO $$
+DECLARE
+  vip_user_id UUID;
+BEGIN
+  -- Insert into auth.users
+  INSERT INTO auth.users (
+    id,
+    instance_id,
+    email,
+    encrypted_password,
+    email_confirmed_at,
+    raw_app_meta_data,
+    raw_user_meta_data,
+    aud,
+    role,
+    created_at,
+    updated_at,
+    confirmation_token,
+    recovery_token
+  )
+  VALUES (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000000',
+    'giuliana.dev@example.com', -- CHANGE THIS
+    crypt('DevPassword123!', gen_salt('bf')), -- CHANGE THIS
+    now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"full_name":"Giuliana"}',
+    'authenticated',
+    'authenticated',
+    now(),
+    now(),
+    '',
+    ''
+  )
+  ON CONFLICT (email) DO NOTHING
+  RETURNING id INTO vip_user_id;
+
+  -- Promote to vip (profile created automatically via trigger)
+  IF vip_user_id IS NOT NULL THEN
+    PERFORM promote_to_vip('giuliana.dev@example.com');
+  END IF;
+END $$;
+*/
 
 -- ============================================================================
 -- HELPER FUNCTION: Promote user to admin
