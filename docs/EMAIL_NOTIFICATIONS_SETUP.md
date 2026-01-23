@@ -72,7 +72,7 @@ To prevent emails from going to spam:
 
 1. Go to Resend Dashboard → **Domains**
 2. Click "Add Domain"
-3. Enter your domain (e.g., `giuliana40.vercel.app`)
+3. Enter your domain (e.g., `tanti-auguri-giuliana.vercel.app`)
 4. Add the DNS records shown by Resend to your domain provider
 5. Wait for verification (usually 5-10 minutes)
 6. Update the `from` field in `/Users/pierluigibaiano/Development/g_gift/src/lib/email.ts`:

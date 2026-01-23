@@ -40,8 +40,10 @@ export function ForgotPasswordForm() {
     try {
       const supabase = createClient()
 
+      // Use NEXT_PUBLIC_APP_URL if set (production), otherwise use current origin (development)
+      const redirectUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${redirectUrl}/reset-password`,
       })
 
       if (resetError) {

@@ -116,7 +116,8 @@ export function RegisterForm() {
             full_name: fullName,
           },
           // Email confirmation always enabled (dev and production)
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          // Use NEXT_PUBLIC_APP_URL if set (production), otherwise use current origin (development)
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`,
         },
       })
 

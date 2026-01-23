@@ -1,17 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server'
-// import { updateSession } from '@/lib/supabase/middleware'
+import { updateSession } from '@/lib/supabase/middleware'
 
 /**
- * Next.js Proxy (formerly middleware)
+ * Next.js Middleware
  * Handles route protection and authentication
  * 
- * Note: In Next.js 16+, middleware.ts was renamed to proxy.ts
- * The function name also changed from `middleware` to `proxy`
+ * This middleware runs on every request and protects routes based on user roles.
  */
-export async function proxy(request: NextRequest) {
-  // Temporarily disabled for debugging
-  return NextResponse.next()
-  // return await updateSession(request)
+export async function middleware(request: NextRequest) {
+  return await updateSession(request)
 }
 
 export const config = {
@@ -21,7 +18,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - api routes (handled separately)
+     * - public files
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

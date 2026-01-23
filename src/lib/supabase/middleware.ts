@@ -37,6 +37,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Get user profile with role
+  // Note: is_approved is kept for backward compatibility but is always true
+  // after migration 004 (email confirmation replaces manual approval)
   let profile: { role: string; is_approved: boolean } | null = null
   if (user) {
     const { data } = await supabase
@@ -81,7 +83,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (path.startsWith('/guest')) {
-    if (profile?.role !== 'guest' || !profile?.is_approved) {
+    // After migration 004, all guests are auto-approved via email confirmation
+    // is_approved is always true for guests who have confirmed their email
+    if (profile?.role !== 'guest') {
       return NextResponse.redirect(new URL('/pending-approval', request.url))
     }
   }

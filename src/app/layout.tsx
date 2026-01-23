@@ -7,7 +7,7 @@ import './nprogress-styles.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://giuliana40.vercel.app'
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tanti-auguri-giuliana.vercel.app'
 
 export const viewport: Viewport = {
   width: 'device-width',

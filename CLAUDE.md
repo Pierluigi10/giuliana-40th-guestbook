@@ -25,7 +25,7 @@ specs/
 
 1. **3-role Auth**: admin, vip, guest with approval workflow
 2. **Upload**: text + photo + video (max 10MB per file)
-3. **Moderation**: admin approves users AND content before VIP can see
+3. **Moderation**: admin approves content before VIP can see (users auto-approved via email confirmation)
 4. **VIP Gallery**: Giuliana sees only approved content
 5. **Reactions**: emoji reactions on content
 
@@ -38,7 +38,7 @@ specs/
 
 ## Implementation Priority
 
-**Week 1**: Setup + Auth + User approval + Content upload + Content approval
+**Week 1**: Setup + Auth + Email confirmation + Content upload + Content approval
 **Week 2**: VIP Gallery + Reactions + Filters + UI polish + Deploy + Testing
 
 ## Git Workflow

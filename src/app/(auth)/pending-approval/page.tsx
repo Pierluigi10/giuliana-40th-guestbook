@@ -34,19 +34,20 @@ export default async function PendingApprovalPage({
     redirect('/login')
   }
 
-  // Check if user is approved now (only if authenticated)
-  let profile: { role: string; is_approved: boolean; full_name: string } | null = null
+  // Get user profile (only if authenticated)
+  let profile: { role: string; full_name: string } | null = null
   if (user) {
     const { data } = await supabase
       .from('profiles')
-      .select('role, is_approved, full_name')
+      .select('role, full_name')
       .eq('id', user.id)
-      .single() as { data: { role: string; is_approved: boolean; full_name: string } | null }
+      .single() as { data: { role: string; full_name: string } | null }
 
     profile = data
 
-    // If approved, redirect to appropriate page
-    if (profile?.is_approved) {
+    // If user is authenticated and has a role, redirect to appropriate page
+    // After migration 004, all users with confirmed email are auto-approved
+    if (profile) {
       if (profile.role === 'admin') {
         redirect('/approve-content')
       } else if (profile.role === 'vip') {
@@ -113,11 +114,10 @@ export default async function PendingApprovalPage({
             <>
               <p className="text-sm text-muted-foreground">
                 La tua registrazione è stata ricevuta con successo.
-                Un amministratore deve approvare il tuo account prima che tu possa
-                accedere al guestbook.
+                Dopo aver confermato la tua email, potrai accedere al guestbook.
               </p>
               <p className="text-sm text-muted-foreground">
-                Riceverai una notifica via email quando il tuo account sarà approvato.
+                Controlla la tua casella email e clicca sul link di conferma.
               </p>
             </>
           )}

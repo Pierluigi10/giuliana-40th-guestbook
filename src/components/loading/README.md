@@ -121,7 +121,8 @@ Loading pages automatically show while server components fetch data:
 ### Gallery Loading (`/app/(vip)/gallery/loading.tsx`)
 Shows skeleton grid with filters while gallery data loads.
 
-### Admin Users Loading (`/app/(admin)/approve-users/loading.tsx`)
+### Admin Users Loading (REMOVED)
+**Note**: This page was removed after migration 004. User approval is now handled via email confirmation.
 Shows user card skeletons while pending users are fetched.
 
 ### Admin Content Loading (`/app/(admin)/approve-content/loading.tsx`)

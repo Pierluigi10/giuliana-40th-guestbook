@@ -326,8 +326,10 @@ export async function getAdminStats(supabase: TypedSupabaseClient): Promise<{ da
       return { data: null, error: usersError }
     }
 
-    const approvedUsers = allUsers?.filter(u => u.is_approved).length || 0
-    const pendingUsers = allUsers?.filter(u => !u.is_approved).length || 0
+    // After migration 004, all users with confirmed email are auto-approved
+    // is_approved is always true for authenticated users
+    const approvedUsers = allUsers?.length || 0
+    const pendingUsers = 0 // No longer used - email confirmation replaces manual approval
 
     const usersByRole = {
       admin: allUsers?.filter(u => u.role === 'admin').length || 0,
