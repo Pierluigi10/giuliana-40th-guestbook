@@ -65,7 +65,6 @@ const nextConfig = {
   },
 
   // Build optimization
-  swcMinify: true,
   productionBrowserSourceMaps: false,
 
   // Vercel deployment optimization
