@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import confetti from 'canvas-confetti'
+import { triggerConfetti } from '@/lib/confetti'
 
 // Birthday date: February 4, 2026
 const BIRTHDAY_DATE = new Date('2026-02-04T00:00:00')
@@ -48,7 +48,7 @@ export function BirthdayCountdown() {
         // Multiple bursts
         for (let i = 0; i < 5; i++) {
           setTimeout(() => {
-            confetti({
+            triggerConfetti({
               particleCount: 100,
               spread: 70,
               origin: { x: Math.random(), y: Math.random() },
