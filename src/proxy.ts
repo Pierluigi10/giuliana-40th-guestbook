@@ -9,7 +9,7 @@ import { type NextRequest, NextResponse } from 'next/server'
  * The function name also changed from `middleware` to `proxy`
  */
 export async function proxy(request: NextRequest) {
-  // Temporaneamente disabilitato per debug
+  // Temporarily disabled for debugging
   return NextResponse.next()
   // return await updateSession(request)
 }

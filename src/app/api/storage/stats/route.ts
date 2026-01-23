@@ -5,7 +5,7 @@ import type { ProfileRow } from '@/lib/supabase/types'
 
 export async function GET() {
   try {
-    // Verifica che sia admin
+    // Verify user is admin
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -27,7 +27,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Ottieni stats
+    // Get stats
     const stats = await getStorageStats()
 
     if (!stats) {

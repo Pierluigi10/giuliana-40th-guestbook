@@ -136,13 +136,13 @@ See all functional requirements (42 items) → [specs/PRD.json](specs/PRD.json)
 **Moderate content**: `/admin/approve-content` → preview → approve/reject
 **Invite friends**: Share registration link `https://[domain]/register`
 
-**Nuovo flusso registrazione** (aggiornato 2026-01-23):
-Gli amici devono:
-1. Registrarsi con email valida
-2. Confermare email cliccando sul link ricevuto (conferma automatica Supabase)
-3. Accedere e caricare contenuti
-4. Admin approva SOLO i contenuti (non più gli utenti)
+**New registration flow** (updated 2026-01-23):
+Friends must:
+1. Register with valid email
+2. Confirm email by clicking the received link (automatic Supabase confirmation)
+3. Log in and upload content
+4. Admin approves ONLY content (no longer users)
 
-~~**Approve users**: Rimosso - approvazione utenti non più necessaria~~
+~~**Approve users**: Removed - user approval no longer required~~
 
 Full admin guide: (create `docs/ADMIN_GUIDE.md` after implementation)

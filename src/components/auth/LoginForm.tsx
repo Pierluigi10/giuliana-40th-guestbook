@@ -62,7 +62,7 @@ export function LoginForm() {
       })
 
       if (signInError) {
-        // Gestisci errori specifici
+        // Handle specific errors
         if (signInError.message.includes('Email not confirmed')) {
           setError('Devi confermare la tua email prima di accedere. Controlla la tua casella di posta.')
         } else {

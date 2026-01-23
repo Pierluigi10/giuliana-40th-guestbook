@@ -4,15 +4,15 @@ import { createClient } from '@/lib/supabase/server'
 /**
  * Auth Callback Route Handler
  *
- * Gestisce il callback di conferma email da Supabase.
- * Questa route viene chiamata quando l'utente clicca sul link
- * nell'email di conferma inviata da Supabase.
+ * Handles email confirmation callback from Supabase.
+ * This route is called when the user clicks the link
+ * in the confirmation email sent by Supabase.
  *
  * Flow:
- * 1. Utente si registra → Supabase invia email con link di conferma
- * 2. Link punta a: /auth/callback?code=xxx
- * 3. Questa route scambia il code con una sessione autenticata
- * 4. Utente viene reindirizzato alla pagina appropriata (upload/gallery/admin)
+ * 1. User registers → Supabase sends email with confirmation link
+ * 2. Link points to: /auth/callback?code=xxx
+ * 3. This route exchanges the code for an authenticated session
+ * 4. User is redirected to the appropriate page (upload/gallery/admin)
  *
  * @see https://supabase.com/docs/guides/auth/server-side/email-based-auth-with-pkce-flow-for-ssr
  */
@@ -21,22 +21,22 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code')
   const next = requestUrl.searchParams.get('next') || null
 
-  // Se non c'è code, redirect al login
+  // If no code, redirect to login
   if (!code) {
-    console.warn('Auth callback chiamato senza code parameter')
+    console.warn('Auth callback called without code parameter')
     return NextResponse.redirect(`${requestUrl.origin}/login?error=missing_code`)
   }
 
   try {
     const supabase = await createClient()
 
-    // Scambia il codice di verifica con una sessione valida
+    // Exchange verification code for valid session
     const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
     if (exchangeError) {
-      console.error('Errore nello scambio code per session:', exchangeError)
+      console.error('Error exchanging code for session:', exchangeError)
 
-      // Gestisci diversi tipi di errore
+      // Handle different error types
       let errorParam = 'email_confirmation_failed'
       if (exchangeError.message.includes('expired')) {
         errorParam = 'token_expired'
@@ -49,17 +49,17 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Ottieni l'utente autenticato
+    // Get authenticated user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError || !user) {
-      console.error('Errore nel recupero utente dopo exchange:', userError)
+      console.error('Error retrieving user after exchange:', userError)
       return NextResponse.redirect(
         `${requestUrl.origin}/login?error=user_not_found`
       )
     }
 
-    // Ottieni il profilo per determinare il redirect in base al ruolo
+    // Get profile to determine redirect based on role
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
@@ -67,13 +67,13 @@ export async function GET(request: NextRequest) {
       .single() as { data: { role: string } | null; error: any }
 
     if (profileError) {
-      console.error('Errore nel recupero profilo:', profileError)
-      // Fallback: redirect generico
+      console.error('Error retrieving profile:', profileError)
+      // Fallback: generic redirect
       return NextResponse.redirect(`${requestUrl.origin}/`)
     }
 
-    // Determina il path di redirect in base al ruolo
-    let redirectPath = next || '/upload' // Default per guest
+    // Determine redirect path based on role
+    let redirectPath = next || '/upload' // Default for guest
 
     if (profile?.role === 'admin') {
       redirectPath = next || '/approve-content'
@@ -83,14 +83,14 @@ export async function GET(request: NextRequest) {
       redirectPath = next || '/upload'
     }
 
-    // Log successo (utile per debugging)
-    console.log(`Email confermata con successo per ${user.email}, redirect a ${redirectPath}`)
+    // Log success (useful for debugging)
+    console.log(`Email confirmed successfully for ${user.email}, redirecting to ${redirectPath}`)
 
-    // Redirect con successo
+    // Redirect with success
     return NextResponse.redirect(`${requestUrl.origin}${redirectPath}`)
 
   } catch (error) {
-    console.error('Errore inaspettato in auth callback:', error)
+    console.error('Unexpected error in auth callback:', error)
     return NextResponse.redirect(
       `${requestUrl.origin}/login?error=unexpected_error`
     )

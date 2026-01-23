@@ -115,13 +115,13 @@ export function RegisterForm() {
           data: {
             full_name: fullName,
           },
-          // Email confirmation sempre abilitata (dev e production)
+          // Email confirmation always enabled (dev and production)
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
       if (signUpError) {
-        // Gestisci errori specifici
+        // Handle specific errors
         if (signUpError.message.includes('already registered')) {
           setError('Questa email è già registrata. Prova ad accedere o recupera la password.')
         } else if (signUpError.message.includes('rate limit')) {
@@ -133,7 +133,7 @@ export function RegisterForm() {
       }
 
       if (data.user) {
-        // Redirect alla pagina con messaggio "Controlla la tua email"
+        // Redirect to page with "Check your email" message
         router.push(`/pending-approval?mode=email_confirmation&email=${encodeURIComponent(email)}`)
       }
     } catch (err) {

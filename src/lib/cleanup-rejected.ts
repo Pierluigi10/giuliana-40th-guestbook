@@ -6,8 +6,8 @@ export interface CleanupResult {
 }
 
 /**
- * Pulisce contenuti rejected più vecchi di N giorni
- * Elimina sia i file da storage che i record dal database
+ * Cleans up rejected content older than N days
+ * Deletes both files from storage and records from database
  */
 export async function cleanupRejectedContent(daysOld: number = 7): Promise<CleanupResult> {
   const errors: string[] = []
@@ -16,11 +16,11 @@ export async function cleanupRejectedContent(daysOld: number = 7): Promise<Clean
   try {
     const supabase = await createClient()
 
-    // Calcola data limite
+    // Calculate limit date
     const limitDate = new Date()
     limitDate.setDate(limitDate.getDate() - daysOld)
 
-    // Trova contenuti rejected più vecchi di N giorni
+    // Find rejected content older than N days
     const { data: rejectedContent, error: fetchError } = await supabase
       .from('content')
       .select('id, media_url')
@@ -37,7 +37,7 @@ export async function cleanupRejectedContent(daysOld: number = 7): Promise<Clean
       return { cleaned: 0, errors: [] }
     }
 
-    // Elimina file da storage
+    // Delete files from storage
     for (const content of rejectedContent) {
       if (content.media_url) {
         try {
@@ -57,7 +57,7 @@ export async function cleanupRejectedContent(daysOld: number = 7): Promise<Clean
       }
     }
 
-    // Elimina record dal database
+    // Delete records from database
     const { error: deleteError } = await supabase
       .from('content')
       .delete()
@@ -77,19 +77,19 @@ export async function cleanupRejectedContent(daysOld: number = 7): Promise<Clean
 }
 
 /**
- * Restituisce statistiche sui contenuti rejected
+ * Returns statistics on rejected content
  */
 export async function getRejectedContentStats() {
   try {
     const supabase = await createClient()
 
-    // Conta contenuti rejected
+    // Count rejected content
     const { count: totalRejected } = await supabase
       .from('content')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'rejected')
 
-    // Conta contenuti rejected più vecchi di 7 giorni
+    // Count rejected content older than 7 days
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 

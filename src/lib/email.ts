@@ -69,7 +69,7 @@ export async function sendContentNotification({
     return { success: true, data }
   } catch (error) {
     console.error('Failed to send email notification:', error)
-    // Non lanciare errore - l'upload deve completare anche se email fallisce
+    // Don't throw error - upload must complete even if email fails
     const errorMessage = error instanceof Error ? error.message : 'Unknown email error'
     return { success: false, error: errorMessage }
   }
@@ -142,7 +142,7 @@ export async function sendApprovalNotification({
     return { success: true, data }
   } catch (error) {
     console.error('Failed to send approval email notification:', error)
-    // Non lanciare errore - l'approvazione deve completare anche se email fallisce
+    // Don't throw error - approval must complete even if email fails
     const errorMessage = error instanceof Error ? error.message : 'Unknown email error'
     return { success: false, error: errorMessage }
   }

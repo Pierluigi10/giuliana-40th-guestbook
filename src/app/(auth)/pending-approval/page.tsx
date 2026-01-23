@@ -24,17 +24,17 @@ export default async function PendingApprovalPage({
 }) {
   const supabase = await createClient()
 
-  // Determina quale messaggio mostrare
+  // Determine which message to show
   const isEmailConfirmation = searchParams.mode === 'email_confirmation'
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Se è modalità conferma email, permetti accesso anche senza autenticazione
+  // If email confirmation mode, allow access even without authentication
   if (!user && !isEmailConfirmation) {
     redirect('/login')
   }
 
-  // Check if user is approved now (solo se autenticato)
+  // Check if user is approved now (only if authenticated)
   let profile: { role: string; is_approved: boolean; full_name: string } | null = null
   if (user) {
     const { data } = await supabase

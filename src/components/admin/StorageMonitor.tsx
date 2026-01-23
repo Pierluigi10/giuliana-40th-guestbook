@@ -48,7 +48,7 @@ export function StorageMonitor() {
 
   const { totalMB, limitMB, percentageUsed, fileCount, filesByType } = stats
 
-  // Colore alert basato su percentage
+  // Alert color based on percentage
   const getAlertColor = () => {
     if (percentageUsed >= 90) return 'bg-red-500'
     if (percentageUsed >= 70) return 'bg-yellow-500'

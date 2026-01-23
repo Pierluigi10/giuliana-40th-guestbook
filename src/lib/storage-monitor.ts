@@ -22,12 +22,12 @@ export async function getStorageStats(): Promise<StorageStats | null> {
   try {
     const supabase = await createClient()
 
-    // Lista tutti i file nel bucket content-media
+    // List all files in content-media bucket
     const { data: files, error } = await supabase
       .storage
       .from('content-media')
       .list('', {
-        limit: 1000, // Fetch fino a 1000 file
+        limit: 1000, // Fetch up to 1000 files
         sortBy: { column: 'created_at', order: 'desc' }
       })
 
@@ -36,7 +36,7 @@ export async function getStorageStats(): Promise<StorageStats | null> {
       return null
     }
 
-    // Calcola totali
+    // Calculate totals
     let totalBytes = 0
     let imageCount = 0
     let videoCount = 0
@@ -45,14 +45,14 @@ export async function getStorageStats(): Promise<StorageStats | null> {
     for (const file of files) {
       totalBytes += file.metadata?.size || 0
 
-      // Conta per tipo
+      // Count by type
       const isImage = file.metadata?.mimetype?.startsWith('image/')
       const isVideo = file.metadata?.mimetype?.startsWith('video/')
 
       if (isImage) imageCount++
       if (isVideo) videoCount++
 
-      // Traccia file più grandi
+      // Track largest files
       largestFiles.push({
         name: file.name,
         size: file.metadata?.size || 0,
@@ -61,7 +61,7 @@ export async function getStorageStats(): Promise<StorageStats | null> {
       })
     }
 
-    // Ordina per dimensione decrescente
+    // Sort by size descending
     largestFiles.sort((a, b) => b.size - a.size)
 
     const totalMB = totalBytes / 1024 / 1024
@@ -78,7 +78,7 @@ export async function getStorageStats(): Promise<StorageStats | null> {
         images: imageCount,
         videos: videoCount
       },
-      largestFiles: largestFiles.slice(0, 10) // Top 10 file più grandi
+      largestFiles: largestFiles.slice(0, 10) // Top 10 largest files
     }
   } catch (error) {
     console.error('Failed to get storage stats:', error)

@@ -1,172 +1,172 @@
-# Deployment Checklist - Guestbook Giuliana 40°
+# Deployment Checklist - Giuliana's 40th Birthday Guestbook
 
-## Timeline Critica
+## Critical Timeline
 
-**Importante:** Esegui il deploy 3 giorni prima del compleanno, feature freeze 2 giorni prima.
+**Important:** Deploy 3 days before the birthday, feature freeze 2 days before.
 
-## Pre-Deploy Verification
+## Pre-Deployment Verification
 
-### 1. Build e Type Check
+### 1. Build and Type Check
 
-- [ ] Esegui `npm run type-check` - deve completare senza errori TypeScript
-- [ ] Esegui `npm run build` - deve completare senza errori
-- [ ] Esegui `npm run lint` - controlla warnings/errors
-- [ ] Testa in modalità development: `npm run dev` - no errori in console
+- [ ] Run `npm run type-check` - must complete without TypeScript errors
+- [ ] Run `npm run build` - must complete without errors
+- [ ] Run `npm run lint` - check for warnings/errors
+- [ ] Test in development mode: `npm run dev` - no console errors
 
-**Script automatico:** Esegui `./scripts/pre-deploy-check.sh` per verificare automaticamente
+**Automated script:** Run `./scripts/pre-deploy-check.sh` to verify automatically
 
-### 2. Database Setup su Supabase
+### 2. Database Setup on Supabase
 
-- [ ] Tutte le migrations eseguite correttamente:
-  - [ ] `001_initial_schema.sql` - tabelle users, content, reactions
-  - [ ] `002_rls_policies.sql` - RLS policies per sicurezza
-  - [ ] `003_seed_data.sql` - dati iniziali
-- [ ] Admin user creato (Pierluigi):
+- [ ] All migrations executed correctly:
+  - [ ] `001_initial_schema.sql` - users, content, reactions tables
+  - [ ] `002_rls_policies.sql` - RLS policies for security
+  - [ ] `003_seed_data.sql` - initial data
+- [ ] Admin user created (Pierluigi):
   - Email: _________________
   - Role: `admin`
   - Status: `approved`
-- [ ] VIP user creato (Giuliana):
+- [ ] VIP user created (Giuliana):
   - Email: _________________
   - Role: `vip`
   - Status: `approved`
-- [ ] Storage bucket `content-files` creato
-- [ ] Storage policies configurate (vedi migration 002)
+- [ ] Storage bucket `content-files` created
+- [ ] Storage policies configured (see migration 002)
 
-**Come verificare:**
+**How to verify:**
 ```sql
--- Controlla utenti
+-- Check users
 SELECT id, email, role, status FROM profiles;
 
--- Controlla bucket storage
+-- Check storage bucket
 SELECT * FROM storage.buckets WHERE name = 'content-files';
 
--- Testa RLS policies
--- Prova ad accedere come guest non approvato (deve fallire)
+-- Test RLS policies
+-- Try to access as unapproved guest (should fail)
 ```
 
-### 3. Environment Variables su Vercel
+### 3. Environment Variables on Vercel
 
-- [ ] `NEXT_PUBLIC_SUPABASE_URL` configurata
-  - Valore: `https://[project-id].supabase.co`
-- [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` configurata
-  - Trovalo in: Supabase Dashboard > Settings > API > anon public
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` configurata
-  - Trovalo in: Supabase Dashboard > Settings > API > service_role
-  - **ATTENZIONE:** Questa chiave NON deve mai essere esposta al client
+- [ ] `NEXT_PUBLIC_SUPABASE_URL` configured
+  - Value: `https://[project-id].supabase.co`
+- [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` configured
+  - Find it in: Supabase Dashboard > Settings > API > anon public
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` configured
+  - Find it in: Supabase Dashboard > Settings > API > service_role
+  - **WARNING:** This key must NEVER be exposed to the client
 
-**Come configurare su Vercel:**
-1. Vai su dashboard.vercel.com
-2. Seleziona il progetto
+**How to configure on Vercel:**
+1. Go to dashboard.vercel.com
+2. Select the project
 3. Settings > Environment Variables
-4. Aggiungi le 3 variabili sopra
-5. Redeploy il progetto
+4. Add the 3 variables above
+5. Redeploy the project
 
 ### 4. Security Tests
 
-- [ ] XSS Protection testata:
-  - Prova a inserire `<script>alert('test')</script>` in un messaggio
-  - Deve essere sanitizzato (no popup)
-- [ ] RLS Policies testate:
-  - Utente guest non approvato NON può vedere gallery VIP
-  - Utente guest NON può approvare contenuti
-  - Utente VIP NON può vedere contenuti non approvati
+- [ ] XSS Protection tested:
+  - Try inserting `<script>alert('test')</script>` in a message
+  - Must be sanitized (no popup)
+- [ ] RLS Policies tested:
+  - Unapproved guest user CANNOT see VIP gallery
+  - Guest user CANNOT approve content
+  - VIP user CANNOT see unapproved content
 - [ ] File upload limits:
-  - File > 10MB devono essere rifiutati
-  - Solo immagini (jpg, png, gif) e video (mp4, mov) accettati
-- [ ] Rate limiting testato:
-  - Non si possono caricare più di 1 contenuto al minuto
+  - Files > 10MB must be rejected
+  - Only images (jpg, png, gif) and videos (mp4, mov) accepted
+- [ ] Rate limiting tested:
+  - Cannot upload more than 1 content per minute
 
-**Test manuale RLS:**
+**Manual RLS test:**
 ```javascript
-// Prova a leggere content non approvato come VIP
-// Deve restituire 0 risultati
+// Try to read unapproved content as VIP
+// Must return 0 results
 const { data } = await supabase
   .from('content')
   .select('*')
   .eq('status', 'pending');
 ```
 
-### 5. E2E Manual Test (Flusso Completo)
+### 5. E2E Manual Test (Complete Flow)
 
-**Flusso Guest:**
-- [ ] Registrazione nuovo guest
-  - Vai su `/register`
-  - Compila form con email/password
-  - Verifica redirect a `/pending-approval`
-- [ ] Approvazione admin
-  - Login come admin su `/login`
-  - Vai su `/approve-users`
-  - Approva il guest appena registrato
-- [ ] Login guest approvato
+**Guest Flow:**
+- [ ] New guest registration
+  - Go to `/register`
+  - Fill form with email/password
+  - Verify redirect to `/pending-approval`
+- [ ] Admin approval
+  - Login as admin on `/login`
+  - Go to `/approve-users`
+  - Approve the newly registered guest
+- [ ] Approved guest login
   - Logout admin
-  - Login come guest su `/login`
-  - Verifica redirect a `/upload`
-- [ ] Upload contenuto
-  - Carica testo + foto
-  - Verifica upload progress bar
-  - Conferma messaggio di successo
-- [ ] Moderazione admin
-  - Login come admin
-  - Vai su `/approve-content`
-  - Approva il contenuto appena caricato
+  - Login as guest on `/login`
+  - Verify redirect to `/upload`
+- [ ] Content upload
+  - Upload text + photo
+  - Verify upload progress bar
+  - Confirm success message
+- [ ] Admin moderation
+  - Login as admin
+  - Go to `/approve-content`
+  - Approve the newly uploaded content
 
-**Flusso VIP:**
-- [ ] Login VIP
-  - Login come Giuliana su `/login`
-  - Verifica redirect a `/gallery`
+**VIP Flow:**
+- [ ] VIP login
+  - Login as Giuliana on `/login`
+  - Verify redirect to `/gallery`
 - [ ] Gallery view
-  - Verifica che appare solo contenuto approvato
-  - Testa filtri (Tutti/Testo/Foto/Video)
-  - Testa pulsanti emoji reactions
-  - Click su foto > verifica lightbox
-  - Click su video > verifica playback
+  - Verify only approved content appears
+  - Test filters (All/Text/Photo/Video)
+  - Test emoji reaction buttons
+  - Click on photo > verify lightbox
+  - Click on video > verify playback
 
-**Flusso Admin:**
-- [ ] Dashboard admin
-  - Vai su `/approve-users`
-  - Verifica lista utenti pending
-  - Testa approvazione bulk (se implementato)
+**Admin Flow:**
+- [ ] Admin dashboard
+  - Go to `/approve-users`
+  - Verify pending users list
+  - Test bulk approval (if implemented)
 - [ ] Content moderation
-  - Vai su `/approve-content`
-  - Verifica preview contenuti
-  - Testa approve/reject
+  - Go to `/approve-content`
+  - Verify content preview
+  - Test approve/reject
 
 ### 6. Mobile Test
 
 - [ ] iPhone Safari
-  - Registrazione funziona
-  - Upload foto funziona (camera picker)
+  - Registration works
+  - Photo upload works (camera picker)
   - Gallery responsive
-  - Reactions cliccabili
+  - Reactions clickable
 - [ ] Android Chrome
-  - Stessi test di iPhone
-- [ ] Layout responsive
-  - Testa breakpoints: 320px, 375px, 768px, 1024px
-  - Menu hamburger su mobile
-  - Form leggibili su schermi piccoli
+  - Same tests as iPhone
+- [ ] Responsive layout
+  - Test breakpoints: 320px, 375px, 768px, 1024px
+  - Hamburger menu on mobile
+  - Forms readable on small screens
 
-**Emulatori:**
+**Emulators:**
 - Chrome DevTools > Toggle device toolbar
-- Testa: iPhone SE, iPhone 14 Pro, iPad, Samsung Galaxy S21
+- Test: iPhone SE, iPhone 14 Pro, iPad, Samsung Galaxy S21
 
 ### 7. Performance Check
 
 - [ ] Lighthouse test (Chrome DevTools)
-  - Performance > 80 (mobile e desktop)
+  - Performance > 80 (mobile and desktop)
   - Accessibility > 90
   - Best Practices > 90
   - SEO > 90
-- [ ] Lazy loading funziona
-  - Immagini caricano on-scroll
-  - Video non autoplay (risparmia banda)
-- [ ] Bundle size accettabile
-  - Esegui `npm run build`
-  - Controlla output: First Load JS < 200kB
+- [ ] Lazy loading works
+  - Images load on-scroll
+  - Videos don't autoplay (saves bandwidth)
+- [ ] Acceptable bundle size
+  - Run `npm run build`
+  - Check output: First Load JS < 200kB
 
-**Come eseguire Lighthouse:**
-1. Apri Chrome DevTools (F12)
-2. Tab "Lighthouse"
-3. Seleziona "Mobile" + "Performance"
+**How to run Lighthouse:**
+1. Open Chrome DevTools (F12)
+2. "Lighthouse" tab
+3. Select "Mobile" + "Performance"
 4. Click "Analyze page load"
 
 ### 8. Cross-Browser Test
@@ -176,124 +176,124 @@ const { data } = await supabase
 - [ ] Firefox (latest)
 - [ ] Edge (latest)
 
-**Funzionalità critiche da testare:**
+**Critical features to test:**
 - Login/Logout
-- Upload file
+- File upload
 - Gallery view
 - Reactions
 
-### 9. Storage e Limiti
+### 9. Storage and Limits
 
-- [ ] Storage Supabase verificato
+- [ ] Supabase storage verified
   - Free tier: 500MB
-  - Controlla usage: Supabase Dashboard > Storage > Usage
-- [ ] Compressione immagini attiva
-  - File caricati devono essere compressi client-side (se implementato)
-- [ ] Monitoring configurato
-  - Configura alert su Supabase se storage > 400MB
+  - Check usage: Supabase Dashboard > Storage > Usage
+- [ ] Image compression active
+  - Uploaded files must be compressed client-side (if implemented)
+- [ ] Monitoring configured
+  - Configure alert on Supabase if storage > 400MB
 
-### 10. Deployment su Vercel
+### 10. Deployment on Vercel
 
-- [ ] Repository GitHub aggiornato
+- [ ] GitHub repository updated
   ```bash
   git add .
   git commit -m "chore: pre-deployment final checks"
   git push origin main
   ```
-- [ ] Vercel auto-deploy completato
-  - Vai su dashboard.vercel.com
-  - Verifica deployment status: "Ready"
-  - Tempo deploy < 5 minuti
-- [ ] Production URL accessibile
-  - Visita `https://[project-name].vercel.app`
-  - Homepage carica correttamente
-- [ ] Tutte le funzionalità testati in produzione
-  - Ripeti tests manuali E2E in produzione
-  - Verifica env variables caricate
+- [ ] Vercel auto-deploy completed
+  - Go to dashboard.vercel.com
+  - Verify deployment status: "Ready"
+  - Deploy time < 5 minutes
+- [ ] Production URL accessible
+  - Visit `https://[project-name].vercel.app`
+  - Homepage loads correctly
+- [ ] All functionality tested in production
+  - Repeat manual E2E tests in production
+  - Verify env variables loaded
 
-**Troubleshooting deploy:**
-- Se deploy fallisce: controlla logs su Vercel
-- Errori comuni: env variables mancanti, build errors TypeScript
+**Deploy troubleshooting:**
+- If deploy fails: check logs on Vercel
+- Common errors: missing env variables, TypeScript build errors
 
-### 11. Post-Deploy Verification
+### 11. Post-Deployment Verification
 
-- [ ] Crea test users
-  - 2-3 guest users di test
-  - Carica 5-10 contenuti di test
-- [ ] Testa notifiche (se implementate)
-  - Email notifications funzionano
-- [ ] Documenta credenziali admin
-  - Salva email/password admin in password manager
-  - Condividi link registrazione con primi amici
-- [ ] Prepara guide utente
-  - Invia istruzioni registrazione agli invitati
-  - Prepara FAQ per domande comuni
+- [ ] Create test users
+  - 2-3 test guest users
+  - Upload 5-10 test content items
+- [ ] Test notifications (if implemented)
+  - Email notifications work
+- [ ] Document admin credentials
+  - Save admin email/password in password manager
+  - Share registration link with first friends
+- [ ] Prepare user guides
+  - Send registration instructions to invitees
+  - Prepare FAQ for common questions
 
-### 12. Monitoring e Backup
+### 12. Monitoring and Backup
 
-- [ ] Configura monitoring Vercel
-  - Analytics attivate
-  - Error tracking attivo
-- [ ] Backup database
-  - Esporta schema Supabase
-  - Salva migrations in repository
-- [ ] Piano di rollback testato
+- [ ] Configure Vercel monitoring
+  - Analytics enabled
+  - Error tracking active
+- [ ] Database backup
+  - Export Supabase schema
+  - Save migrations in repository
+- [ ] Rollback plan tested
   ```bash
-  # In caso di emergenza
+  # In case of emergency
   git revert HEAD
   git push origin main
-  # Vercel redeploy automaticamente
+  # Vercel redeploys automatically
   ```
 
-## Checklist Finale (T-3 giorni)
+## Final Checklist (T-3 days)
 
-- [ ] Tutti i test sopra completati
-- [ ] Admin e VIP users creati
-- [ ] Environment variables configurate
-- [ ] Deploy in produzione completato
-- [ ] Test E2E in produzione superati
-- [ ] Link registrazione condiviso con 2-3 amici beta tester
+- [ ] All tests above completed
+- [ ] Admin and VIP users created
+- [ ] Environment variables configured
+- [ ] Production deployment completed
+- [ ] E2E tests in production passed
+- [ ] Registration link shared with 2-3 beta tester friends
 
-## Feature Freeze (T-2 giorni)
+## Feature Freeze (T-2 days)
 
-**Dopo questa data: SOLO bugfix critici, NO nuove features**
+**After this date: ONLY critical bugfixes, NO new features**
 
-- [ ] Feature freeze comunicato al team (Pierluigi)
-- [ ] Ultime modifiche mergeate
-- [ ] Database backup completato
-- [ ] Monitoraggio attivo
+- [ ] Feature freeze communicated to team (Pierluigi)
+- [ ] Last changes merged
+- [ ] Database backup completed
+- [ ] Monitoring active
 
-## D-Day Preparation (T-1 giorno)
+## D-Day Preparation (T-1 day)
 
-- [ ] Verifica storage disponibile
-- [ ] Controlla numero utenti registrati
-- [ ] Testa gallery con contenuti reali
-- [ ] Verifica performance con carico atteso
-- [ ] Prepara piano emergenza
+- [ ] Verify available storage
+- [ ] Check number of registered users
+- [ ] Test gallery with real content
+- [ ] Verify performance with expected load
+- [ ] Prepare emergency plan
 
 ## Emergency Contacts
 
-**Supporto Tecnico:**
+**Technical Support:**
 - Vercel Support: https://vercel.com/support
 - Supabase Support: https://supabase.com/support
 - Next.js Discord: https://nextjs.org/discord
 
-**Documentazione:**
+**Documentation:**
 - Vercel Docs: https://vercel.com/docs
 - Supabase Docs: https://supabase.com/docs
 - Next.js Docs: https://nextjs.org/docs
 
 ## Rollback Plan
 
-**Se trovi bug critici in produzione:**
+**If you find critical bugs in production:**
 
-1. **Rollback immediato:**
+1. **Immediate rollback:**
    ```bash
-   git log --oneline  # Trova commit ID precedente
-   git revert HEAD    # Reverta ultimo commit
+   git log --oneline  # Find previous commit ID
+   git revert HEAD    # Revert last commit
    git push origin main
    ```
-   Vercel redeploy automaticamente in ~3 minuti
+   Vercel redeploys automatically in ~3 minutes
 
 2. **Hotfix:**
    ```bash
@@ -305,44 +305,44 @@ const { data } = await supabase
    git push origin main
    ```
 
-3. **Notifiche utenti:**
-   - Se necessario downtime, notifica utenti via email/SMS
-   - Prepara messaggio: "Manutenzione temporanea, torniamo presto"
+3. **User notifications:**
+   - If downtime needed, notify users via email/SMS
+   - Prepare message: "Temporary maintenance, we'll be back soon"
 
-## Known Issues e Mitigazioni
+## Known Issues and Mitigations
 
-| Rischio | Probabilità | Impatto | Mitigazione |
-|---------|-------------|---------|-------------|
-| Storage pieno (500MB) | Media | Alto | Compression immagini, limit 10MB, monitoring |
-| Bulk uploads pre-evento | Alta | Medio | Rate limiting 1/min, guida utenti |
-| Bug critico pre-evento | Bassa | Critico | Deploy T-3, feature freeze T-2 |
-| Delay approvazioni admin | Media | Medio | Email notifications, dashboard mobile-friendly |
-| Crash database | Molto bassa | Critico | Backup giornalieri, RLS policies testati |
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| Storage full (500MB) | Medium | High | Image compression, 10MB limit, monitoring |
+| Bulk uploads pre-event | High | Medium | Rate limiting 1/min, user guide |
+| Critical bug pre-event | Low | Critical | Deploy T-3, feature freeze T-2 |
+| Admin approval delays | Medium | Medium | Email notifications, mobile-friendly dashboard |
+| Database crash | Very low | Critical | Daily backups, RLS policies tested |
 
 ## Success Metrics
 
 **Target:**
-- 30+ amici registrati
-- 50+ contenuti caricati
-- 0 bug critici
+- 30+ friends registered
+- 50+ content items uploaded
+- 0 critical bugs
 - Lighthouse Performance > 80
-- 100% uptime durante evento
+- 100% uptime during event
 
-**Monitoraggio:**
-- Dashboard Vercel Analytics
+**Monitoring:**
+- Vercel Analytics Dashboard
 - Supabase Dashboard > Database > Statistics
-- Google Analytics (se implementato)
+- Google Analytics (if implemented)
 
-## Quick Reference: Comandi Comuni
+## Quick Reference: Common Commands
 
-### Prima del Deploy
+### Before Deploy
 ```bash
 npm run build && npm run type-check && npm run lint
-git status  # deve mostrare "clean"
+git status  # must show "clean"
 git push origin main  # trigger Vercel deployment
 ```
 
-### Controlla Deployment
+### Check Deployment
 ```bash
 # Vercel Dashboard
 https://vercel.com/dashboard
@@ -356,11 +356,11 @@ https://supabase.com/dashboard
 
 ### Rollback
 ```bash
-# Via Vercel dashboard: Click "Redeploy" su deployment precedente
+# Via Vercel dashboard: Click "Redeploy" on previous deployment
 # Via Git: git revert HEAD && git push origin main
 ```
 
-### Visualizza Logs
+### View Logs
 ```bash
 # Vercel deployment logs: Dashboard → Deployments → Click deployment
 # Supabase database logs: Dashboard → Logs
@@ -368,14 +368,14 @@ https://supabase.com/dashboard
 
 ## Notes
 
-- **Non fare deploy il giorno del compleanno** - troppo rischioso
-- Testa tutto in produzione, non fidarti solo di local/staging
-- Mantieni calma: il rollback è veloce (3 minuti)
-- Backup database prima di ogni migration critica
+- **Don't deploy on the birthday** - too risky
+- Test everything in production, don't trust only local/staging
+- Stay calm: rollback is fast (3 minutes)
+- Backup database before every critical migration
 
 ---
 
-**Compilato da:** ___________________
-**Data:** ___________________
-**Deployment completato:** ___________________
+**Completed by:** ___________________
+**Date:** ___________________
+**Deployment completed:** ___________________
 **Production URL:** ___________________

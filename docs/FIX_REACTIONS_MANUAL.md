@@ -1,28 +1,28 @@
-# Come Risolvere il Problema delle Reactions
+# How to Fix Reactions Issue
 
-## Problema
-Gli utenti guest non possono aggiungere reactions ai contenuti nella galleria.
+## Problem
+Guest users cannot add reactions to content in the gallery.
 
-## Causa
-Il sistema aveva due restrizioni che impedivano ai guest di aggiungere reactions:
-1. **Codice TypeScript** - controllava che solo VIP e Admin potessero aggiungere reactions
-2. **Database RLS Policy** - la policy permetteva solo a VIP e Admin di inserire reactions
+## Cause
+The system had two restrictions preventing guests from adding reactions:
+1. **TypeScript code** - checked that only VIP and Admin could add reactions
+2. **Database RLS Policy** - the policy only allowed VIP and Admin to insert reactions
 
-## Soluzione
+## Solution
 
-### ✅ Parte 1: Codice TypeScript (GIÀ CORRETTO)
-Il file `src/actions/reactions.ts` è stato già aggiornato per permettere a tutti gli utenti autenticati di aggiungere reactions.
+### ✅ Part 1: TypeScript Code (ALREADY FIXED)
+The file `src/actions/reactions.ts` has already been updated to allow all authenticated users to add reactions.
 
-### ⚠️  Parte 2: Database Policy (DA ESEGUIRE MANUALMENTE)
+### ⚠️  Part 2: Database Policy (MUST BE EXECUTED MANUALLY)
 
-Devi eseguire questa migration SQL nel tuo database Supabase:
+You need to run this SQL migration in your Supabase database:
 
-1. **Apri Supabase Dashboard**
-   - Vai su https://supabase.com/dashboard
-   - Seleziona il tuo progetto
-   - Vai su **SQL Editor** nel menu laterale
+1. **Open Supabase Dashboard**
+   - Go to https://supabase.com/dashboard
+   - Select your project
+   - Go to **SQL Editor** in the sidebar
 
-2. **Copia e incolla questo SQL** nel SQL Editor:
+2. **Copy and paste this SQL** into the SQL Editor:
 
 ```sql
 -- Drop existing restrictive policy
@@ -42,49 +42,49 @@ CREATE POLICY "Authenticated users can add reactions"
   );
 ```
 
-3. **Clicca su "Run"** per eseguire la query
+3. **Click "Run"** to execute the query
 
-4. **Verifica** che la policy sia stata creata:
+4. **Verify** that the policy was created:
 
 ```sql
--- Verifica le policies della tabella reactions
+-- Check reactions table policies
 SELECT * FROM pg_policies WHERE tablename = 'reactions';
 ```
 
-Dovresti vedere:
-- Policy "Authenticated users can add reactions" per INSERT
-- Policy "Users can read reactions on approved content" per SELECT
-- Policy "Users can delete their own reactions" per DELETE
+You should see:
+- Policy "Authenticated users can add reactions" for INSERT
+- Policy "Users can read reactions on approved content" for SELECT
+- Policy "Users can delete their own reactions" for DELETE
 
-## Verifica della Correzione
+## Verification
 
-Dopo aver eseguito la migration:
+After running the migration:
 
-1. **Riavvia l'applicazione** (se in sviluppo):
+1. **Restart the application** (if in development):
    ```bash
    npm run dev
    ```
 
-2. **Testa le reactions**:
-   - Accedi come guest
-   - Vai nella galleria
-   - Prova ad aggiungere una reaction a un contenuto
-   - Verifica che funzioni senza errori
+2. **Test reactions**:
+   - Log in as guest
+   - Go to the gallery
+   - Try adding a reaction to content
+   - Verify it works without errors
 
-## File Modificati
+## Modified Files
 
-- ✅ `src/actions/reactions.ts` - rimosso il controllo del ruolo
-- ✅ `supabase/migrations/007_fix_reactions_permissions.sql` - nuova migration SQL
-- ⚠️  Database Supabase - **DEVI ESEGUIRE MANUALMENTE** la migration
+- ✅ `src/actions/reactions.ts` - removed role check
+- ✅ `supabase/migrations/007_fix_reactions_permissions.sql` - new SQL migration
+- ⚠️  Supabase Database - **YOU MUST EXECUTE MANUALLY** the migration
 
-## Note Tecniche
+## Technical Notes
 
-La nuova policy permette a tutti gli utenti autenticati (guest, vip, admin) di:
-- ✅ Aggiungere reactions solo ai contenuti approvati
-- ✅ Rimuovere le proprie reactions
-- ✅ Vedere tutte le reactions sui contenuti approvati
+The new policy allows all authenticated users (guest, vip, admin) to:
+- ✅ Add reactions only to approved content
+- ✅ Remove their own reactions
+- ✅ See all reactions on approved content
 
-La sicurezza è mantenuta perché:
-- Solo gli utenti autenticati possono aggiungere reactions
-- Le reactions possono essere aggiunte solo a contenuti approvati
-- Gli utenti possono eliminare solo le proprie reactions
+Security is maintained because:
+- Only authenticated users can add reactions
+- Reactions can only be added to approved content
+- Users can only delete their own reactions
