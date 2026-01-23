@@ -55,7 +55,7 @@ const itemVariants = {
 
 export function FeatureCards() {
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
+    <section className="py-12 md:py-24 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
       <div className="max-w-7xl mx-auto">
         <motion.div
           className="text-center mb-16"
@@ -66,11 +66,11 @@ export function FeatureCards() {
         >
           <h2
             id="features-heading"
-            className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent px-4"
           >
             Come Funziona
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
             Tre semplici passaggi per contribuire alla celebrazione
           </p>
         </motion.div>

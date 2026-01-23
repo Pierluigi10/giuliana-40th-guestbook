@@ -258,16 +258,16 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
                 placeholder="Cerca per nome, email o contenuto..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-birthday-purple"
+                className="w-full min-h-[44px] px-4 py-2.5 md:py-2 text-base md:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-birthday-purple touch-manipulation"
               />
             </div>
 
             {selectedIds.size > 0 && (
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleBulkApprove}
                   disabled={bulkLoading}
-                  className="px-4 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="min-h-[44px] px-4 py-2.5 md:py-2 rounded-md bg-green-500 text-white text-base md:text-sm font-medium hover:bg-green-600 active:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 touch-manipulation"
                 >
                   {bulkLoading && <Spinner size="sm" className="text-white" />}
                   ✅ Approva {selectedIds.size}
@@ -275,7 +275,7 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
                 <button
                   onClick={handleBulkReject}
                   disabled={bulkLoading}
-                  className="px-4 py-2 rounded-md bg-red-500 text-white font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="min-h-[44px] px-4 py-2.5 md:py-2 rounded-md bg-red-500 text-white text-base md:text-sm font-medium hover:bg-red-600 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 touch-manipulation"
                 >
                   {bulkLoading && <Spinner size="sm" className="text-white" />}
                   ❌ Rifiuta {selectedIds.size}
@@ -301,10 +301,10 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
                 <button
                   key={f.id}
                   onClick={() => setFilter(f.id)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`min-h-[44px] px-3 md:px-4 py-2.5 md:py-2 rounded-md text-sm md:text-sm font-medium transition-colors touch-manipulation ${
                     filter === f.id
                       ? 'bg-birthday-purple text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
                   }`}
                 >
                   <span className="mr-1">{f.icon}</span>
@@ -317,7 +317,7 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
                 <select
                   value={userFilter}
                   onChange={(e) => setUserFilter(e.target.value)}
-                  className="px-4 py-2 rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-birthday-purple"
+                  className="min-h-[44px] px-3 md:px-4 py-2.5 md:py-2 rounded-md text-base md:text-sm font-medium border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-birthday-purple touch-manipulation"
                 >
                   <option value="all">👤 Tutti gli utenti</option>
                   {uniqueUsers.map((user) => (
@@ -332,7 +332,7 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
               <select
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="px-4 py-2 rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-birthday-purple"
+                className="min-h-[44px] px-3 md:px-4 py-2.5 md:py-2 rounded-md text-base md:text-sm font-medium border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-birthday-purple touch-manipulation"
               >
                 <option value="all">📅 Tutte le date</option>
                 <option value="today">Oggi</option>
@@ -451,11 +451,11 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                 <button
                   onClick={() => handleApprove(item.id)}
                   disabled={loadingId === item.id}
-                  className="flex-1 rounded-md bg-green-500 px-4 py-3 text-sm font-medium text-white hover:bg-green-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 min-h-[44px] rounded-md bg-green-500 px-4 py-2.5 md:py-3 text-base md:text-sm font-medium text-white hover:bg-green-600 active:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 touch-manipulation"
                 >
                   {loadingId === item.id && <Spinner size="sm" className="text-white" />}
                   {loadingId === item.id ? 'Approvazione...' : '✅ Approva'}
@@ -463,7 +463,7 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
                 <button
                   onClick={() => handleReject(item.id)}
                   disabled={loadingId === item.id}
-                  className="flex-1 rounded-md bg-red-500 px-4 py-3 text-sm font-medium text-white hover:bg-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 min-h-[44px] rounded-md bg-red-500 px-4 py-2.5 md:py-3 text-base md:text-sm font-medium text-white hover:bg-red-600 active:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 touch-manipulation"
                 >
                   {loadingId === item.id && <Spinner size="sm" className="text-white" />}
                   {loadingId === item.id ? 'Rifiuto...' : '❌ Rifiuta'}
@@ -477,12 +477,13 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
       {/* Lightbox */}
       {lightboxContent && lightboxContent.type === 'image' && lightboxContent.media_url && (
         <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-2 md:p-4"
           onClick={() => setLightboxContent(null)}
         >
           <button
             onClick={() => setLightboxContent(null)}
-            className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition-colors"
+            className="absolute top-2 right-2 md:top-4 md:right-4 text-white bg-black/70 rounded-full p-3 md:p-2 hover:bg-black/80 active:bg-black/90 transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Chiudi"
           >
             <svg
               className="w-6 h-6"
@@ -503,7 +504,7 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
             alt="Full size preview"
             width={1920}
             height={1080}
-            className="max-w-full max-h-full object-contain"
+            className="max-w-full max-h-[95vh] md:max-h-full object-contain"
           />
         </div>
       )}

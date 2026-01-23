@@ -95,7 +95,7 @@ export function TextUpload({ userId }: TextUploadProps) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Scrivi un messaggio speciale per il compleanno di Giuliana..."
-          className="w-full min-h-[200px] rounded-md border border-input bg-background px-4 py-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple resize-none"
+          className="w-full min-h-[200px] rounded-md border border-input bg-background px-4 py-3 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple resize-none touch-manipulation"
           maxLength={maxLength}
         />
         <div className="flex justify-between items-center mt-2">
@@ -112,7 +112,7 @@ export function TextUpload({ userId }: TextUploadProps) {
       <button
         type="submit"
         disabled={!isValid || loading}
-        className="w-full rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
         {loading ? '✨ Invio in corso...' : '📨 Invia Messaggio'}

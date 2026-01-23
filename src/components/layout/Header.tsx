@@ -167,7 +167,7 @@ export function Header({ userName, userRole }: HeaderProps) {
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-md px-3 md:px-4 py-2 min-h-[44px] text-sm md:text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground active:bg-accent/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             aria-label="Esci dall'applicazione"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />

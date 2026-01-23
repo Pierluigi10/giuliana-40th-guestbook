@@ -162,7 +162,7 @@ export function RegisterForm() {
           value={fullName}
           onChange={(e) => handleFullNameChange(e.target.value)}
           required
-          className={`w-full rounded-md border ${fieldErrors.fullName ? 'border-destructive' : 'border-input'} bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+          className={`w-full min-h-[44px] rounded-md border ${fieldErrors.fullName ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
           placeholder="Mario Rossi"
         />
         {fieldErrors.fullName && (
@@ -180,7 +180,7 @@ export function RegisterForm() {
           value={email}
           onChange={(e) => handleEmailChange(e.target.value)}
           required
-          className={`w-full rounded-md border ${fieldErrors.email ? 'border-destructive' : 'border-input'} bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+          className={`w-full min-h-[44px] rounded-md border ${fieldErrors.email ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
           placeholder="mario@example.com"
         />
         {fieldErrors.email && (
@@ -200,7 +200,7 @@ export function RegisterForm() {
             onChange={(e) => handlePasswordChange(e.target.value)}
             required
             minLength={6}
-            className={`w-full rounded-md border ${fieldErrors.password ? 'border-destructive' : 'border-input'} bg-background px-3 py-2 pr-10 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+            className={`w-full min-h-[44px] rounded-md border ${fieldErrors.password ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 pr-10 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
             placeholder="••••••••"
           />
           <button
@@ -230,7 +230,7 @@ export function RegisterForm() {
             onChange={(e) => handleConfirmPasswordChange(e.target.value)}
             required
             minLength={6}
-            className={`w-full rounded-md border ${fieldErrors.confirmPassword ? 'border-destructive' : 'border-input'} bg-background px-3 py-2 pr-10 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+            className={`w-full min-h-[44px] rounded-md border ${fieldErrors.confirmPassword ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 pr-10 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
             placeholder="••••••••"
           />
           <button
@@ -249,7 +249,7 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={loading || !isFormValid()}
-        className="w-full rounded-md bg-birthday-purple px-4 py-2 text-sm font-medium text-white hover:bg-birthday-purple/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full min-h-[44px] rounded-md bg-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-birthday-purple/90 active:bg-birthday-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
       >
         {loading ? 'Registrazione in corso...' : 'Registrati'}
       </button>

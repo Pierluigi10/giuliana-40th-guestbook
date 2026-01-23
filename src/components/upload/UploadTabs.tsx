@@ -37,20 +37,20 @@ export function UploadTabs({ userId }: UploadTabsProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${
+              className={`flex-1 min-h-[44px] py-3 md:py-4 px-3 md:px-6 text-center font-medium transition-colors touch-manipulation ${
                 activeTab === tab.id
                   ? 'bg-birthday-purple text-white border-b-4 border-birthday-gold'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 active:bg-gray-200'
               }`}
             >
-              <span className="text-2xl mr-2">{tab.icon}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="text-xl md:text-2xl mr-1 md:mr-2">{tab.icon}</span>
+              <span className="text-sm md:text-base hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {activeTab === 'text' && (
             <div data-tutorial-text-tab>
               <TextUpload userId={userId} />

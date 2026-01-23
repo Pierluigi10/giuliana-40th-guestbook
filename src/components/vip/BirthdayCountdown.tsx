@@ -67,19 +67,19 @@ export function BirthdayCountdown() {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold rounded-lg shadow-lg p-6 text-center"
+        className="bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold rounded-lg shadow-lg p-4 md:p-6 text-center"
       >
         <motion.div
           animate={{ rotate: [0, 10, -10, 10, 0] }}
           transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
-          className="text-6xl mb-4"
+          className="text-4xl md:text-6xl mb-3 md:mb-4"
         >
           🎉
         </motion.div>
-        <h3 className="text-2xl font-bold text-white mb-2">
+        <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
           È il tuo compleanno!
         </h3>
-        <p className="text-white/90">
+        <p className="text-base md:text-lg text-white/90">
           Buon 40° compleanno Giuliana! 🎂✨
         </p>
       </motion.div>
@@ -97,32 +97,32 @@ export function BirthdayCountdown() {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-birthday-pink/20 via-birthday-purple/20 to-birthday-gold/20 rounded-lg shadow-lg p-6 border border-birthday-purple/30"
+      className="bg-gradient-to-br from-birthday-pink/20 via-birthday-purple/20 to-birthday-gold/20 rounded-lg shadow-lg p-4 md:p-6 border border-birthday-purple/30"
     >
-      <div className="text-center mb-4">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">
+      <div className="text-center mb-3 md:mb-4">
+        <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">
           ⏳ Countdown al Compleanno
         </h3>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs md:text-sm text-muted-foreground">
           Mancano ancora...
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
         {timeUnits.map((unit, index) => (
           <motion.div
             key={unit.label}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white/80 rounded-lg p-4 text-center shadow-md"
+            className="bg-white/80 rounded-lg p-3 md:p-4 text-center shadow-md"
           >
-            <div className="text-3xl mb-2">{unit.emoji}</div>
+            <div className="text-2xl md:text-3xl mb-1 md:mb-2">{unit.emoji}</div>
             <motion.div
               key={unit.value}
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
-              className="text-4xl font-bold bg-gradient-to-r from-birthday-pink to-birthday-purple bg-clip-text text-transparent mb-1"
+              className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-birthday-pink to-birthday-purple bg-clip-text text-transparent mb-1"
             >
               {unit.value}
             </motion.div>

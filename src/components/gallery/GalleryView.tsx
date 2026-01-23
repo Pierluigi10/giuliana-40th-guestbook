@@ -282,8 +282,8 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
     <div className="space-y-6">
       {/* Sound Toggle (only for VIP/Admin) */}
       {(userRole === 'vip' || userRole === 'admin') && (
-        <div className="bg-white rounded-lg shadow-lg p-3 flex items-center justify-end">
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="bg-white rounded-lg shadow-lg p-3 md:p-4 flex items-center justify-end">
+          <label className="flex items-center gap-2 cursor-pointer touch-manipulation min-h-[44px]">
             <input
               type="checkbox"
               checked={soundEnabled}
@@ -291,9 +291,9 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
                 setSoundEnabled(e.target.checked)
                 localStorage.setItem('sound_effects_enabled', String(e.target.checked))
               }}
-              className="w-4 h-4 text-birthday-purple rounded focus:ring-birthday-purple"
+              className="w-5 h-5 md:w-4 md:h-4 text-birthday-purple rounded focus:ring-birthday-purple"
             />
-            <span className="text-sm text-gray-700">🔊 Effetti sonori</span>
+            <span className="text-sm md:text-base text-gray-700">🔊 Effetti sonori</span>
           </label>
         </div>
       )}
@@ -324,23 +324,23 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        <div className="flex flex-wrap justify-center gap-3">
+      <div className="bg-white rounded-lg shadow-lg p-3 md:p-4">
+        <div className="flex flex-wrap justify-center gap-2 md:gap-3">
           {filters.map((f) => (
             <motion.button
               key={f.id}
               onClick={() => handleFilterChange(f.id)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`px-6 py-3 rounded-full text-sm font-medium transition-all ${
+              className={`min-h-[44px] px-4 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-medium transition-all touch-manipulation ${
                 filter === f.id
                   ? 'bg-gradient-to-r from-birthday-pink to-birthday-purple text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
               }`}
             >
-              <span className="mr-2 text-lg">{f.icon}</span>
-              {f.label}
-              <span className="ml-2 opacity-75">({f.count})</span>
+              <span className="mr-1 md:mr-2 text-base md:text-lg">{f.icon}</span>
+              <span className="hidden sm:inline">{f.label}</span>
+              <span className="sm:ml-2 opacity-75">({f.count})</span>
             </motion.button>
           ))}
         </div>
@@ -480,11 +480,11 @@ function Lightbox({ content, onClose, onNavigate }: LightboxProps) {
         onClick={onClose}
         whileHover={{ scale: 1.1, rotate: 90 }}
         whileTap={{ scale: 0.9 }}
-        className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition-colors z-10"
+        className="absolute top-2 right-2 md:top-4 md:right-4 text-white bg-black/70 rounded-full p-3 md:p-3 hover:bg-black/80 active:bg-black/90 transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label="Chiudi"
       >
         <svg
-          className="w-6 h-6"
+          className="w-6 h-6 md:w-6 md:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -506,11 +506,11 @@ function Lightbox({ content, onClose, onNavigate }: LightboxProps) {
         }}
         whileHover={{ scale: 1.1, x: -5 }}
         whileTap={{ scale: 0.9 }}
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition-colors z-10"
+        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-white bg-black/70 rounded-full p-3 md:p-3 hover:bg-black/80 active:bg-black/90 transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label="Precedente"
       >
         <svg
-          className="w-6 h-6"
+          className="w-6 h-6 md:w-6 md:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -532,11 +532,11 @@ function Lightbox({ content, onClose, onNavigate }: LightboxProps) {
         }}
         whileHover={{ scale: 1.1, x: 5 }}
         whileTap={{ scale: 0.9 }}
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/50 rounded-full p-3 hover:bg-black/70 transition-colors z-10"
+        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-white bg-black/70 rounded-full p-3 md:p-3 hover:bg-black/80 active:bg-black/90 transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label="Successivo"
       >
         <svg
-          className="w-6 h-6"
+          className="w-6 h-6 md:w-6 md:h-6"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -552,7 +552,7 @@ function Lightbox({ content, onClose, onNavigate }: LightboxProps) {
 
       <motion.div 
         onClick={(e) => e.stopPropagation()} 
-        className="max-w-7xl max-h-[90vh] w-full"
+        className="max-w-7xl max-h-[95vh] md:max-h-[90vh] w-full px-2 md:px-4"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
@@ -562,7 +562,7 @@ function Lightbox({ content, onClose, onNavigate }: LightboxProps) {
           <motion.img
             src={content.media_url}
             alt="Full size"
-            className="w-full h-full object-contain"
+            className="w-full h-auto max-h-[95vh] md:max-h-[90vh] object-contain"
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}
@@ -574,7 +574,8 @@ function Lightbox({ content, onClose, onNavigate }: LightboxProps) {
             src={content.media_url}
             controls
             autoPlay
-            className="w-full h-full"
+            playsInline
+            className="w-full h-auto max-h-[95vh] md:max-h-[90vh] object-contain"
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.3 }}

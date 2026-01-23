@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { ChevronDown } from 'lucide-react'
+import { BirthdayDecorations } from '@/components/ui/BirthdayDecorations'
 
 export function HeroSection() {
   useEffect(() => {
@@ -58,6 +59,9 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
+      {/* Birthday decorations */}
+      <BirthdayDecorations variant="hero" />
+
       {/* Animated background blobs */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <motion.div
@@ -109,7 +113,7 @@ export function HeroSection() {
       >
         {/* Title */}
         <motion.h1
-          className="text-6xl sm:text-7xl md:text-8xl font-bold bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent leading-tight"
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent leading-tight px-4"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -119,7 +123,7 @@ export function HeroSection() {
 
         {/* Subtitle */}
         <motion.p
-          className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
@@ -150,7 +154,7 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <motion.div
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4 px-4 w-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.8 }}
@@ -158,7 +162,7 @@ export function HeroSection() {
           <Button
             asChild
             size="lg"
-            className="min-w-[200px] bg-gradient-to-r from-birthday-pink to-birthday-purple hover:from-birthday-pink/90 hover:to-birthday-purple/90 text-white font-semibold text-lg h-12"
+            className="w-full sm:w-auto min-w-[200px] min-h-[44px] bg-gradient-to-r from-birthday-pink to-birthday-purple hover:from-birthday-pink/90 hover:to-birthday-purple/90 active:from-birthday-pink/80 active:to-birthday-purple/80 text-white font-semibold text-base md:text-lg h-12 touch-manipulation"
           >
             <Link href="/login" aria-label="Accedi al guestbook">
               Accedi e Inizia
@@ -168,7 +172,7 @@ export function HeroSection() {
             asChild
             size="lg"
             variant="outline"
-            className="min-w-[200px] border-2 border-birthday-purple hover:bg-birthday-purple/10 font-semibold text-lg h-12"
+            className="w-full sm:w-auto min-w-[200px] min-h-[44px] border-2 border-birthday-purple hover:bg-birthday-purple/10 active:bg-birthday-purple/20 font-semibold text-base md:text-lg h-12 touch-manipulation"
           >
             <Link href="/register" aria-label="Registrati al guestbook">
               Registrati

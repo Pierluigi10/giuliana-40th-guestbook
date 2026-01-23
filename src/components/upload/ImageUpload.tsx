@@ -390,7 +390,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       <button
         type="submit"
         disabled={!file || loading}
-        className="w-full rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
         {loading ? '✨ Caricamento in corso...' : '📸 Carica Foto'}

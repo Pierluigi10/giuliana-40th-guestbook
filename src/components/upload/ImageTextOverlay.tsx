@@ -107,12 +107,15 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
 
       {/* Canvas Preview */}
       <div
-        className="relative border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50 touch-none"
+        className="relative border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50 touch-none select-none"
         onMouseDown={() => setIsDragging(true)}
         onMouseUp={() => setIsDragging(false)}
         onMouseMove={handlePositionChange}
         onMouseLeave={() => setIsDragging(false)}
-        onTouchStart={() => setIsDragging(true)}
+        onTouchStart={(e) => {
+          e.preventDefault()
+          setIsDragging(true)
+        }}
         onTouchEnd={() => setIsDragging(false)}
         onTouchMove={(e) => {
           if (!isDragging) return
@@ -133,13 +136,13 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
           ref={imageRef}
           src={imageUrl}
           alt="Preview"
-          className="w-full h-auto max-h-[400px] object-contain"
+          className="w-full h-auto max-h-[300px] md:max-h-[400px] object-contain"
           style={{ display: 'none' }}
           onLoad={drawCanvas}
         />
         <canvas
           ref={canvasRef}
-          className="w-full h-auto max-h-[400px] object-contain cursor-crosshair"
+          className="w-full h-auto max-h-[300px] md:max-h-[400px] object-contain cursor-crosshair touch-none"
         />
         {text && (
           <div
@@ -160,57 +163,57 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
       </div>
 
       {/* Controls */}
-      <div className="space-y-3 bg-gray-50 rounded-lg p-4">
+      <div className="space-y-3 bg-gray-50 rounded-lg p-3 md:p-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Testo</label>
+          <label className="block text-sm md:text-base font-medium mb-2">Testo</label>
           <input
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Scrivi un messaggio..."
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="w-full min-h-[44px] rounded-md border border-input bg-background px-3 py-2.5 text-base md:text-sm touch-manipulation"
             maxLength={50}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Dimensione</label>
+            <label className="block text-sm md:text-base font-medium mb-2">Dimensione</label>
             <input
               type="range"
               min="16"
               max="48"
               value={fontSize}
               onChange={(e) => setFontSize(Number(e.target.value))}
-              className="w-full"
+              className="w-full h-3 md:h-2 touch-manipulation"
             />
-            <p className="text-xs text-muted-foreground text-center">{fontSize}px</p>
+            <p className="text-xs md:text-xs text-muted-foreground text-center mt-1">{fontSize}px</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Colore</label>
+            <label className="block text-sm md:text-base font-medium mb-2">Colore</label>
             <div className="flex gap-2">
               <input
                 type="color"
                 value={textColor}
                 onChange={(e) => setTextColor(e.target.value)}
-                className="w-full h-10 rounded border"
+                className="w-full min-h-[44px] h-11 md:h-10 rounded border touch-manipulation"
               />
             </div>
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground text-center">
-          💡 Clicca e trascina sulla foto per spostare il testo
+        <p className="text-xs md:text-xs text-muted-foreground text-center">
+          💡 Tocca e trascina sulla foto per spostare il testo
         </p>
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2 md:gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+          className="flex-1 min-h-[44px] rounded-md border border-gray-300 px-4 py-2.5 md:py-2 text-base md:text-sm font-medium hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
         >
           Annulla
         </button>
@@ -218,7 +221,7 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
           type="button"
           onClick={handleSave}
           disabled={!text}
-          className="flex-1 rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 min-h-[44px] rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
           Salva con testo
         </button>

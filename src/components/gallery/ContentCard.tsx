@@ -163,8 +163,8 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
       {/* Content - Prominente, stile Instagram */}
       <div className="relative">
         {content.type === 'text' && (
-          <div className={`bg-gradient-to-br ${gradient} p-8 min-h-[300px] flex items-center justify-center`}>
-            <p className="text-lg md:text-xl whitespace-pre-wrap leading-relaxed text-center">
+          <div className={`bg-gradient-to-br ${gradient} p-4 md:p-8 min-h-[250px] md:min-h-[300px] flex items-center justify-center`}>
+            <p className="text-base md:text-lg lg:text-xl whitespace-pre-wrap leading-relaxed text-center px-2">
               {DOMPurify.sanitize(content.text_content || '', {
                 ALLOWED_TAGS: [],
                 ALLOWED_ATTR: []
@@ -185,7 +185,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
               alt="Content"
               width={800}
               height={600}
-              className="w-full h-[300px] object-cover transition-transform duration-300 group-hover:brightness-110"
+              className="w-full h-[250px] md:h-[300px] object-cover transition-transform duration-300 group-hover:brightness-110"
             />
             <motion.div 
               className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center"
@@ -214,7 +214,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
           >
             <video
               src={content.media_url}
-              className="w-full h-[300px] object-cover transition-transform duration-300"
+              className="w-full h-[250px] md:h-[300px] object-cover transition-transform duration-300"
               preload="metadata"
             />
             <motion.div 
@@ -237,14 +237,14 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
         {/* Delete button overlay - top right */}
         {canDelete && (
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-2 right-2 md:top-3 md:right-3">
             <button
               onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
               disabled={isDeleting}
-              className="w-9 h-9 rounded-full bg-black/50 hover:bg-red-500 text-white flex items-center justify-center transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 backdrop-blur-sm"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 md:w-9 md:h-9 rounded-full bg-black/60 hover:bg-red-500 active:bg-red-600 text-white flex items-center justify-center transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 backdrop-blur-sm touch-manipulation"
               aria-label="Elimina questo contenuto"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg className="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
@@ -254,20 +254,20 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                   className="fixed inset-0 z-10"
                   onClick={() => setShowDeleteConfirm(false)}
                 />
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl p-3 z-20 min-w-[200px]">
-                  <p className="text-sm mb-3 text-gray-700">Eliminare questo contenuto?</p>
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl p-3 md:p-3 z-20 min-w-[200px] md:min-w-[200px]">
+                  <p className="text-sm md:text-sm mb-3 text-gray-700">Eliminare questo contenuto?</p>
                   <div className="flex gap-2">
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="flex-1 bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600 disabled:opacity-50"
+                      className="flex-1 min-h-[44px] bg-red-500 text-white px-3 py-2 rounded text-sm md:text-sm hover:bg-red-600 active:bg-red-700 disabled:opacity-50 touch-manipulation"
                     >
                       {isDeleting ? 'Eliminazione...' : 'Elimina'}
                     </button>
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
                       disabled={isDeleting}
-                      className="flex-1 bg-gray-200 px-3 py-2 rounded text-sm hover:bg-gray-300 disabled:opacity-50"
+                      className="flex-1 min-h-[44px] bg-gray-200 px-3 py-2 rounded text-sm md:text-sm hover:bg-gray-300 active:bg-gray-400 disabled:opacity-50 touch-manipulation"
                     >
                       Annulla
                     </button>
@@ -322,20 +322,20 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                       rotate: [0, 5, -5, 0],
                     } : {}}
                     transition={{ duration: 0.3 }}
-                    className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-1 ${
+                    className={`min-w-[44px] min-h-[44px] flex items-center justify-center gap-1 px-2 md:px-1.5 py-1 md:py-0.5 rounded-full text-xs md:text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-1 touch-manipulation ${
                       hasUserReacted(emoji)
                         ? 'bg-gradient-to-r from-birthday-pink to-birthday-purple text-white shadow-md'
-                        : 'bg-gray-100 hover:bg-gray-200'
+                        : 'bg-gray-100 hover:bg-gray-200 active:bg-gray-300'
                     }`}
                     aria-label={`${emojiToText(emoji)}, ${count} ${count === 1 ? 'persona ha' : 'persone hanno'} reagito. ${
                       hasUserReacted(emoji) ? 'Già reagito, clicca per rimuovere' : 'Clicca per reagire'
                     }`}
                     aria-pressed={hasUserReacted(emoji)}
                   >
-                    <span className="text-sm" role="img" aria-label={emojiToText(emoji)}>
+                    <span className="text-base md:text-sm" role="img" aria-label={emojiToText(emoji)}>
                       {emoji}
                     </span>
-                    <span className="font-medium text-[10px]">{count}</span>
+                    <span className="font-medium text-xs md:text-[10px]">{count}</span>
                   </motion.button>
                 </HoverCardTrigger>
                 <HoverCardContent side="top" className="w-auto max-w-xs p-3" sideOffset={5} role="tooltip">
@@ -363,7 +363,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 whileHover={{ scale: 1.15, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
-                className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-gold focus-visible:ring-offset-1"
+                className="min-w-[44px] min-h-[44px] w-11 h-11 md:w-6 md:h-6 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center text-base md:text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-gold focus-visible:ring-offset-1 touch-manipulation"
                 aria-label="Apri selettore emoji per aggiungere reazione"
                 aria-expanded={showEmojiPicker}
                 aria-controls="emoji-picker-menu"
@@ -381,7 +381,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                     aria-hidden="true"
                   />
                   <div
-                    className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl p-2 flex gap-1 z-20"
+                    className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl p-2 md:p-2 flex flex-wrap gap-2 md:gap-1 z-20 max-w-[200px] md:max-w-none"
                     id="emoji-picker-menu"
                     role="menu"
                     aria-label="Selettore emoji"
@@ -395,7 +395,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                         }}
                         whileHover={{ scale: 1.3, rotate: [0, -10, 10, -10, 0] }}
                         whileTap={{ scale: 0.9 }}
-                        className="w-10 h-10 rounded-lg hover:bg-gray-100 flex items-center justify-center text-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple"
+                        className="min-w-[44px] min-h-[44px] w-11 h-11 md:w-10 md:h-10 rounded-lg hover:bg-gray-100 active:bg-gray-200 flex items-center justify-center text-2xl md:text-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple touch-manipulation"
                         role="menuitem"
                         aria-label={`Reagisci con ${emojiToText(emoji)}`}
                       >
