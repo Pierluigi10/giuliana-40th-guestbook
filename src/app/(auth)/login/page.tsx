@@ -1,6 +1,17 @@
+import type { Metadata } from 'next'
 import { LoginForm } from '@/components/auth/LoginForm'
 import Link from 'next/link'
 import { Suspense } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Accedi',
+  description: 'Accedi al guestbook di Giuliana per condividere i tuoi auguri',
+  openGraph: {
+    title: 'Accedi - Guestbook Giuliana 40',
+    description: 'Accedi per partecipare alla celebrazione',
+    type: 'website',
+  },
+}
 
 export default function LoginPage() {
   return (

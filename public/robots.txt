@@ -1,0 +1,16 @@
+# Private app - do not index
+User-agent: *
+Disallow: /
+
+# Prevent search engines from indexing
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /

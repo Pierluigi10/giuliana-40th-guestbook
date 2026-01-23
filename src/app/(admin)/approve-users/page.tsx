@@ -1,6 +1,21 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { UserApprovalQueue } from '@/components/admin/UserApprovalQueue'
+
+export const metadata: Metadata = {
+  title: 'Approva Utenti',
+  description: 'Pannello admin - Gestisci le richieste di registrazione degli ospiti',
+  robots: {
+    index: false,
+    follow: false,
+  },
+  openGraph: {
+    title: 'Approva Utenti - Admin',
+    description: 'Pannello amministrativo',
+    type: 'website',
+  },
+}
 
 export default async function ApproveUsersPage() {
   const supabase = await createClient()

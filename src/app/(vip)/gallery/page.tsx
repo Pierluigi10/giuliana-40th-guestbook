@@ -1,6 +1,18 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { GalleryView } from '@/components/gallery/GalleryView'
+import { ContentErrorBoundary } from '@/components/errors/ContentErrorBoundary'
+
+export const metadata: Metadata = {
+  title: 'Galleria VIP',
+  description: 'Visualizza tutti i messaggi, foto e video per il compleanno di Giuliana',
+  openGraph: {
+    title: 'Galleria VIP - Guestbook Giuliana 40',
+    description: 'Tutti i messaggi e gli auguri per il compleanno di Giuliana',
+    type: 'website',
+  },
+}
 
 export default async function GalleryPage() {
   const supabase = await createClient()
@@ -57,7 +69,9 @@ export default async function GalleryPage() {
           </p>
         </div>
 
-        <GalleryView initialContent={approvedContent || []} userId={user.id} />
+        <ContentErrorBoundary>
+          <GalleryView initialContent={approvedContent || []} userId={user.id} />
+        </ContentErrorBoundary>
       </div>
     </div>
   )

@@ -1,6 +1,18 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { UploadTabs } from '@/components/upload/UploadTabs'
+import { UploadErrorBoundary } from '@/components/errors/UploadErrorBoundary'
+
+export const metadata: Metadata = {
+  title: 'Carica il tuo messaggio',
+  description: 'Condividi un messaggio, foto o video per il compleanno di Giuliana',
+  openGraph: {
+    title: 'Carica il tuo messaggio - Guestbook Giuliana 40',
+    description: 'Condividi i tuoi auguri con messaggi, foto e video',
+    type: 'website',
+  },
+}
 
 export default async function UploadPage() {
   const supabase = await createClient()
@@ -35,7 +47,9 @@ export default async function UploadPage() {
         </div>
 
         <div className="max-w-3xl mx-auto">
-          <UploadTabs userId={user.id} />
+          <UploadErrorBoundary>
+            <UploadTabs userId={user.id} />
+          </UploadErrorBoundary>
         </div>
       </div>
     </div>

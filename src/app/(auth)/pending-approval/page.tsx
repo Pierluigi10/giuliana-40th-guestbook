@@ -1,6 +1,21 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'In attesa di approvazione',
+  description: 'La tua registrazione è in attesa di approvazione da parte di un amministratore',
+  robots: {
+    index: false,
+    follow: false,
+  },
+  openGraph: {
+    title: 'In attesa di approvazione - Guestbook Giuliana 40',
+    description: 'Account in attesa di approvazione',
+    type: 'website',
+  },
+}
 
 export default async function PendingApprovalPage() {
   const supabase = await createClient()

@@ -1,6 +1,21 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ContentModerationQueue } from '@/components/admin/ContentModerationQueue'
+
+export const metadata: Metadata = {
+  title: 'Approva Contenuti',
+  description: 'Pannello admin - Modera i contenuti prima della pubblicazione',
+  robots: {
+    index: false,
+    follow: false,
+  },
+  openGraph: {
+    title: 'Approva Contenuti - Admin',
+    description: 'Pannello amministrativo',
+    type: 'website',
+  },
+}
 
 export default async function ApproveContentPage() {
   const supabase = await createClient()

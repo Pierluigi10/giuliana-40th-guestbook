@@ -1,5 +1,16 @@
+import type { Metadata } from 'next'
 import { RegisterForm } from '@/components/auth/RegisterForm'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Registrazione',
+  description: 'Registrati per partecipare alla celebrazione del 40° di Giuliana',
+  openGraph: {
+    title: 'Registrazione - Guestbook Giuliana 40',
+    description: 'Unisciti agli amici di Giuliana nel guestbook',
+    type: 'website',
+  },
+}
 
 export default function RegisterPage() {
   return (
