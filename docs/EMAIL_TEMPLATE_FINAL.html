@@ -1,0 +1,135 @@
+<!-- ============================================================================
+     TEMPLATE EMAIL CONFERMA - VERSIONE FINALE
+     ============================================================================
+     - Colori SOLIDI (no gradienti) per massima compatibilità
+     - Testato su Outlook, Gmail, Apple Mail, Yahoo
+     - Design festivo ma professionale
+     ============================================================================ -->
+
+<!-- SUBJECT -->
+🎉 Conferma la tua email per il Guestbook di Giuliana!
+
+<!-- HTML BODY -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #fef2f8;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fef2f8; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <!-- Container principale -->
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #f0e5ec;">
+
+          <!-- Header con colore SOLIDO fucsia scuro -->
+          <tr>
+            <td style="background-color: #C71585; padding: 40px 30px; text-align: center;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="text-align: center;">
+                    <!-- Emoji grande come icona -->
+                    <div style="font-size: 48px; line-height: 1; margin-bottom: 15px;">🎂</div>
+                    <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; font-weight: bold; line-height: 1.3;">
+                      Guestbook Giuliana 40
+                    </h1>
+                    <p style="margin: 8px 0 0; color: #FFFFFF; font-size: 15px; opacity: 0.95;">
+                      Un compleanno speciale da ricordare!
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Contenuto principale -->
+          <tr>
+            <td style="padding: 40px 30px; background-color: #ffffff;">
+              <h2 style="margin: 0 0 20px; color: #2d3748; font-size: 22px; font-weight: 600;">
+                ✨ Benvenuto nel Guestbook!
+              </h2>
+
+              <p style="margin: 0 0 18px; color: #4a5568; font-size: 15px; line-height: 1.6;">
+                Ciao! Siamo felici che tu voglia lasciare un messaggio speciale per il 40° compleanno di Giuliana.
+              </p>
+
+              <p style="margin: 0 0 28px; color: #4a5568; font-size: 15px; line-height: 1.6;">
+                Per completare la registrazione e iniziare a condividere i tuoi auguri, ricordi e foto, clicca sul pulsante qui sotto:
+              </p>
+
+              <!-- CTA Button con colore SOLIDO -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding: 0 0 30px;">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="background-color: #9B59B6; border-radius: 50px; text-align: center;">
+                          <a href="{{ .ConfirmationURL }}"
+                             style="display: block; padding: 15px 40px; color: #FFFFFF; text-decoration: none; font-size: 17px; font-weight: 600; font-family: Arial, sans-serif;">
+                            🎉 Conferma la mia email
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Box informativo -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px;">
+                <tr>
+                  <td style="padding: 18px; background-color: #fef5f8; border-left: 4px solid #C71585; border-radius: 6px;">
+                    <p style="margin: 0 0 8px; color: #2d3748; font-size: 13px; font-weight: 600;">
+                      ℹ️ Nota importante
+                    </p>
+                    <p style="margin: 0; color: #4a5568; font-size: 13px; line-height: 1.5;">
+                      Questo link di conferma è valido per 24 ore. Se non funziona, copia e incolla l'URL completo nel tuo browser.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Link alternativo -->
+              <p style="margin: 25px 0 0; color: #718096; font-size: 12px; line-height: 1.5;">
+                Se il pulsante non funziona, usa questo link:<br>
+                <a href="{{ .ConfirmationURL }}" style="color: #9B59B6; text-decoration: underline; word-break: break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Decorazione festiva (bordo colorato) -->
+          <tr>
+            <td style="height: 6px; background-color: #C71585;"></td>
+          </tr>
+          <tr>
+            <td style="height: 6px; background-color: #9B59B6;"></td>
+          </tr>
+          <tr>
+            <td style="height: 6px; background-color: #FFD700;"></td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 28px 30px; background-color: #fef5f8; text-align: center;">
+              <p style="margin: 0 0 8px; color: #4a5568; font-size: 14px; font-weight: 500;">
+                🎈 Non vediamo l'ora di leggere il tuo messaggio! 🎈
+              </p>
+              <p style="margin: 0; color: #718096; font-size: 11px; line-height: 1.5;">
+                Questa è un'email automatica dal Guestbook di Giuliana 40.<br>
+                Se non ti sei registrato, puoi ignorare questa email.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+        <!-- Footer esterno -->
+        <p style="margin: 18px 0 0; color: #718096; font-size: 11px; text-align: center;">
+          💝 Con affetto, lo staff del Guestbook 💝
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
