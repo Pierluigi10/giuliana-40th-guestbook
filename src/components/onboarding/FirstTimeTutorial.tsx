@@ -32,7 +32,7 @@ const TUTORIAL_STEPS: Record<TutorialStep, StepConfig> = {
     description: 'Ti guideremo passo dopo passo per caricare il tuo messaggio speciale per Giuliana. È facile e veloce!',
     position: 'center',
   },
-  tabs-overview: {
+  'tabs-overview': {
     title: 'Scegli il tipo di contenuto 📝',
     description: 'Puoi caricare un messaggio di testo, una foto o un video. Clicca sulle tab in alto per scegliere!',
     highlightSelector: '[data-tutorial-tabs]',
