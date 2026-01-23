@@ -541,17 +541,17 @@ export async function bulkApproveContent(contentIds: string[]) {
     const approvedAt = new Date().toISOString()
 
     // Update all content status in bulk
-    const updateData: ContentUpdate = {
-      status: 'approved',
-      approved_at: approvedAt,
-    }
-    const result = await supabase
+    // @ts-ignore - Supabase type inference issue with update chaining
+    const result = await (supabase as any)
       .from('content')
-      .update(updateData)
+      .update({
+        status: 'approved',
+        approved_at: approvedAt,
+      })
       .in('id', contentIds)
       .eq('status', 'pending')
 
-    const { error } = result as { error: any }
+    const { error } = result
 
     if (error) {
       console.error('Error bulk approving content:', error)
@@ -603,16 +603,16 @@ export async function bulkRejectContent(contentIds: string[]) {
     }
 
     // Update all content status in bulk
-    const rejectData: ContentUpdate = {
-      status: 'rejected',
-    }
-    const result = await supabase
+    // @ts-ignore - Supabase type inference issue with update chaining
+    const result = await (supabase as any)
       .from('content')
-      .update(rejectData)
+      .update({
+        status: 'rejected',
+      })
       .in('id', contentIds)
       .eq('status', 'pending')
 
-    const { error } = result as { error: any }
+    const { error } = result
 
     if (error) {
       console.error('Error bulk rejecting content:', error)
