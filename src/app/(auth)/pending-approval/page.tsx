@@ -17,30 +17,43 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function PendingApprovalPage() {
+export default async function PendingApprovalPage({
+  searchParams,
+}: {
+  searchParams: { mode?: string; email?: string }
+}) {
   const supabase = await createClient()
+
+  // Determina quale messaggio mostrare
+  const isEmailConfirmation = searchParams.mode === 'email_confirmation'
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
+  // Se è modalità conferma email, permetti accesso anche senza autenticazione
+  if (!user && !isEmailConfirmation) {
     redirect('/login')
   }
 
-  // Check if user is approved now
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, is_approved, full_name')
-    .eq('id', user.id)
-    .single() as { data: { role: string; is_approved: boolean; full_name: string } | null }
+  // Check if user is approved now (solo se autenticato)
+  let profile: { role: string; is_approved: boolean; full_name: string } | null = null
+  if (user) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('role, is_approved, full_name')
+      .eq('id', user.id)
+      .single() as { data: { role: string; is_approved: boolean; full_name: string } | null }
 
-  // If approved, redirect to appropriate page
-  if (profile?.is_approved) {
-    if (profile.role === 'admin') {
-      redirect('/admin/approve-users')
-    } else if (profile.role === 'vip') {
-      redirect('/vip/gallery')
-    } else if (profile.role === 'guest') {
-      redirect('/guest/upload')
+    profile = data
+
+    // If approved, redirect to appropriate page
+    if (profile?.is_approved) {
+      if (profile.role === 'admin') {
+        redirect('/approve-content')
+      } else if (profile.role === 'vip') {
+        redirect('/gallery')
+      } else if (profile.role === 'guest') {
+        redirect('/upload')
+      }
     }
   }
 
@@ -54,31 +67,60 @@ export default async function PendingApprovalPage() {
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+            {isEmailConfirmation ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            )}
           </svg>
         </div>
 
         <div>
-          <h1 className="text-3xl font-bold">In attesa di approvazione</h1>
+          <h1 className="text-3xl font-bold">
+            {isEmailConfirmation ? 'Controlla la tua email' : 'In attesa di approvazione'}
+          </h1>
           <p className="mt-2 text-muted-foreground">
             Ciao {profile?.full_name || 'ospite'}!
           </p>
         </div>
 
         <div className="rounded-lg border border-border bg-card p-6 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            La tua registrazione è stata ricevuta con successo.
-            Un amministratore deve approvare il tuo account prima che tu possa
-            accedere al guestbook.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Riceverai una notifica via email quando il tuo account sarà approvato.
-          </p>
+          {isEmailConfirmation ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Ti abbiamo inviato un'email di conferma all'indirizzo{' '}
+                <strong>{searchParams.email || user?.email || 'la tua email'}</strong>.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Clicca sul link nella email per completare la registrazione e accedere
+                al guestbook.
+              </p>
+              <p className="text-xs text-muted-foreground mt-4 border-t border-border pt-4">
+                Non hai ricevuto l'email? Controlla la cartella spam o attendi qualche minuto.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                La tua registrazione è stata ricevuta con successo.
+                Un amministratore deve approvare il tuo account prima che tu possa
+                accedere al guestbook.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Riceverai una notifica via email quando il tuo account sarà approvato.
+              </p>
+            </>
+          )}
         </div>
 
         <div className="pt-4">

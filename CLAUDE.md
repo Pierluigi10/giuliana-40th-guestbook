@@ -133,8 +133,16 @@ See all functional requirements (42 items) → [specs/PRD.json](specs/PRD.json)
 
 ## Admin Operations (Pierluigi)
 
-**Approve users**: `/admin/approve-users` → click "Approve" button
 **Moderate content**: `/admin/approve-content` → preview → approve/reject
 **Invite friends**: Share registration link `https://[domain]/register`
+
+**Nuovo flusso registrazione** (aggiornato 2026-01-23):
+Gli amici devono:
+1. Registrarsi con email valida
+2. Confermare email cliccando sul link ricevuto (conferma automatica Supabase)
+3. Accedere e caricare contenuti
+4. Admin approva SOLO i contenuti (non più gli utenti)
+
+~~**Approve users**: Rimosso - approvazione utenti non più necessaria~~
 
 Full admin guide: (create `docs/ADMIN_GUIDE.md` after implementation)
