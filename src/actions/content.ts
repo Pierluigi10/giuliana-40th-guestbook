@@ -541,14 +541,17 @@ export async function bulkApproveContent(contentIds: string[]) {
     const approvedAt = new Date().toISOString()
 
     // Update all content status in bulk
-    const { error } = await supabase
+    const updateData: ContentUpdate = {
+      status: 'approved',
+      approved_at: approvedAt,
+    }
+    const result = await supabase
       .from('content')
-      .update({
-        status: 'approved',
-        approved_at: approvedAt,
-      })
+      .update(updateData)
       .in('id', contentIds)
       .eq('status', 'pending')
+
+    const { error } = result as { error: any }
 
     if (error) {
       console.error('Error bulk approving content:', error)
@@ -600,13 +603,16 @@ export async function bulkRejectContent(contentIds: string[]) {
     }
 
     // Update all content status in bulk
-    const { error } = await supabase
+    const rejectData: ContentUpdate = {
+      status: 'rejected',
+    }
+    const result = await supabase
       .from('content')
-      .update({
-        status: 'rejected',
-      })
+      .update(rejectData)
       .in('id', contentIds)
       .eq('status', 'pending')
+
+    const { error } = result as { error: any }
 
     if (error) {
       console.error('Error bulk rejecting content:', error)
