@@ -1,7 +1,14 @@
 import { type NextRequest, NextResponse } from 'next/server'
 // import { updateSession } from '@/lib/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+/**
+ * Next.js Proxy (formerly middleware)
+ * Handles route protection and authentication
+ * 
+ * Note: In Next.js 16+, middleware.ts was renamed to proxy.ts
+ * The function name also changed from `middleware` to `proxy`
+ */
+export async function proxy(request: NextRequest) {
   // Temporaneamente disabilitato per debug
   return NextResponse.next()
   // return await updateSession(request)

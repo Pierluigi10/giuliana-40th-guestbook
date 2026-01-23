@@ -112,7 +112,7 @@ echo ""
 echo "${BLUE}[5/8] Checking critical files...${NC}"
 
 CRITICAL_FILES=(
-    "src/middleware.ts"
+    "src/proxy.ts"
     "src/lib/supabase/client.ts"
     "src/lib/supabase/server.ts"
     "src/app/(vip)/gallery/page.tsx"

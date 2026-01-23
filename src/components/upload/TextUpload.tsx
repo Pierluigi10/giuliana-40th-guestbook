@@ -22,14 +22,18 @@ export function TextUpload({ userId }: TextUploadProps) {
     e.preventDefault()
 
     if (!isValid) {
-      toast.error('Il messaggio deve essere tra 10 e 1000 caratteri')
+      toast.error('Il messaggio deve essere tra 10 e 1000 caratteri', {
+        description: 'Aggiungi qualche parola in più per rendere il messaggio ancora più speciale! 💝'
+      })
       return
     }
 
     // Check client-side rate limit
     const rateLimitCheck = checkUploadRateLimit(userId)
     if (!rateLimitCheck.allowed) {
-      toast.error(`Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto`)
+      toast.error(`Aspetta ancora un attimo! ⏱️`, {
+        description: `Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto. Stiamo preparando tutto per Giuliana! 🎁`
+      })
       return
     }
 
@@ -39,13 +43,25 @@ export function TextUpload({ userId }: TextUploadProps) {
       const result = await uploadTextContent(text)
 
       if (result.success) {
-        toast.success('Messaggio inviato! In attesa di approvazione 🎉')
+        const count = result.contentCount || 0
+        const countMessage = count === 1 
+          ? 'Questo è il tuo primo messaggio! 🎊' 
+          : `Hai già caricato ${count} contenuti! Continua così! 🌟`
+        
+        toast.success('🎉 Il tuo messaggio è stato inviato!', {
+          description: `Giuliana lo vedrà presto! ${countMessage}`,
+          duration: 5000
+        })
         setText('')
       } else {
-        toast.error(result.error || 'Errore durante l\'invio')
+        toast.error('Ops! Qualcosa è andato storto 😔', {
+          description: result.error || 'Riprova tra un momento, stiamo sistemando tutto per te!',
+        })
       }
     } catch (error) {
-      toast.error('Si è verificato un errore')
+      toast.error('Si è verificato un errore', {
+        description: 'Non ti preoccupare, riprova tra un attimo! Il tuo messaggio è importante per Giuliana 💝'
+      })
       console.error(error)
     } finally {
       setLoading(false)
@@ -89,11 +105,11 @@ export function TextUpload({ userId }: TextUploadProps) {
         className="w-full rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
       >
         {loading && <Spinner size="sm" className="text-white" />}
-        {loading ? 'Invio in corso...' : '📨 Invia Messaggio'}
+        {loading ? '✨ Invio in corso...' : '📨 Invia Messaggio'}
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Facciamo un rapido check e il tuo messaggio è in galleria 😊
+        Facciamo un rapido check e il tuo messaggio sarà presto in galleria! Giuliana lo adorerà! 😊✨
       </p>
     </form>
   )

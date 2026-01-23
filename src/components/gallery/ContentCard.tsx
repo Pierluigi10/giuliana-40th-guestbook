@@ -135,10 +135,19 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: animationDelay, ease: 'easeOut' }}
-      className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all hover:scale-[1.02] transform"
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ 
+        duration: 0.5, 
+        delay: animationDelay, 
+        ease: [0.16, 1, 0.3, 1] // Custom easing for smooth animation
+      }}
+      whileHover={{ 
+        scale: 1.03,
+        y: -4,
+        transition: { duration: 0.2 }
+      }}
+      className="bg-white rounded-lg shadow-lg overflow-hidden transition-all transform"
     >
       {/* Content - Prominente, stile Instagram */}
       <div className="relative">
@@ -154,43 +163,65 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         )}
 
         {content.type === 'image' && content.media_url && (
-          <div
+          <motion.div
             className="relative overflow-hidden cursor-pointer group bg-black"
             onClick={onOpenLightbox}
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
           >
             <Image
               src={content.media_url}
               alt="Content"
               width={800}
               height={600}
-              className="w-full h-auto"
+              className="w-full h-auto transition-transform duration-300 group-hover:brightness-110"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-              <span className="text-white text-sm bg-black/50 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+            <motion.div 
+              className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              whileHover={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.span 
+                className="text-white text-sm bg-black/70 px-4 py-2 rounded-full backdrop-blur-sm"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileHover={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+              >
                 Clicca per ingrandire
-              </span>
-            </div>
-          </div>
+              </motion.span>
+            </motion.div>
+          </motion.div>
         )}
 
         {content.type === 'video' && content.media_url && (
-          <div
+          <motion.div
             className="relative overflow-hidden cursor-pointer bg-black"
             onClick={onOpenLightbox}
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
           >
             <video
               src={content.media_url}
-              className="w-full h-auto"
+              className="w-full h-auto transition-transform duration-300"
               preload="metadata"
             />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors">
-              <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+            <motion.div 
+              className="absolute inset-0 flex items-center justify-center bg-black/30"
+              whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div 
+                className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 1)' }}
+                transition={{ duration: 0.2 }}
+              >
                 <svg className="w-8 h-8 text-birthday-purple ml-1" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* Delete button overlay - top right */}
@@ -273,9 +304,11 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                 <HoverCardTrigger asChild>
                   <button
                     onClick={() => handleReactionClick(emoji)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                     className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-1 ${
                       hasUserReacted(emoji)
-                        ? 'bg-gradient-to-r from-birthday-pink to-birthday-purple text-white'
+                        ? 'bg-gradient-to-r from-birthday-pink to-birthday-purple text-white shadow-md'
                         : 'bg-gray-100 hover:bg-gray-200'
                     }`}
                     aria-label={`${emojiToText(emoji)}, ${count} ${count === 1 ? 'persona ha' : 'persone hanno'} reagito. ${
@@ -310,16 +343,18 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
             {/* Add reaction button */}
             <div className="relative">
-              <button
+              <motion.button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm transition-all hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-gold focus-visible:ring-offset-1"
+                whileHover={{ scale: 1.15, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-gold focus-visible:ring-offset-1"
                 aria-label="Apri selettore emoji per aggiungere reazione"
                 aria-expanded={showEmojiPicker}
                 aria-controls="emoji-picker-menu"
               >
                 <span aria-hidden="true">+</span>
                 <span className="sr-only">Aggiungi reazione</span>
-              </button>
+              </motion.button>
 
               {/* Emoji Picker */}
               {showEmojiPicker && (
@@ -336,20 +371,22 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                     aria-label="Selettore emoji"
                   >
                     {availableEmojis.map(emoji => (
-                      <button
+                      <motion.button
                         key={emoji}
                         onClick={() => {
                           handleReactionClick(emoji)
                           setShowEmojiPicker(false)
                         }}
-                        className="w-10 h-10 rounded-lg hover:bg-gray-100 flex items-center justify-center text-2xl transition-all hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple"
+                        whileHover={{ scale: 1.3, rotate: [0, -10, 10, -10, 0] }}
+                        whileTap={{ scale: 0.9 }}
+                        className="w-10 h-10 rounded-lg hover:bg-gray-100 flex items-center justify-center text-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple"
                         role="menuitem"
                         aria-label={`Reagisci con ${emojiToText(emoji)}`}
                       >
                         <span role="img" aria-label={emojiToText(emoji)}>
                           {emoji}
                         </span>
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </>

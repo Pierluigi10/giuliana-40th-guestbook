@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { GalleryView } from '@/components/gallery/GalleryView'
 import { ContentErrorBoundary } from '@/components/errors/ContentErrorBoundary'
 import { Header } from '@/components/layout/Header'
+import { StatsDashboard } from '@/components/vip/StatsDashboard'
+import { getVIPStats } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
   title: 'Galleria VIP',
@@ -35,29 +37,13 @@ export default async function GalleryPage() {
     redirect('/login')
   }
 
-  // Fetch approved content with author info and reactions
-  const { data: approvedContent } = await supabase
-    .from('content')
-    .select(`
-      id,
-      type,
-      text_content,
-      media_url,
-      approved_at,
-      created_at,
-      user_id,
-      profiles (
-        full_name
-      ),
-      reactions (
-        id,
-        emoji,
-        user_id,
-        profiles (full_name)
-      )
-    `)
-    .eq('status', 'approved')
-    .order('approved_at', { ascending: false })
+  // Fetch initial page of approved content (first 20 items for infinite scroll)
+  const { getApprovedContentPaginated } = await import('@/lib/supabase/queries')
+  const initialContentResult = await getApprovedContentPaginated(supabase, 0, 20)
+  const approvedContent = initialContentResult.data || []
+
+  // Fetch VIP statistics
+  const { data: vipStats } = await getVIPStats(supabase)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-birthday-pink/5 via-birthday-purple/5 to-birthday-gold/5">
@@ -73,6 +59,14 @@ export default async function GalleryPage() {
           </p>
         </div>
 
+        {/* Statistics Dashboard */}
+        <ContentErrorBoundary>
+          <div className="mb-8">
+            <StatsDashboard initialStats={vipStats} />
+          </div>
+        </ContentErrorBoundary>
+
+        {/* Gallery View */}
         <ContentErrorBoundary>
           <GalleryView
             initialContent={approvedContent || []}

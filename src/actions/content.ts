@@ -3,8 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ContentInsert, ContentUpdate } from '@/lib/supabase/types'
-import { insertContent, updateContent, selectProfileById, selectFullProfileById } from '@/lib/supabase/queries'
-import { sendContentNotification } from '@/lib/email'
+import { insertContent, updateContent, selectProfileById, selectFullProfileById, getUserContentCount } from '@/lib/supabase/queries'
+import { sendContentNotification, sendApprovalNotification } from '@/lib/email'
 
 export async function uploadTextContent(textContent: string) {
   try {
@@ -68,8 +68,12 @@ export async function uploadTextContent(textContent: string) {
       })
     }
 
+    // Get user content count for feedback message
+    const { count } = await getUserContentCount(supabase, user.id)
+    const contentCount = count || 0
+
     revalidatePath('/guest/upload')
-    return { success: true }
+    return { success: true, contentCount }
   } catch (error) {
     console.error('Upload text error:', error)
     return { success: false, error: 'Errore del server' }
@@ -188,9 +192,13 @@ export async function uploadImageContent(formData: FormData) {
     }
     console.log('[Image Upload] Email notification completed')
 
+    // Get user content count for feedback message
+    const { count } = await getUserContentCount(supabase, user.id)
+    const contentCount = count || 0
+
     revalidatePath('/guest/upload')
     console.log('[Image Upload] Upload completed successfully!')
-    return { success: true }
+    return { success: true, contentCount }
   } catch (error) {
     console.error('[Image Upload] Unexpected error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Errore del server'
@@ -294,8 +302,12 @@ export async function uploadVideoContent(formData: FormData) {
       })
     }
 
+    // Get user content count for feedback message
+    const { count } = await getUserContentCount(supabase, user.id)
+    const contentCount = count || 0
+
     revalidatePath('/guest/upload')
-    return { success: true }
+    return { success: true, contentCount }
   } catch (error) {
     console.error('Upload video error:', error)
     return { success: false, error: 'Errore del server' }
@@ -319,6 +331,35 @@ export async function approveContent(contentId: string) {
       return { success: false, error: 'Permesso negato' }
     }
 
+    // Fetch content info with author details before updating
+    const { data: contentData } = await supabase
+      .from('content')
+      .select(`
+        id,
+        type,
+        text_content,
+        user_id,
+        profiles (
+          full_name,
+          email
+        )
+      `)
+      .eq('id', contentId)
+      .single() as { data: {
+        id: string
+        type: 'text' | 'image' | 'video'
+        text_content: string | null
+        user_id: string
+        profiles: {
+          full_name: string | null
+          email: string | null
+        } | null
+      } | null }
+
+    if (!contentData) {
+      return { success: false, error: 'Contenuto non trovato' }
+    }
+
     // Update content status
     const updateData: ContentUpdate = {
       status: 'approved',
@@ -331,7 +372,18 @@ export async function approveContent(contentId: string) {
       return { success: false, error: 'Errore durante l\'approvazione' }
     }
 
+    // Send email notification to content author (non-blocking)
+    if (contentData.profiles?.email && contentData.profiles?.full_name) {
+      await sendApprovalNotification({
+        userName: contentData.profiles.full_name,
+        userEmail: contentData.profiles.email,
+        contentType: contentData.type,
+        contentPreview: contentData.text_content || undefined,
+      })
+    }
+
     revalidatePath('/admin/approve-content')
+    revalidatePath('/gallery')
     return { success: true }
   } catch (error) {
     console.error('Approve content error:', error)
@@ -432,6 +484,139 @@ export async function deleteContent(contentId: string) {
     return { success: true }
   } catch (error) {
     console.error('Delete content error:', error)
+    return { success: false, error: 'Errore del server' }
+  }
+}
+
+export async function bulkApproveContent(contentIds: string[]) {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Non autenticato' }
+    }
+
+    // Check if user is admin
+    const { data: profile } = await selectProfileById(supabase, user.id)
+
+    if (profile?.role !== 'admin') {
+      return { success: false, error: 'Permesso negato' }
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return { success: false, error: 'Nessun contenuto selezionato' }
+    }
+
+    // Fetch all content info with author details before updating
+    const { data: contentDataArray } = await supabase
+      .from('content')
+      .select(`
+        id,
+        type,
+        text_content,
+        user_id,
+        profiles (
+          full_name,
+          email
+        )
+      `)
+      .in('id', contentIds)
+      .eq('status', 'pending') as { data: Array<{
+        id: string
+        type: 'text' | 'image' | 'video'
+        text_content: string | null
+        user_id: string
+        profiles: {
+          full_name: string | null
+          email: string | null
+        } | null
+      }> | null }
+
+    if (!contentDataArray || contentDataArray.length === 0) {
+      return { success: false, error: 'Nessun contenuto pending trovato' }
+    }
+
+    const approvedAt = new Date().toISOString()
+
+    // Update all content status in bulk
+    const { error } = await supabase
+      .from('content')
+      .update({
+        status: 'approved',
+        approved_at: approvedAt,
+      })
+      .in('id', contentIds)
+      .eq('status', 'pending')
+
+    if (error) {
+      console.error('Error bulk approving content:', error)
+      return { success: false, error: 'Errore durante l\'approvazione' }
+    }
+
+    // Send email notifications to content authors (non-blocking)
+    for (const contentData of contentDataArray) {
+      if (contentData.profiles?.email && contentData.profiles?.full_name) {
+        await sendApprovalNotification({
+          userName: contentData.profiles.full_name,
+          userEmail: contentData.profiles.email,
+          contentType: contentData.type,
+          contentPreview: contentData.text_content || undefined,
+        }).catch((err) => {
+          console.error('Error sending approval email:', err)
+        })
+      }
+    }
+
+    revalidatePath('/admin/approve-content')
+    revalidatePath('/gallery')
+    return { success: true, count: contentDataArray.length }
+  } catch (error) {
+    console.error('Bulk approve content error:', error)
+    return { success: false, error: 'Errore del server' }
+  }
+}
+
+export async function bulkRejectContent(contentIds: string[]) {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Non autenticato' }
+    }
+
+    // Check if user is admin
+    const { data: profile } = await selectProfileById(supabase, user.id)
+
+    if (profile?.role !== 'admin') {
+      return { success: false, error: 'Permesso negato' }
+    }
+
+    if (!contentIds || contentIds.length === 0) {
+      return { success: false, error: 'Nessun contenuto selezionato' }
+    }
+
+    // Update all content status in bulk
+    const { error } = await supabase
+      .from('content')
+      .update({
+        status: 'rejected',
+      })
+      .in('id', contentIds)
+      .eq('status', 'pending')
+
+    if (error) {
+      console.error('Error bulk rejecting content:', error)
+      return { success: false, error: 'Errore durante il rifiuto' }
+    }
+
+    revalidatePath('/admin/approve-content')
+    return { success: true, count: contentIds.length }
+  } catch (error) {
+    console.error('Bulk reject content error:', error)
     return { success: false, error: 'Errore del server' }
   }
 }
