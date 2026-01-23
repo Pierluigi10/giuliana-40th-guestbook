@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ContentCard } from './ContentCard'
+import { ContentCardSkeletonGrid } from '@/components/loading/ContentCardSkeleton'
 import confetti from 'canvas-confetti'
 import type { ContentRow, ReactionRow, ProfileRow } from '@/lib/supabase/types'
 
@@ -26,6 +27,7 @@ export function GalleryView({ initialContent, userId }: GalleryViewProps) {
   const [content, setContent] = useState<Content[]>(initialContent)
   const [filter, setFilter] = useState<'all' | 'text' | 'image' | 'video'>('all')
   const [lightboxContent, setLightboxContent] = useState<Content | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Confetti effect on first load
   useEffect(() => {
@@ -118,18 +120,22 @@ export function GalleryView({ initialContent, userId }: GalleryViewProps) {
       </div>
 
       {/* Masonry Grid */}
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-        {filteredContent.map((item, index) => (
-          <div key={item.id} className="break-inside-avoid">
-            <ContentCard
-              content={item}
-              userId={userId}
-              onOpenLightbox={() => setLightboxContent(item)}
-              animationDelay={index * 0.1}
-            />
-          </div>
-        ))}
-      </div>
+      {isLoading ? (
+        <ContentCardSkeletonGrid count={9} />
+      ) : (
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          {filteredContent.map((item, index) => (
+            <div key={item.id} className="break-inside-avoid">
+              <ContentCard
+                content={item}
+                userId={userId}
+                onOpenLightbox={() => setLightboxContent(item)}
+                animationDelay={index * 0.1}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Lightbox */}
       {lightboxContent && (lightboxContent.type === 'image' || lightboxContent.type === 'video') && (
