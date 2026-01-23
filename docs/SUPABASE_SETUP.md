@@ -179,32 +179,60 @@ USING (
 
 ## Step 3: Create Admin and VIP Users
 
+**IMPORTANT**: Before you start, read the credentials documentation at `docs/CREDENTIALS.md` for:
+- Password security guidelines
+- How to securely store and share credentials
+- Detailed troubleshooting for authentication issues
+
+---
+
+### Quick Reference Card
+
+Copy this checklist and complete each step:
+
+```
+ADMIN USER SETUP
+[ ] Create user in Supabase Dashboard (Authentication → Users → Add user)
+    Email: _______________________________
+    Password: [STORED IN PASSWORD MANAGER]
+    Auto-confirm: YES ✓
+[ ] Promote to admin: SELECT promote_to_admin('email@example.com');
+[ ] Verify: SELECT * FROM profiles WHERE role = 'admin';
+[ ] Test login at: http://localhost:3000/login → should redirect to /approve-users
+
+VIP USER SETUP
+[ ] Create user in Supabase Dashboard (Authentication → Users → Add user)
+    Email: _______________________________
+    Password: [STORED IN PASSWORD MANAGER]
+    Auto-confirm: YES ✓
+[ ] Promote to VIP: SELECT promote_to_vip('email@example.com');
+[ ] Verify: SELECT * FROM profiles WHERE role = 'vip';
+[ ] Test login at: http://localhost:3000/login → should redirect to /gallery
+[ ] Share credentials securely with Giuliana (see docs/CREDENTIALS.md)
+```
+
+---
+
 ### 3.1 Create Admin User (Pierluigi)
 
-**Option A: Via Authentication UI (recommended)**
+**Method A: Via Authentication UI (recommended for production)**
 
 1. In Supabase dashboard, click **Authentication** in left menu
 2. Click **Users**
 3. Click **Add user** → **Create new user**
 4. Fill in:
-   - **Email**: `your-admin-email@example.com` (e.g., pierluigi@example.com)
-   - **Password**: Choose a secure password (min 8 characters)
+   - **Email**: `your-admin-email@example.com` (use your real email)
+   - **Password**: Generate a strong password (min 12 characters recommended)
+     - Use a password manager's generator (1Password, Bitwarden, etc.)
+     - Example strong password: `Kx9#mL2pQz7@vN4w`
    - ✅ **Auto Confirm User**: YES (check this option!)
 5. Click **Create user**
+6. **IMPORTANT**: Copy the password and store it in your password manager immediately!
 
-**Option B: Via SQL (alternative)**
+**Method B: Via SQL (for development/testing only)**
 
-```sql
--- Insert admin user directly (bypass email confirmation)
-INSERT INTO auth.users (email, encrypted_password, email_confirmed_at, created_at, updated_at)
-VALUES (
-  'your-admin-email@example.com',
-  crypt('your-secure-password', gen_salt('bf')),
-  now(),
-  now(),
-  now()
-);
-```
+See `supabase/migrations/003_seed_data.sql` for automated seed script.
+**WARNING**: This method stores passwords in plaintext. NEVER use in production.
 
 ### 3.2 Promote Admin User
 
@@ -216,7 +244,12 @@ VALUES (
 SELECT promote_to_admin('your-admin-email@example.com');
 ```
 
-4. ✅ Verify that "1 row(s) returned" or success message appears
+4. ✅ Verify that the function returns without errors
+
+**What this does**:
+- Sets `role = 'admin'` in profiles table
+- Sets `is_approved = true` (auto-approved)
+- Grants access to admin routes: `/approve-users`, `/approve-content`
 
 ### 3.3 Create VIP User (Giuliana)
 
@@ -224,10 +257,17 @@ Repeat the same steps for VIP:
 
 1. **Authentication** → **Users** → **Add user**
 2. Fill in:
-   - **Email**: `giuliana@example.com` (Giuliana's email)
-   - **Password**: Choose a password (communicate it to Giuliana privately)
+   - **Email**: `giuliana@example.com` (use Giuliana's real email)
+   - **Password**: Generate a strong password (min 12 characters)
    - ✅ **Auto Confirm User**: YES
 3. Click **Create user**
+4. **IMPORTANT**: Store the password securely - you'll need to share it with Giuliana
+
+**How to share password with Giuliana** (choose one):
+- ✅ Password manager shared vault (1Password, Bitwarden)
+- ✅ Encrypted messaging (Signal, WhatsApp with disappearing messages)
+- ✅ In person
+- ❌ DO NOT send via plain email or SMS
 
 ### 3.4 Promote VIP User
 
@@ -238,7 +278,12 @@ Repeat the same steps for VIP:
 SELECT promote_to_vip('giuliana@example.com');
 ```
 
-3. ✅ Verify success message
+3. ✅ Verify that the function returns without errors
+
+**What this does**:
+- Sets `role = 'vip'` in profiles table
+- Sets `is_approved = true` (auto-approved)
+- Grants access to VIP route: `/gallery` (approved content only)
 
 ---
 
