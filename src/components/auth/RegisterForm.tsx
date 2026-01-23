@@ -28,6 +28,10 @@ export function RegisterForm() {
           data: {
             full_name: fullName,
           },
+          // Skip email confirmation in development
+          emailRedirectTo: process.env.NODE_ENV === 'development'
+            ? undefined
+            : `${window.location.origin}/auth/callback`,
         },
       })
 
