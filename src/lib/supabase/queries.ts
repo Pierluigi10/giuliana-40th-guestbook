@@ -33,3 +33,12 @@ export async function selectProfileById(supabase: TypedSupabaseClient, userId: s
     .eq('id', userId)
     .single() as Promise<{ data: Pick<ProfileRow, 'role'> | null; error: any }>
 }
+
+export async function selectFullProfileById(supabase: TypedSupabaseClient, userId: string) {
+  // @ts-expect-error - Supabase generic inference limitation
+  return supabase
+    .from('profiles')
+    .select('id, email, full_name, role')
+    .eq('id', userId)
+    .single() as Promise<{ data: Pick<ProfileRow, 'id' | 'email' | 'full_name' | 'role'> | null; error: any }>
+}

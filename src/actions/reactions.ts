@@ -3,10 +3,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ReactionInsert, ReactionRow } from '@/lib/supabase/types'
-import { insertReaction, selectProfileById } from '@/lib/supabase/queries'
+import { insertReaction } from '@/lib/supabase/queries'
 
 export async function addReaction(contentId: string, emoji: string): Promise<
-  { success: true; reaction?: ReactionRow } | { success: false; error: string }
+  { success: true; reaction?: any } | { success: false; error: string }
 > {
   try {
     const supabase = await createClient()
@@ -17,14 +17,7 @@ export async function addReaction(contentId: string, emoji: string): Promise<
       return { success: false, error: 'Non autenticato' }
     }
 
-    // Check if user is VIP or admin
-    const { data: profile } = await selectProfileById(supabase, user.id)
-
-    if (!profile || !['vip', 'admin'].includes(profile.role)) {
-      return { success: false, error: 'Solo VIP e Admin possono aggiungere reactions' }
-    }
-
-    // Add reaction
+    // Add reaction (all authenticated users can add reactions)
     const reactionData: ReactionInsert = {
       content_id: contentId,
       user_id: user.id,
@@ -41,8 +34,20 @@ export async function addReaction(contentId: string, emoji: string): Promise<
       return { success: false, error: 'Errore durante l\'aggiunta della reaction' }
     }
 
+    // Fetch the reaction with profile data
+    if (data) {
+      const { data: reactionWithProfile } = await supabase
+        .from('reactions')
+        .select('id, emoji, user_id, profiles (full_name)')
+        .eq('id', data.id)
+        .single()
+
+      revalidatePath('/vip/gallery')
+      return { success: true, reaction: reactionWithProfile }
+    }
+
     revalidatePath('/vip/gallery')
-    return { success: true, reaction: data as ReactionRow }
+    return { success: true }
   } catch (error) {
     console.error('Add reaction error:', error)
     return { success: false, error: 'Errore del server' }
