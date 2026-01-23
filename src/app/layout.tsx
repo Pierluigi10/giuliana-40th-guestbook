@@ -5,7 +5,11 @@ import { TopLoadingBar } from '@/components/loading/TopLoadingBar'
 import './globals.css'
 import './nprogress-styles.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['system-ui', 'arial'],
+})
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tanti-auguri-giuliana.vercel.app'
 
