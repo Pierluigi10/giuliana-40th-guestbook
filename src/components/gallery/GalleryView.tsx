@@ -30,9 +30,9 @@ interface Content {
   approved_at: ContentRow['approved_at']
   created_at: ContentRow['created_at']
   user_id: ContentRow['user_id']
-  profiles: Pick<ProfileRow, 'full_name'> | null
+  profiles: { full_name: string | null } | null
   reactions: Array<Pick<ReactionRow, 'id' | 'emoji' | 'user_id'> & {
-    profiles: Pick<ProfileRow, 'full_name'> | null
+    profiles: { full_name: string | null } | null
   }>
 }
 
