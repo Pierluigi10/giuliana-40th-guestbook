@@ -53,7 +53,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             href="/approve-content"
             className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
@@ -70,6 +70,15 @@ export default async function AdminDashboardPage() {
             <h3 className="font-semibold text-lg mb-1">Gestione Utenti</h3>
             <p className="text-sm text-muted-foreground">
               Visualizza ed elimina gli utenti
+            </p>
+          </Link>
+          <Link
+            href="/security-log"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <h3 className="font-semibold text-lg mb-1">Log di Sicurezza</h3>
+            <p className="text-sm text-muted-foreground">
+              Monitora tentativi di spam bloccati
             </p>
           </Link>
           <Link

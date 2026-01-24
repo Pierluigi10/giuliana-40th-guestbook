@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, User, Menu } from 'lucide-react'
+import { LogOut, User, Menu, LayoutDashboard, CheckCircle, Users, Shield, Download } from 'lucide-react'
 import confetti from 'canvas-confetti'
 import {
   Sheet,
@@ -12,6 +12,14 @@ import {
   SheetTrigger,
   SheetTitle,
 } from '@/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface HeaderProps {
   userName?: string
@@ -139,12 +147,46 @@ export function Header({ userName, userRole }: HeaderProps) {
               Lascia un ricordo
             </Link>
             {userRole === 'admin' && (
-              <Link
-                href="/approve-content"
-                className="text-sm font-medium hover:text-birthday-gold transition-colors"
-              >
-                Modera
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="text-sm font-medium hover:text-birthday-gold transition-colors flex items-center gap-1">
+                  Admin
+                  <Menu className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Pannello Admin</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/approve-content" className="flex items-center gap-2 cursor-pointer">
+                      <CheckCircle className="h-4 w-4" />
+                      Modera Contenuti
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/manage-users" className="flex items-center gap-2 cursor-pointer">
+                      <Users className="h-4 w-4" />
+                      Gestione Utenti
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/security-log" className="flex items-center gap-2 cursor-pointer">
+                      <Shield className="h-4 w-4" />
+                      Log di Sicurezza
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/export" className="flex items-center gap-2 cursor-pointer">
+                      <Download className="h-4 w-4" />
+                      Esporta Dati
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </nav>
         )}
@@ -210,13 +252,55 @@ export function Header({ userName, userRole }: HeaderProps) {
                     Lascia un ricordo
                   </Link>
                   {userRole === 'admin' && (
-                    <Link
-                      href="/approve-content"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-base font-medium hover:text-birthday-gold transition-colors py-2"
-                    >
-                      Modera Contenuti
-                    </Link>
+                    <>
+                      <div className="border-t pt-4 mt-2">
+                        <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
+                          Area Admin
+                        </p>
+                        <div className="flex flex-col gap-3">
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
+                          >
+                            <LayoutDashboard className="h-5 w-5" />
+                            Dashboard
+                          </Link>
+                          <Link
+                            href="/approve-content"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
+                          >
+                            <CheckCircle className="h-5 w-5" />
+                            Modera Contenuti
+                          </Link>
+                          <Link
+                            href="/manage-users"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
+                          >
+                            <Users className="h-5 w-5" />
+                            Gestione Utenti
+                          </Link>
+                          <Link
+                            href="/security-log"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
+                          >
+                            <Shield className="h-5 w-5" />
+                            Log di Sicurezza
+                          </Link>
+                          <Link
+                            href="/export"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
+                          >
+                            <Download className="h-5 w-5" />
+                            Esporta Dati
+                          </Link>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </nav>
               </SheetContent>
