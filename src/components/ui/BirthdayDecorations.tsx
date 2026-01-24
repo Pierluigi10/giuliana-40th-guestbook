@@ -280,6 +280,10 @@ export function BirthdayDecorations({
               ry="3"
               fill={THEME_COLORS.gold}
               opacity="0.8"
+              initial={{
+                opacity: 0.8,
+                ry: 3,
+              }}
               animate={{
                 opacity: [0.8, 1, 0.8],
                 ry: [3, 4, 3],
