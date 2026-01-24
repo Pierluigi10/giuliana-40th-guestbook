@@ -427,6 +427,7 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
                       alt="Content preview"
                       width={800}
                       height={600}
+                      loading="lazy"
                       className="w-full h-auto max-h-[400px] object-contain bg-gray-50"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors">

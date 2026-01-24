@@ -188,6 +188,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
               alt="Content"
               width={800}
               height={600}
+              loading="lazy"
               className="w-full h-[250px] md:h-[300px] object-cover transition-transform duration-300 group-hover:brightness-110"
             />
             <motion.div 
