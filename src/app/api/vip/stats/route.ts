@@ -6,24 +6,13 @@ export async function GET() {
   try {
     const supabase = await createClient()
 
-    // Check authentication
+    // Check authentication - all authenticated users can view stats
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user is VIP or admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single() as { data: { role: 'admin' | 'vip' | 'guest' } | null; error: any }
-
-    if (!profile || (profile.role !== 'vip' && profile.role !== 'admin')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
-    // Get stats
+    // Get stats - no role check required, stats are public to all authenticated users
     const { data, error } = await getVIPStats(supabase)
 
     if (error) {
