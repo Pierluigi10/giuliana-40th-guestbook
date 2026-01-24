@@ -26,6 +26,7 @@ export async function GET() {
       userEmail: 'mario.rossi@example.com',
       contentType: 'text',
       contentPreview: 'Buon compleanno Giuliana! Questo è un messaggio di test per verificare che le notifiche email funzionino correttamente. Tanti auguri per i tuoi 40 anni!',
+      contentId: 'test-content-id-12345',
     })
 
     if (result.success) {

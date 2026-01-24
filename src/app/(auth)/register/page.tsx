@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { RegisterForm } from '@/components/auth/RegisterForm'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Home } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Registrazione',
@@ -16,6 +18,15 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
+        <div className="flex justify-center mb-4">
+          <Button variant="ghost" asChild>
+            <Link href="/" className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
+          </Button>
+        </div>
+
         <div className="text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent">
             Registrazione

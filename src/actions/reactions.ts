@@ -42,7 +42,7 @@ export async function addReaction(contentId: string, emoji: string): Promise<
         .eq('id', data.id)
         .single()
 
-      revalidatePath('/vip/gallery')
+      revalidatePath('/gallery')
       return { success: true, reaction: reactionWithProfile }
     }
 

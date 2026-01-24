@@ -79,9 +79,9 @@ export function TextUpload({ userId }: TextUploadProps) {
           colors,
         })
         
-        toast.success('🎉 Il tuo messaggio è stato inviato!', {
-          description: `Giuliana lo vedrà presto! ${countMessage}`,
-          duration: 5000
+        toast.success('🎉 Messaggio inviato con successo!', {
+          description: `In attesa di approvazione dall'admin. Giuliana lo vedrà presto! ${countMessage}`,
+          duration: 6000
         })
         setText('')
       } else {
@@ -158,7 +158,7 @@ export function TextUpload({ userId }: TextUploadProps) {
       </motion.button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Le tue parole saranno presto parte della festa di Giuliana! 💝✨
+        📋 Il tuo contenuto sarà in attesa di approvazione dall'admin prima di essere visibile 💝✨
       </p>
     </form>
   )

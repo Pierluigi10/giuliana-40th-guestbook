@@ -105,38 +105,41 @@ export function RegisterForm() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-
-      // Sign up user
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-          // Email confirmation always enabled (dev and production)
-          // Use NEXT_PUBLIC_APP_URL if set (production), otherwise use current origin (development)
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`,
+      // Register user via API (auto-confirms email)
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email,
+          password,
+          fullName,
+        }),
       })
 
-      if (signUpError) {
-        // Handle specific errors
-        if (signUpError.message.includes('already registered')) {
-          setError('Questa email è già registrata. Prova ad accedere o recupera la password.')
-        } else if (signUpError.message.includes('rate limit')) {
-          setError('Troppe registrazioni. Riprova tra qualche minuto.')
-        } else {
-          setError(signUpError.message)
-        }
+      const result = await response.json()
+
+      if (!response.ok) {
+        setError(result.error || 'Si è verificato un errore durante la registrazione')
         return
       }
 
-      if (data.user) {
-        // Redirect to page with "Check your email" message
-        router.push(`/pending-approval?mode=email_confirmation&email=${encodeURIComponent(email)}`)
+      // Auto-login after successful registration
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        setError('Registrazione completata, ma errore durante l\'accesso automatico. Prova ad accedere manualmente.')
+        return
       }
+
+      // Redirect to upload page with onboarding tour
+      router.push('/upload')
+      router.refresh()
     } catch (err) {
       setError('Si è verificato un errore durante la registrazione')
       console.error(err)

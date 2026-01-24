@@ -13,6 +13,7 @@ export interface ContentNotificationParams {
   userEmail: string
   contentType: ContentType
   contentPreview?: string
+  contentId: string
 }
 
 /**
@@ -24,6 +25,7 @@ export async function sendContentNotification({
   userEmail,
   contentType,
   contentPreview,
+  contentId,
 }: ContentNotificationParams) {
   try {
     // Skip email sending if Resend is not configured
@@ -34,6 +36,11 @@ export async function sendContentNotification({
 
     const typeLabel = contentType === 'text' ? 'messaggio' : contentType === 'image' ? 'foto' : 'video'
     const typeEmoji = contentType === 'text' ? '💬' : contentType === 'image' ? '📷' : '🎥'
+
+    // Generate approval token for email-based approval
+    const { generateApprovalToken } = await import('./approval-token')
+    const approvalToken = generateApprovalToken(contentId)
+    const approvalUrl = `${APP_URL}/api/admin/approve-email?token=${approvalToken}`
 
     const data = await resend.emails.send({
       from: 'Guestbook Giuliana <onboarding@resend.dev>', // Default sender, update with custom domain
@@ -53,10 +60,20 @@ export async function sendContentNotification({
             })}</p>
           </div>
 
-          <a href="${APP_URL}/admin/approve-content"
-             style="display: inline-block; background: #FF69B4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
-            Vai alla Dashboard Admin
-          </a>
+          <div style="margin: 30px 0;">
+            <a href="${approvalUrl}"
+               style="display: inline-block; background: #10B981; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 0 10px 10px 0; font-weight: bold; font-size: 16px;">
+              ✅ Approva Subito
+            </a>
+            <a href="${APP_URL}/admin/approve-content"
+               style="display: inline-block; background: #FF69B4; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 0 10px 10px 0;">
+              📋 Dashboard Admin
+            </a>
+          </div>
+
+          <p style="color: #999; font-size: 13px; margin: 20px 0;">
+            💡 <strong>Tip:</strong> Clicca "Approva Subito" per approvare il contenuto direttamente da questa email!
+          </p>
 
           <p style="color: #666; font-size: 12px; margin-top: 30px;">
             Questa è una notifica automatica dal Guestbook di Giuliana 40°

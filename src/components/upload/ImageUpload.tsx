@@ -11,8 +11,7 @@ import { Spinner } from '@/components/loading/Spinner'
 import Image from 'next/image'
 import { checkUploadRateLimit } from '@/lib/utils'
 import { isMobileDevice, isCameraAvailable, getImageCompressionOptions } from '@/lib/mobile-utils'
-import { ImageTextOverlay } from './ImageTextOverlay'
-import { Camera, Image as ImageIcon, Type } from 'lucide-react'
+import { Camera, Image as ImageIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface ImageUploadProps {
@@ -24,7 +23,6 @@ export function ImageUpload({ userId }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [showTextOverlay, setShowTextOverlay] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [cameraAvailable, setCameraAvailable] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -74,7 +72,6 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     setFile(null)
     setPreview(null)
     setProgress(0)
-    setShowTextOverlay(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
   }
@@ -107,25 +104,6 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     }
   }
 
-  const handleTextOverlaySave = (imageWithText: string) => {
-    // Convert data URL to File
-    fetch(imageWithText)
-      .then(res => res.blob())
-      .then(blob => {
-        const newFile = new File([blob], file?.name || 'image-with-text.jpg', {
-          type: 'image/jpeg',
-        })
-        setFile(newFile)
-        setPreview(imageWithText)
-        setShowTextOverlay(false)
-        toast.success('Testo aggiunto! ✨', {
-          description: 'Ora puoi caricare la foto con il testo!'
-        })
-      })
-      .catch(() => {
-        toast.error('Errore nel salvataggio del testo')
-      })
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -265,9 +243,9 @@ export function ImageUpload({ userId }: ImageUploadProps) {
           colors,
         })
 
-        toast.success('🎉 La tua foto è stata caricata!', {
-          description: `Giuliana la vedrà presto! ${countMessage}`,
-          duration: 5000
+        toast.success('🎉 Foto caricata con successo!', {
+          description: `In attesa di approvazione dall'admin. Giuliana la vedrà presto! ${countMessage}`,
+          duration: 6000
         })
         handleRemove()
         setProgress(100)
@@ -307,14 +285,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       className="space-y-4"
       style={{ scrollMarginBottom: '120px' }} // Prevent keyboard from blocking submit button on mobile
     >
-      {/* Text Overlay Editor */}
-      {showTextOverlay && preview ? (
-        <ImageTextOverlay
-          imageUrl={preview}
-          onSave={handleTextOverlaySave}
-          onCancel={() => setShowTextOverlay(false)}
-        />
-      ) : !preview ? (
+      {!preview ? (
         <>
           {/* Drop Zone */}
           <div {...getRootProps()}>
@@ -470,16 +441,6 @@ export function ImageUpload({ userId }: ImageUploadProps) {
               {(file!.size / 1024 / 1024).toFixed(2)} MB
             </p>
           </div>
-
-          {/* Add Text Overlay Button */}
-          <button
-            type="button"
-            onClick={() => setShowTextOverlay(true)}
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-          >
-            <Type className="w-4 h-4" />
-            Aggiungi testo alla foto
-          </button>
         </div>
       )}
 
@@ -515,7 +476,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       </motion.button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Il tuo ricordo sarà presto parte della festa di Giuliana! 💝✨
+        📋 Il tuo contenuto sarà in attesa di approvazione dall'admin prima di essere visibile 💝✨
       </p>
     </form>
   )

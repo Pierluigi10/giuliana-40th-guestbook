@@ -224,9 +224,9 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           colors,
         })
 
-        toast.success('🎉 Il tuo video è stato caricato!', {
-          description: `Giuliana lo vedrà presto! ${countMessage}`,
-          duration: 5000
+        toast.success('🎉 Video caricato con successo!', {
+          description: `In attesa di approvazione dall'admin. Giuliana lo vedrà presto! ${countMessage}`,
+          duration: 6000
         })
         handleRemove()
         setProgress(100)
@@ -418,7 +418,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Facciamo un rapido check e il tuo video sarà presto in galleria! Giuliana lo adorerà! 😊✨
+        📋 Il tuo contenuto sarà in attesa di approvazione dall'admin prima di essere visibile 💝✨
       </p>
     </form>
   )

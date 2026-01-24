@@ -50,9 +50,9 @@ export async function uploadTextContent(textContent: string) {
       text_content: textContent,
       status: 'pending',
     }
-    const { error } = await insertContent(supabase, contentData)
+    const { data: insertedContent, error } = await insertContent(supabase, contentData)
 
-    if (error) {
+    if (error || !insertedContent) {
       console.error('Error inserting text content:', error)
       return { success: false, error: 'Errore durante il salvataggio' }
     }
@@ -65,6 +65,7 @@ export async function uploadTextContent(textContent: string) {
         userEmail: profile.email,
         contentType: 'text',
         contentPreview: textContent,
+        contentId: insertedContent.id,
       })
     }
 
@@ -125,9 +126,9 @@ export async function saveImageContentRecord(mediaUrl: string) {
       status: 'pending',
     }
     console.log('[Image Upload] Inserting content record...')
-    const { error: insertError } = await insertContent(supabase, imageData)
+    const { data: insertedContent, error: insertError } = await insertContent(supabase, imageData)
 
-    if (insertError) {
+    if (insertError || !insertedContent) {
       console.error('[Image Upload] Database insert error:', insertError)
       return { success: false, error: 'Errore durante il salvataggio' }
     }
@@ -141,6 +142,7 @@ export async function saveImageContentRecord(mediaUrl: string) {
         userName: profile.full_name,
         userEmail: profile.email,
         contentType: 'image',
+        contentId: insertedContent.id,
       })
     }
     console.log('[Image Upload] Email notification completed')
@@ -250,9 +252,9 @@ export async function uploadImageContent(formData: FormData) {
       status: 'pending',
     }
     console.log('[Image Upload] Inserting content record...')
-    const { error: insertError } = await insertContent(supabase, imageData)
+    const { data: insertedContent, error: insertError } = await insertContent(supabase, imageData)
 
-    if (insertError) {
+    if (insertError || !insertedContent) {
       console.error('[Image Upload] Database insert error:', insertError)
       // Clean up uploaded file
       await supabase.storage.from('content-media').remove([fileName])
@@ -268,6 +270,7 @@ export async function uploadImageContent(formData: FormData) {
         userName: profile.full_name,
         userEmail: profile.email,
         contentType: 'image',
+        contentId: insertedContent.id,
       })
     }
     console.log('[Image Upload] Email notification completed')
@@ -331,9 +334,9 @@ export async function saveVideoContentRecord(mediaUrl: string) {
       status: 'pending',
     }
     console.log('[Video Upload] Inserting content record...')
-    const { error: insertError } = await insertContent(supabase, videoData)
+    const { data: insertedContent, error: insertError } = await insertContent(supabase, videoData)
 
-    if (insertError) {
+    if (insertError || !insertedContent) {
       console.error('[Video Upload] Database insert error:', insertError)
       return { success: false, error: 'Errore durante il salvataggio' }
     }
@@ -347,6 +350,7 @@ export async function saveVideoContentRecord(mediaUrl: string) {
         userName: profile.full_name,
         userEmail: profile.email,
         contentType: 'video',
+        contentId: insertedContent.id,
       })
     }
     console.log('[Video Upload] Email notification completed')
@@ -443,9 +447,9 @@ export async function uploadVideoContent(formData: FormData) {
       media_url: publicUrl,
       status: 'pending',
     }
-    const { error: insertError } = await insertContent(supabase, videoData)
+    const { data: insertedContent, error: insertError } = await insertContent(supabase, videoData)
 
-    if (insertError) {
+    if (insertError || !insertedContent) {
       console.error('Error inserting video content:', insertError)
       // Clean up uploaded file
       await supabase.storage.from('content-media').remove([fileName])
@@ -459,6 +463,7 @@ export async function uploadVideoContent(formData: FormData) {
         userName: profile.full_name,
         userEmail: profile.email,
         contentType: 'video',
+        contentId: insertedContent.id,
       })
     }
 

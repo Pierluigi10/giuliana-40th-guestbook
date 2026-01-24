@@ -1,4 +1,4 @@
-import type { TypedSupabaseClient, ContentInsert, ContentUpdate, ReactionInsert, ReactionRow, ProfileRow } from './types'
+import type { TypedSupabaseClient, ContentRow, ContentInsert, ContentUpdate, ReactionInsert, ReactionRow, ProfileRow } from './types'
 
 /**
  * Type-safe query helpers for content operations
@@ -10,7 +10,8 @@ import type { TypedSupabaseClient, ContentInsert, ContentUpdate, ReactionInsert,
 
 export async function insertContent(supabase: TypedSupabaseClient, data: ContentInsert) {
   // @ts-expect-error - Supabase generic inference limitation
-  return supabase.from('content').insert(data)
+  const result = supabase.from('content').insert(data).select().single()
+  return result as unknown as Promise<{ data: ContentRow | null; error: any }>
 }
 
 export async function updateContent(supabase: TypedSupabaseClient, contentId: string, data: ContentUpdate) {
