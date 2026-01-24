@@ -11,7 +11,10 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "setup:storage": "node -r dotenv/config -e \"require('dotenv').config({path:'.env.local'});require('child_process').execSync('npx tsx scripts/setup-storage-bucket.ts',{stdio:'inherit',env:process.env})\"",
+    "verify:storage": "node -r dotenv/config -e \"require('dotenv').config({path:'.env.local'});require('child_process').execSync('npx tsx scripts/verify-storage-policies.ts',{stdio:'inherit',env:process.env})\"",
+    "test:upload": "node -r dotenv/config -e \"require('dotenv').config({path:'.env.local'});require('child_process').execSync('npx tsx scripts/test-upload-permissions.ts',{stdio:'inherit',env:process.env})\""
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
