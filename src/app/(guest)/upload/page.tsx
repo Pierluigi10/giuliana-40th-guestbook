@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { UploadTabs } from '@/components/upload/UploadTabs'
 import { UploadErrorBoundary } from '@/components/errors/UploadErrorBoundary'
 import { Header } from '@/components/layout/Header'
@@ -47,6 +48,17 @@ export default async function UploadPage() {
           <p className="text-muted-foreground">
             Ciao {profile?.full_name}! Regala un ricordo indimenticabile per i 40 anni di Giuliana 🎂💝
           </p>
+        </div>
+
+        {/* Back to Gallery Link */}
+        <div className="mb-6 max-w-3xl mx-auto">
+          <Link
+            href="/gallery"
+            className="inline-flex items-center text-birthday-purple hover:text-birthday-purple/80 transition-colors"
+          >
+            <span className="mr-2">←</span>
+            <span>Torna alla galleria</span>
+          </Link>
         </div>
 
         <div className="max-w-3xl mx-auto">
