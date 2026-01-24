@@ -76,12 +76,6 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (path.startsWith('/vip')) {
-    if (profile?.role !== 'vip') {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-  }
-
   if (path.startsWith('/guest')) {
     // After migration 004, all guests are auto-approved via email confirmation
     // is_approved is always true for guests who have confirmed their email

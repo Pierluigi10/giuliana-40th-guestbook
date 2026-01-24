@@ -46,7 +46,7 @@ export async function addReaction(contentId: string, emoji: string): Promise<
       return { success: true, reaction: reactionWithProfile }
     }
 
-    revalidatePath('/vip/gallery')
+    revalidatePath('/gallery')
     return { success: true }
   } catch (error) {
     console.error('Add reaction error:', error)
@@ -76,7 +76,7 @@ export async function removeReaction(reactionId: string) {
       return { success: false, error: 'Errore durante la rimozione della reaction' }
     }
 
-    revalidatePath('/vip/gallery')
+    revalidatePath('/gallery')
     return { success: true }
   } catch (error) {
     console.error('Remove reaction error:', error)

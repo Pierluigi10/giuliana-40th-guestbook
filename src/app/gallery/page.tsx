@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { GalleryView } from '@/components/gallery/GalleryView'
 import { ContentErrorBoundary } from '@/components/errors/ContentErrorBoundary'
 import { Header } from '@/components/layout/Header'
@@ -8,13 +9,14 @@ import { StatsDashboard } from '@/components/vip/StatsDashboard'
 import { BirthdayCountdown } from '@/components/vip/BirthdayCountdown'
 import { FloatingParticles } from '@/components/ui/FloatingParticles'
 import { BirthdayDecorations } from '@/components/ui/BirthdayDecorations'
+import { GalleryTutorial } from '@/components/onboarding/GalleryTutorial'
 import { getVIPStats } from '@/lib/supabase/queries'
 
 export const metadata: Metadata = {
-  title: 'Galleria VIP',
+  title: 'Galleria',
   description: 'Visualizza tutti i messaggi, foto e video per il compleanno di Giuliana',
   openGraph: {
-    title: 'Galleria VIP - Guestbook Giuliana 40',
+    title: 'Galleria - Guestbook Giuliana 40',
     description: 'Tutti i messaggi e gli auguri per il compleanno di Giuliana',
     type: 'website',
   },
@@ -64,6 +66,22 @@ export default async function GalleryPage() {
           </p>
         </div>
 
+        {/* Guest CTA to Upload */}
+        {profile.role === 'guest' && (
+          <div className="mb-8 max-w-2xl mx-auto">
+            <Link href="/upload">
+              <div className="rounded-lg bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple p-6 text-center cursor-pointer hover:shadow-lg transition-shadow">
+                <h2 className="text-xl font-semibold text-white mb-2">
+                  Aggiungi il tuo messaggio
+                </h2>
+                <p className="text-white/90">
+                  Condividi un messaggio, foto o video per rendere questo compleanno ancora più speciale
+                </p>
+              </div>
+            </Link>
+          </div>
+        )}
+
         {/* Birthday Countdown */}
         <ContentErrorBoundary>
           <div className="mb-8">
@@ -86,6 +104,9 @@ export default async function GalleryPage() {
             userRole={profile.role}
           />
         </ContentErrorBoundary>
+
+        {/* Gallery Tutorial - only for guests */}
+        {profile.role === 'guest' && <GalleryTutorial userId={user.id} />}
       </div>
     </div>
   )
