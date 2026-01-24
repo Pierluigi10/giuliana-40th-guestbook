@@ -27,10 +27,20 @@ export async function sendContentNotification({
   contentPreview,
   contentId,
 }: ContentNotificationParams) {
+  // Debug logging at the start
+  console.log('[EMAIL DEBUG] sendContentNotification called:', {
+    userName,
+    contentType,
+    contentId,
+    resendConfigured: !!resend,
+    apiKeyPresent: !!RESEND_API_KEY,
+    adminEmail: ADMIN_EMAIL,
+  })
+
   try {
     // Skip email sending if Resend is not configured
     if (!resend || !RESEND_API_KEY) {
-      console.warn('Email notification skipped: RESEND_API_KEY not configured')
+      console.warn('[EMAIL DEBUG] Email notification skipped: RESEND_API_KEY not configured')
       return { success: false, error: 'RESEND_API_KEY not configured' }
     }
 
@@ -42,7 +52,9 @@ export async function sendContentNotification({
     const approvalToken = generateApprovalToken(contentId)
     const approvalUrl = `${APP_URL}/api/admin/approve-email?token=${approvalToken}`
 
-    const data = await resend.emails.send({
+    console.log('[EMAIL DEBUG] Attempting to send email to:', ADMIN_EMAIL)
+
+    const response = await resend.emails.send({
       from: 'Guestbook Giuliana <onboarding@resend.dev>', // Default sender, update with custom domain
       to: [ADMIN_EMAIL],
       subject: `${typeEmoji} Nuovo ${typeLabel} da approvare - ${userName}`,
@@ -82,10 +94,22 @@ export async function sendContentNotification({
       `,
     })
 
-    console.log('Email notification sent successfully:', data)
-    return { success: true, data }
+    if (response.error) {
+      throw new Error(`Email API error: ${response.error.message}`)
+    }
+
+    console.log('[EMAIL DEBUG] Email notification sent successfully:', {
+      emailId: response.data?.id,
+      to: ADMIN_EMAIL,
+      userName,
+      contentId,
+    })
+    return { success: true, data: response.data }
   } catch (error) {
-    console.error('Failed to send email notification:', error)
+    console.error('[EMAIL DEBUG] Failed to send email notification:', error)
+    if (error instanceof Error) {
+      console.error('[EMAIL DEBUG] Error stack trace:', error.stack)
+    }
     // Don't throw error - upload must complete even if email fails
     const errorMessage = error instanceof Error ? error.message : 'Unknown email error'
     return { success: false, error: errorMessage }
@@ -109,17 +133,29 @@ export async function sendApprovalNotification({
   contentType,
   contentPreview,
 }: ApprovalNotificationParams) {
+  // Debug logging at the start
+  console.log('[EMAIL DEBUG] sendApprovalNotification called:', {
+    userName,
+    userEmail,
+    contentType,
+    resendConfigured: !!resend,
+    apiKeyPresent: !!RESEND_API_KEY,
+    adminEmail: ADMIN_EMAIL,
+  })
+
   try {
     // Skip email sending if Resend is not configured
     if (!resend || !RESEND_API_KEY) {
-      console.warn('Approval email notification skipped: RESEND_API_KEY not configured')
+      console.warn('[EMAIL DEBUG] Approval email notification skipped: RESEND_API_KEY not configured')
       return { success: false, error: 'RESEND_API_KEY not configured' }
     }
 
     const typeLabel = contentType === 'text' ? 'messaggio' : contentType === 'image' ? 'foto' : 'video'
     const typeEmoji = contentType === 'text' ? '💬' : contentType === 'image' ? '📷' : '🎥'
 
-    const data = await resend.emails.send({
+    console.log('[EMAIL DEBUG] Attempting to send approval email to:', userEmail)
+
+    const response = await resend.emails.send({
       from: 'Guestbook Giuliana <onboarding@resend.dev>', // Default sender, update with custom domain
       to: [userEmail],
       subject: `🎉 Il tuo ${typeLabel} per Giuliana è stato approvato!`,
@@ -155,10 +191,22 @@ export async function sendApprovalNotification({
       `,
     })
 
-    console.log('Approval email notification sent successfully:', data)
-    return { success: true, data }
+    if (response.error) {
+      throw new Error(`Email API error: ${response.error.message}`)
+    }
+
+    console.log('[EMAIL DEBUG] Approval email notification sent successfully:', {
+      emailId: response.data?.id,
+      to: userEmail,
+      userName,
+      contentType,
+    })
+    return { success: true, data: response.data }
   } catch (error) {
-    console.error('Failed to send approval email notification:', error)
+    console.error('[EMAIL DEBUG] Failed to send approval email notification:', error)
+    if (error instanceof Error) {
+      console.error('[EMAIL DEBUG] Error stack trace:', error.stack)
+    }
     // Don't throw error - approval must complete even if email fails
     const errorMessage = error instanceof Error ? error.message : 'Unknown email error'
     return { success: false, error: errorMessage }
