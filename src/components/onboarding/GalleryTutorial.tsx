@@ -59,6 +59,16 @@ export function GalleryTutorial({ userId }: GalleryTutorialProps) {
 
   const checkIfShouldShowTutorial = async () => {
     try {
+      // Check if tutorial should be forced (from registration flow)
+      const forceTutorial = sessionStorage.getItem('show_gallery_tutorial')
+      if (forceTutorial === 'true') {
+        // Clear the flag so it only shows once
+        sessionStorage.removeItem('show_gallery_tutorial')
+        setShouldShow(true)
+        setIsLoading(false)
+        return
+      }
+
       // Check localStorage first (fast)
       const tutorialCompleted = localStorage.getItem(`${STORAGE_KEY}_${userId}`)
       if (tutorialCompleted === 'true') {

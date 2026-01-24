@@ -10,6 +10,10 @@ import type { ContentRow, ReactionRow, ProfileRow } from '@/lib/supabase/types'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { useConfetti } from '@/components/ui/confetti-notification'
+import Image from 'next/image'
+import Masonry from 'react-masonry-css'
+import Lightbox from 'yet-another-react-lightbox'
+import 'yet-another-react-lightbox/styles.css'
 
 // Helper component to auto-hide notifications
 function NotificationAutoHide({ message, onHide, delay }: { message: string; onHide: () => void; delay: number }) {
@@ -370,26 +374,35 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6"
             >
-              {filteredContent.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="break-inside-avoid"
-                >
-                  <ContentCard
-                    content={item}
-                    userId={userId}
-                    userRole={userRole}
-                    onOpenLightbox={() => setLightboxContent(item)}
-                    onDelete={handleContentDeleted}
-                    animationDelay={index * 0.05}
-                  />
-                </motion.div>
-              ))}
+              <Masonry
+                breakpointCols={{
+                  default: 3,
+                  1024: 2,
+                  640: 1
+                }}
+                className="flex -ml-8 w-auto"
+                columnClassName="pl-8 bg-clip-padding"
+              >
+                {filteredContent.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    className="mb-8"
+                  >
+                    <ContentCard
+                      content={item}
+                      userId={userId}
+                      userRole={userRole}
+                      onOpenLightbox={() => setLightboxContent(item)}
+                      onDelete={handleContentDeleted}
+                      animationDelay={index * 0.05}
+                    />
+                  </motion.div>
+                ))}
+              </Masonry>
             </motion.div>
           </AnimatePresence>
 
@@ -415,175 +428,58 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
         </>
       )}
 
-      {/* Lightbox */}
-      <AnimatePresence>
-        {lightboxContent && (lightboxContent.type === 'image' || lightboxContent.type === 'video') && (
-          <Lightbox
-            key={lightboxContent.id}
-            content={lightboxContent}
-            onClose={() => setLightboxContent(null)}
-            onNavigate={(direction: 'next' | 'prev') => {
-              const mediaContent = filteredContent.filter(item => item.type === 'image' || item.type === 'video')
-              const currentMediaIndex = mediaContent.findIndex(item => item.id === lightboxContent.id)
+      {/* Lightbox - solo per immagini */}
+      {lightboxContent && lightboxContent.type === 'image' && (
+        <Lightbox
+          open={true}
+          close={() => setLightboxContent(null)}
+          slides={
+            filteredContent
+              .filter(item => item.type === 'image')
+              .map(item => ({
+                src: item.media_url || '',
+              }))
+          }
+          index={
+            filteredContent
+              .filter(item => item.type === 'image')
+              .findIndex(item => item.id === lightboxContent.id)
+          }
+        />
+      )}
 
-              if (direction === 'next') {
-                const nextIndex = (currentMediaIndex + 1) % mediaContent.length
-                setLightboxContent(mediaContent[nextIndex])
-              } else {
-                const prevIndex = currentMediaIndex === 0 ? mediaContent.length - 1 : currentMediaIndex - 1
-                setLightboxContent(mediaContent[prevIndex])
-              }
-            }}
-          />
+      {/* Modal per video */}
+      <AnimatePresence>
+        {lightboxContent && lightboxContent.type === 'video' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+            onClick={() => setLightboxContent(null)}
+          >
+            <button
+              onClick={() => setLightboxContent(null)}
+              className="absolute top-4 right-4 text-white bg-black/70 rounded-full p-3 hover:bg-black/80 transition-colors"
+              aria-label="Chiudi"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <video
+              src={lightboxContent.media_url || ''}
+              controls
+              autoPlay
+              playsInline
+              className="max-w-full max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Il tuo browser non supporta la riproduzione video.
+            </video>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
-  )
-}
-
-interface LightboxProps {
-  content: Content
-  onClose: () => void
-  onNavigate: (direction: 'next' | 'prev') => void
-}
-
-function Lightbox({ content, onClose, onNavigate }: LightboxProps) {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose()
-      } else if (e.key === 'ArrowLeft') {
-        onNavigate('prev')
-      } else if (e.key === 'ArrowRight') {
-        onNavigate('next')
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    // Prevent body scroll when lightbox is open
-    document.body.style.overflow = 'hidden'
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = 'unset'
-    }
-  }, [onClose, onNavigate])
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <motion.button
-        onClick={onClose}
-        whileHover={{ scale: 1.1, rotate: 90 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute top-2 right-2 md:top-4 md:right-4 text-white bg-black/70 rounded-full p-3 md:p-3 hover:bg-black/80 active:bg-black/90 transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label="Chiudi"
-      >
-        <svg
-          className="w-6 h-6 md:w-6 md:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </motion.button>
-
-      {/* Previous button */}
-      <motion.button
-        onClick={(e) => {
-          e.stopPropagation()
-          onNavigate('prev')
-        }}
-        whileHover={{ scale: 1.1, x: -5 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-white bg-black/70 rounded-full p-3 md:p-3 hover:bg-black/80 active:bg-black/90 transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label="Precedente"
-      >
-        <svg
-          className="w-6 h-6 md:w-6 md:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </motion.button>
-
-      {/* Next button */}
-      <motion.button
-        onClick={(e) => {
-          e.stopPropagation()
-          onNavigate('next')
-        }}
-        whileHover={{ scale: 1.1, x: 5 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-white bg-black/70 rounded-full p-3 md:p-3 hover:bg-black/80 active:bg-black/90 transition-colors z-10 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label="Successivo"
-      >
-        <svg
-          className="w-6 h-6 md:w-6 md:h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-      </motion.button>
-
-      <motion.div 
-        onClick={(e) => e.stopPropagation()} 
-        className="max-w-7xl max-h-[95vh] md:max-h-[90vh] w-full px-2 md:px-4"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {content.type === 'image' && content.media_url && (
-          <motion.img
-            src={content.media_url}
-            alt="Full size"
-            className="w-full h-auto max-h-[95vh] md:max-h-[90vh] object-contain"
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          />
-        )}
-
-        {content.type === 'video' && content.media_url && (
-          <motion.video
-            src={content.media_url}
-            controls
-            autoPlay
-            playsInline
-            className="w-full h-auto max-h-[95vh] md:max-h-[90vh] object-contain"
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            Il tuo browser non supporta la riproduzione video.
-          </motion.video>
-        )}
-      </motion.div>
-    </motion.div>
   )
 }

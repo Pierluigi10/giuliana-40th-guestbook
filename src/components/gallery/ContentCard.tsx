@@ -14,6 +14,10 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
+import { analyzeNetworkError } from '@/lib/network-errors'
+import { UserAvatar } from '@/components/ui/UserAvatar'
+import { formatRelativeDate } from '@/lib/date-utils'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 // Emoji to text mapping for screen readers
 function emojiToText(emoji: string): string {
@@ -59,6 +63,11 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showFullText, setShowFullText] = useState(false)
+
+  // Determina se il testo è troppo lungo (più di 150 caratteri o 4 righe circa)
+  const isLongText = content.text_content && content.text_content.length > 150
+  const previewText = isLongText ? content.text_content!.slice(0, 150) + '...' : content.text_content
 
   // Keyboard navigation: ESC key closes emoji picker
   useEffect(() => {
@@ -86,32 +95,46 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
   const handleReactionClick = async (emoji: string) => {
     const userReaction = reactions.find(r => r.emoji === emoji && r.user_id === userId)
 
-    if (userReaction) {
-      // Remove reaction
-      const result = await removeReaction(userReaction.id)
-      if (result.success) {
-        setReactions(prev => prev.filter(r => r.id !== userReaction.id))
+    try {
+      if (userReaction) {
+        // Remove reaction
+        const result = await removeReaction(userReaction.id)
+        if (result.success) {
+          setReactions(prev => prev.filter(r => r.id !== userReaction.id))
+        } else {
+          const errorInfo = analyzeNetworkError('error' in result ? result.error : 'Errore sconosciuto')
+          toast.error('Errore rimozione reaction', {
+            description: errorInfo.userMessage
+          })
+        }
       } else {
-        toast.error('Errore durante la rimozione della reaction')
+        // Add reaction with celebration!
+        const result = await addReaction(content.id, emoji)
+        if (result.success && result.reaction) {
+          setReactions(prev => [...prev, result.reaction!])
+
+          // Small confetti burst for reaction
+          const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
+          confetti({
+            particleCount: 20,
+            spread: 30,
+            origin: { x: 0.5, y: 0.5 },
+            colors,
+            startVelocity: 20,
+          })
+        } else {
+          const errorInfo = analyzeNetworkError('error' in result ? result.error : 'Errore sconosciuto')
+          toast.error('Errore aggiunta reaction', {
+            description: errorInfo.userMessage
+          })
+        }
       }
-    } else {
-      // Add reaction with celebration!
-      const result = await addReaction(content.id, emoji)
-      if (result.success && result.reaction) {
-        setReactions(prev => [...prev, result.reaction!])
-        
-        // Small confetti burst for reaction
-        const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
-        confetti({
-          particleCount: 20,
-          spread: 30,
-          origin: { x: 0.5, y: 0.5 },
-          colors,
-          startVelocity: 20,
-        })
-      } else {
-        toast.error('Errore durante l\'aggiunta della reaction')
-      }
+    } catch (error) {
+      console.error('[ContentCard] Reaction error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Errore nella reaction', {
+        description: errorInfo.userMessage
+      })
     }
   }
 
@@ -123,10 +146,17 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         toast.success('Contenuto eliminato')
         onDelete?.(content.id)
       } else {
-        toast.error(result.error || 'Errore durante l\'eliminazione')
+        const errorInfo = analyzeNetworkError(result.error)
+        toast.error('Errore eliminazione', {
+          description: errorInfo.userMessage
+        })
       }
     } catch (error) {
-      toast.error('Errore durante l\'eliminazione')
+      console.error('[ContentCard] Delete error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Errore eliminazione', {
+        description: errorInfo.userMessage
+      })
     } finally {
       setIsDeleting(false)
       setShowDeleteConfirm(false)
@@ -135,53 +165,60 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
   const canDelete = userRole === 'admin' || content.user_id === userId
 
-  const gradients = [
-    'from-birthday-rose-gold/30 to-birthday-blush/20',
-    'from-birthday-blush/20 to-birthday-purple/20',
-    'from-birthday-purple/20 to-birthday-gold/20',
-    'from-birthday-mauve/20 to-birthday-rose-gold/20',
+  // Colori pastello soft per gli sfondi
+  const backgroundColors = [
+    'bg-pink-50',
+    'bg-purple-50',
+    'bg-rose-50',
+    'bg-indigo-50',
+    'bg-fuchsia-50',
   ]
 
-  const gradient = gradients[content.id.charCodeAt(0) % gradients.length]
+  const bgColor = backgroundColors[content.id.charCodeAt(0) % backgroundColors.length]
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ 
-        duration: 0.5, 
-        delay: animationDelay, 
-        ease: [0.16, 1, 0.3, 1] // Custom easing for smooth animation
+      transition={{
+        duration: 0.5,
+        delay: animationDelay,
+        ease: [0.16, 1, 0.3, 1]
       }}
-      whileHover={{ 
-        scale: 1.03,
+      whileHover={{
+        scale: 1.02,
         y: -4,
         transition: { duration: 0.2 }
       }}
-      className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg overflow-hidden transition-all transform border border-white/20"
+      className="bg-white rounded-2xl shadow-sm hover:shadow-md overflow-hidden transition-all transform border border-gray-100"
     >
-      {/* Content - Prominente, stile Instagram */}
+      {/* Content - Prominente, stile Pinterest */}
       <div className="relative">
         {content.type === 'text' && (
-          <div className={`bg-gradient-to-br ${gradient} p-4 md:p-8 min-h-[250px] md:min-h-[300px] flex items-center justify-center`}>
+          <div className={`${bgColor} p-6 md:p-8`}>
             <p
-              className="text-base md:text-lg lg:text-xl whitespace-pre-wrap leading-relaxed text-center px-2 font-medium"
-              style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.08)' }} // Subtle shadow for WCAG contrast on gradients
+              className="text-gray-800 text-base md:text-lg leading-relaxed italic whitespace-pre-wrap"
             >
-              {DOMPurify.sanitize(content.text_content || '', {
+              "{DOMPurify.sanitize(previewText || '', {
                 ALLOWED_TAGS: [],
                 ALLOWED_ATTR: []
-              })}
+              })}"
             </p>
+            {isLongText && (
+              <button
+                onClick={() => setShowFullText(true)}
+                className="mt-4 text-sm text-birthday-purple hover:text-birthday-pink font-semibold transition-colors"
+              >
+                Leggi tutto →
+              </button>
+            )}
           </div>
         )}
 
         {content.type === 'image' && content.media_url && (
           <motion.div
-            className="relative overflow-hidden cursor-pointer group bg-black min-h-[300px] flex items-center justify-center"
+            className="relative overflow-hidden cursor-pointer group bg-black"
             onClick={onOpenLightbox}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
           >
             <Image
               src={content.media_url}
@@ -189,15 +226,15 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
               width={800}
               height={600}
               loading="lazy"
-              className="w-full h-[250px] md:h-[300px] object-cover transition-transform duration-300 group-hover:brightness-110"
+              className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            <motion.div 
-              className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center"
+            <motion.div
+              className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center"
               initial={{ opacity: 0 }}
               whileHover={{ opacity: 1 }}
               transition={{ duration: 0.2 }}
             >
-              <motion.span 
+              <motion.span
                 className="text-white text-sm bg-black/70 px-4 py-2 rounded-full backdrop-blur-sm"
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileHover={{ opacity: 1, scale: 1 }}
@@ -211,22 +248,20 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
         {content.type === 'video' && content.media_url && (
           <motion.div
-            className="relative overflow-hidden cursor-pointer bg-black min-h-[300px] flex items-center justify-center"
+            className="relative overflow-hidden cursor-pointer bg-black"
             onClick={onOpenLightbox}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
           >
             <video
               src={content.media_url}
-              className="w-full h-[250px] md:h-[300px] object-cover transition-transform duration-300"
+              className="w-full h-48 object-cover"
               preload="metadata"
             />
-            <motion.div 
+            <motion.div
               className="absolute inset-0 flex items-center justify-center bg-black/30"
               whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
               transition={{ duration: 0.2 }}
             >
-              <motion.div 
+              <motion.div
                 className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
                 whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 1)' }}
                 transition={{ duration: 0.2 }}
@@ -284,26 +319,24 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         )}
       </div>
 
-      {/* Author info + Reactions - Compatto, stile Instagram */}
-      <div className="px-3 py-2">
-        <div className="flex items-center gap-2 justify-between">
+      {/* Author info + Reactions - Stile Pinterest clean */}
+      <div className="p-4">
+        <div className="flex items-center gap-3 justify-between mb-3">
           {/* Author info - Left */}
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-r from-birthday-pink to-birthday-purple flex items-center justify-center text-xs flex-shrink-0">
-              {content.type === 'text' ? '💬' : content.type === 'image' ? '📸' : '🎥'}
-            </div>
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <UserAvatar
+              name={content.profiles?.full_name || 'Anonimo'}
+              size="sm"
+            />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold truncate">
+              <p className="text-sm font-semibold text-gray-900 truncate">
                 {DOMPurify.sanitize(content.profiles?.full_name || 'Anonimo', {
                   ALLOWED_TAGS: [],
                   ALLOWED_ATTR: []
                 })}
               </p>
-              <p className="text-[10px] text-muted-foreground">
-                {content.approved_at && new Date(content.approved_at).toLocaleDateString('it-IT', {
-                  day: 'numeric',
-                  month: 'long',
-                })}
+              <p className="text-xs text-gray-400 uppercase tracking-widest">
+                {content.approved_at && formatRelativeDate(content.approved_at)}
               </p>
             </div>
           </div>
@@ -416,6 +449,39 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
           </div>
         </div>
       </div>
+
+      {/* Full Text Modal */}
+      <Dialog open={showFullText} onOpenChange={setShowFullText}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <UserAvatar
+                name={content.profiles?.full_name || 'Anonimo'}
+                size="md"
+              />
+              <div>
+                <p className="text-lg font-semibold">
+                  {DOMPurify.sanitize(content.profiles?.full_name || 'Anonimo', {
+                    ALLOWED_TAGS: [],
+                    ALLOWED_ATTR: []
+                  })}
+                </p>
+                <p className="text-sm text-gray-500 font-normal">
+                  {content.approved_at && formatRelativeDate(content.approved_at)}
+                </p>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <p className="text-gray-800 text-lg leading-relaxed italic whitespace-pre-wrap">
+              "{DOMPurify.sanitize(content.text_content || '', {
+                ALLOWED_TAGS: [],
+                ALLOWED_ATTR: []
+              })}"
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import confetti from 'canvas-confetti'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Heart } from 'lucide-react'
 import { BirthdayDecorations } from '@/components/ui/BirthdayDecorations'
 
 export function HeroSection() {
@@ -163,15 +163,22 @@ export function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.8 }}
         >
-          <Button
-            asChild
-            size="lg"
-            className="w-full sm:w-auto min-w-[200px] min-h-[44px] bg-gradient-to-r from-birthday-pink to-birthday-purple hover:from-birthday-pink/90 hover:to-birthday-purple/90 active:from-birthday-pink/80 active:to-birthday-purple/80 text-white font-semibold text-base md:text-lg h-12 touch-manipulation"
+          <Link
+            href="/login"
+            aria-label="Accedi al guestbook"
+            className="group relative inline-flex items-center justify-center w-full sm:w-auto min-w-[200px] min-h-[44px] px-8 py-4 font-bold text-white transition-all duration-200 bg-birthday-pink rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-birthday-pink hover:bg-birthday-pink/90 touch-manipulation"
           >
-            <Link href="/login" aria-label="Accedi al guestbook">
-              ✨ Inizia la Magia
-            </Link>
-          </Button>
+            <span className="absolute inset-0 w-full h-full mt-1 ml-1 transition-all duration-300 ease-in-out bg-birthday-purple rounded-xl group-hover:mt-0 group-hover:ml-0 -z-10"></span>
+            <span className="absolute inset-0 w-full h-full bg-white rounded-xl -z-20"></span>
+
+            <Heart
+              className="w-5 h-5 mr-3 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12"
+              fill="currentColor"
+            />
+
+            Regala un ricordo
+          </Link>
+
           <Button
             asChild
             size="lg"
