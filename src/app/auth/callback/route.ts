@@ -73,14 +73,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Determine redirect path based on role
-    let redirectPath = next || '/upload' // Default for guest
+    let redirectPath = next || '/gallery' // Default for guest
 
     if (profile?.role === 'admin') {
       redirectPath = next || '/approve-content'
     } else if (profile?.role === 'vip') {
       redirectPath = next || '/gallery'
     } else if (profile?.role === 'guest') {
-      redirectPath = next || '/upload'
+      redirectPath = next || '/gallery'
     }
 
     // Log success (useful for debugging)

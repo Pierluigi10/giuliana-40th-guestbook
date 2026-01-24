@@ -85,15 +85,13 @@ export function LoginForm() {
         } else if (profile.role === 'vip') {
           router.push(redirect || '/gallery')
         } else if (profile.role === 'guest') {
-          router.push(redirect || '/upload')
+          router.push(redirect || '/gallery')
         }
         router.refresh()
       }
     } catch (err) {
       setError('Si è verificato un errore durante l\'accesso')
       console.error(err)
-    } finally {
-      setLoading(false)
     }
   }
 
