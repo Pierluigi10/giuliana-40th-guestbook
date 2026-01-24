@@ -10,6 +10,7 @@ import { checkUploadRateLimit } from '@/lib/utils'
 import { isMobileDevice, isCameraAvailable } from '@/lib/mobile-utils'
 import { Camera, Video } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { analyzeNetworkError, uploadWithRetry } from '@/lib/network-errors'
 
 interface VideoUploadProps {
   userId: string
@@ -156,38 +157,29 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       console.log('[Video Upload] Starting direct upload to Supabase Storage...')
 
       // Upload file directly to Supabase Storage with retry logic
-      let uploadError: any
-      let uploadAttempts = 0
-      const maxRetries = 2
-
-      while (uploadAttempts <= maxRetries) {
-        const { error } = await supabase.storage
+      const uploadResult = await uploadWithRetry(
+        () => supabase.storage
           .from('content-media')
           .upload(fileName, file, {
             contentType: file.type,
             upsert: false,
-          })
-
-        uploadError = error
-
-        if (!uploadError) {
-          break // Upload successful
+          }),
+        {
+          maxRetries: 2,
+          onRetry: (attempt, error) => {
+            console.log(`[Video Upload] Retry attempt ${attempt}/3...`)
+            toast.info('Riprovo il caricamento... 🔄', {
+              description: `Tentativo ${attempt} di 3`
+            })
+          }
         }
+      )
 
-        uploadAttempts++
-        if (uploadAttempts <= maxRetries) {
-          console.log(`[Video Upload] Retry attempt ${uploadAttempts}/${maxRetries}...`)
-          toast.info('Riprovo il caricamento... 🔄', {
-            description: `Tentativo ${uploadAttempts} di ${maxRetries + 1}`
-          })
-          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1s before retry
-        }
-      }
-
-      if (uploadError) {
-        console.error('[Video Upload] Storage upload error:', uploadError)
+      if (uploadResult.error) {
+        console.error('[Video Upload] Storage upload error:', uploadResult.error)
+        const errorInfo = analyzeNetworkError(uploadResult.error)
         toast.error('Errore durante il caricamento del file 📤', {
-          description: uploadError.message || 'Riprova tra un momento!'
+          description: errorInfo.userMessage
         })
         setProgress(0)
         setLoading(false)
@@ -206,7 +198,22 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       setProgress(80)
 
       // Save content record to database via server action
-      const result = await saveVideoContentRecord(publicUrl)
+      let result
+      try {
+        result = await saveVideoContentRecord(publicUrl)
+      } catch (error) {
+        console.error('[Video Upload] Server action error:', error)
+        const errorInfo = analyzeNetworkError(error)
+        toast.error('Errore durante il salvataggio 💾', {
+          description: errorInfo.userMessage
+        })
+        // Clean up uploaded file
+        await supabase.storage.from('content-media').remove([fileName])
+        setProgress(0)
+        setLoading(false)
+        return
+      }
+
       setProgress(95)
 
       if (result.success) {
@@ -250,10 +257,11 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         }
       }
 
-      toast.error('Si è verificato un errore', {
-        description: 'Non ti preoccupare, riprova tra un attimo! Il tuo video è importante per Giuliana 🎬💝'
+      console.error('[Video Upload] Unexpected error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Si è verificato un errore 😔', {
+        description: errorInfo.userMessage
       })
-      console.error(error)
       setProgress(0)
     } finally {
       setLoading(false)

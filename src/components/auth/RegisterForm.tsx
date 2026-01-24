@@ -24,6 +24,14 @@ export function RegisterForm() {
     fullName: ''
   })
 
+  // Track which fields have been touched (blur event)
+  const [touchedFields, setTouchedFields] = useState({
+    email: false,
+    password: false,
+    confirmPassword: false,
+    fullName: false
+  })
+
   // Email validation
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -33,7 +41,20 @@ export function RegisterForm() {
   // Validate email on change
   const handleEmailChange = (value: string) => {
     setEmail(value)
-    if (value && !isValidEmail(value)) {
+    // Only show error if field has been touched
+    if (touchedFields.email) {
+      if (value && !isValidEmail(value)) {
+        setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
+      } else {
+        setFieldErrors(prev => ({ ...prev, email: '' }))
+      }
+    }
+  }
+
+  // Validate email on blur
+  const handleEmailBlur = () => {
+    setTouchedFields(prev => ({ ...prev, email: true }))
+    if (email && !isValidEmail(email)) {
       setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
     } else {
       setFieldErrors(prev => ({ ...prev, email: '' }))
@@ -43,23 +64,51 @@ export function RegisterForm() {
   // Validate password on change
   const handlePasswordChange = (value: string) => {
     setPassword(value)
-    if (value && value.length < 6) {
+    // Only show error if field has been touched
+    if (touchedFields.password) {
+      if (value && value.length < 6) {
+        setFieldErrors(prev => ({ ...prev, password: 'Minimo 6 caratteri' }))
+      } else {
+        setFieldErrors(prev => ({ ...prev, password: '' }))
+      }
+    }
+    // Also check confirm password match if it exists and has been touched
+    if (touchedFields.confirmPassword && confirmPassword) {
+      if (value !== confirmPassword) {
+        setFieldErrors(prev => ({ ...prev, confirmPassword: 'Le password non coincidono' }))
+      } else {
+        setFieldErrors(prev => ({ ...prev, confirmPassword: '' }))
+      }
+    }
+  }
+
+  // Validate password on blur
+  const handlePasswordBlur = () => {
+    setTouchedFields(prev => ({ ...prev, password: true }))
+    if (password && password.length < 6) {
       setFieldErrors(prev => ({ ...prev, password: 'Minimo 6 caratteri' }))
     } else {
       setFieldErrors(prev => ({ ...prev, password: '' }))
-    }
-    // Also check confirm password match if it exists
-    if (confirmPassword && value !== confirmPassword) {
-      setFieldErrors(prev => ({ ...prev, confirmPassword: 'Le password non coincidono' }))
-    } else if (confirmPassword) {
-      setFieldErrors(prev => ({ ...prev, confirmPassword: '' }))
     }
   }
 
   // Validate confirm password on change
   const handleConfirmPasswordChange = (value: string) => {
     setConfirmPassword(value)
-    if (value && value !== password) {
+    // Only show error if field has been touched
+    if (touchedFields.confirmPassword) {
+      if (value && value !== password) {
+        setFieldErrors(prev => ({ ...prev, confirmPassword: 'Le password non coincidono' }))
+      } else {
+        setFieldErrors(prev => ({ ...prev, confirmPassword: '' }))
+      }
+    }
+  }
+
+  // Validate confirm password on blur
+  const handleConfirmPasswordBlur = () => {
+    setTouchedFields(prev => ({ ...prev, confirmPassword: true }))
+    if (confirmPassword && confirmPassword !== password) {
       setFieldErrors(prev => ({ ...prev, confirmPassword: 'Le password non coincidono' }))
     } else {
       setFieldErrors(prev => ({ ...prev, confirmPassword: '' }))
@@ -69,7 +118,20 @@ export function RegisterForm() {
   // Validate full name on change
   const handleFullNameChange = (value: string) => {
     setFullName(value)
-    if (value && value.trim().length < 2) {
+    // Only show error if field has been touched
+    if (touchedFields.fullName) {
+      if (value && value.trim().length < 2) {
+        setFieldErrors(prev => ({ ...prev, fullName: 'Inserisci nome e cognome' }))
+      } else {
+        setFieldErrors(prev => ({ ...prev, fullName: '' }))
+      }
+    }
+  }
+
+  // Validate full name on blur
+  const handleFullNameBlur = () => {
+    setTouchedFields(prev => ({ ...prev, fullName: true }))
+    if (fullName && fullName.trim().length < 2) {
       setFieldErrors(prev => ({ ...prev, fullName: 'Inserisci nome e cognome' }))
     } else {
       setFieldErrors(prev => ({ ...prev, fullName: '' }))
@@ -137,8 +199,11 @@ export function RegisterForm() {
         return
       }
 
-      // Redirect to upload page with onboarding tour
-      router.push('/upload')
+      // Set flag to show tutorial on first gallery visit
+      sessionStorage.setItem('show_gallery_tutorial', 'true')
+
+      // Redirect to gallery after successful registration and auto-login
+      router.push('/gallery')
       router.refresh()
     } catch (err) {
       setError('Si è verificato un errore durante la registrazione')
@@ -165,6 +230,7 @@ export function RegisterForm() {
           type="text"
           value={fullName}
           onChange={(e) => handleFullNameChange(e.target.value)}
+          onBlur={handleFullNameBlur}
           required
           className={`w-full min-h-[44px] rounded-md border ${fieldErrors.fullName ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
           placeholder="Mario Rossi"
@@ -183,6 +249,7 @@ export function RegisterForm() {
           type="email"
           value={email}
           onChange={(e) => handleEmailChange(e.target.value)}
+          onBlur={handleEmailBlur}
           required
           className={`w-full min-h-[44px] rounded-md border ${fieldErrors.email ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
           placeholder="mario@example.com"
@@ -202,6 +269,7 @@ export function RegisterForm() {
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => handlePasswordChange(e.target.value)}
+            onBlur={handlePasswordBlur}
             required
             minLength={6}
             className={`w-full min-h-[44px] rounded-md border ${fieldErrors.password ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 pr-10 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
@@ -232,6 +300,7 @@ export function RegisterForm() {
             type={showConfirmPassword ? 'text' : 'password'}
             value={confirmPassword}
             onChange={(e) => handleConfirmPasswordChange(e.target.value)}
+            onBlur={handleConfirmPasswordBlur}
             required
             minLength={6}
             className={`w-full min-h-[44px] rounded-md border ${fieldErrors.confirmPassword ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 pr-10 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}

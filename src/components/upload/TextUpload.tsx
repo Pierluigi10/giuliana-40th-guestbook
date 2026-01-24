@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti'
 import { uploadTextContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import { checkUploadRateLimit } from '@/lib/utils'
+import { analyzeNetworkError } from '@/lib/network-errors'
 
 interface TextUploadProps {
   userId: string
@@ -66,10 +67,10 @@ export function TextUpload({ userId }: TextUploadProps) {
 
       if (result.success) {
         const count = result.contentCount || 0
-        const countMessage = count === 1 
-          ? 'Questo è il tuo primo messaggio! 🎊' 
+        const countMessage = count === 1
+          ? 'Questo è il tuo primo messaggio! 🎊'
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
-        
+
         // Celebration confetti!
         const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
         confetti({
@@ -78,7 +79,7 @@ export function TextUpload({ userId }: TextUploadProps) {
           origin: { x: 0.5, y: 0.5 },
           colors,
         })
-        
+
         toast.success('🎉 Messaggio inviato con successo!', {
           description: `In attesa di approvazione dall'admin. Giuliana lo vedrà presto! ${countMessage}`,
           duration: 6000
@@ -90,10 +91,11 @@ export function TextUpload({ userId }: TextUploadProps) {
         })
       }
     } catch (error) {
-      toast.error('Si è verificato un errore', {
-        description: 'Non ti preoccupare, riprova tra un attimo! Il tuo messaggio è importante per Giuliana 💝'
+      console.error('[Text Upload] Unexpected error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Si è verificato un errore 😔', {
+        description: errorInfo.userMessage
       })
-      console.error(error)
     } finally {
       setLoading(false)
     }

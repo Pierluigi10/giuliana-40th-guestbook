@@ -22,6 +22,12 @@ export function LoginForm() {
     password: ''
   })
 
+  // Track which fields have been touched (blur event)
+  const [touchedFields, setTouchedFields] = useState({
+    email: false,
+    password: false
+  })
+
   // Email validation
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -31,7 +37,20 @@ export function LoginForm() {
   // Validate email on change
   const handleEmailChange = (value: string) => {
     setEmail(value)
-    if (value && !isValidEmail(value)) {
+    // Only show error if field has been touched
+    if (touchedFields.email) {
+      if (value && !isValidEmail(value)) {
+        setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
+      } else {
+        setFieldErrors(prev => ({ ...prev, email: '' }))
+      }
+    }
+  }
+
+  // Validate email on blur
+  const handleEmailBlur = () => {
+    setTouchedFields(prev => ({ ...prev, email: true }))
+    if (email && !isValidEmail(email)) {
       setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
     } else {
       setFieldErrors(prev => ({ ...prev, email: '' }))
@@ -112,6 +131,7 @@ export function LoginForm() {
           type="email"
           value={email}
           onChange={(e) => handleEmailChange(e.target.value)}
+          onBlur={handleEmailBlur}
           required
           className={`w-full min-h-[44px] rounded-md border ${fieldErrors.email ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
           placeholder="mario@example.com"
