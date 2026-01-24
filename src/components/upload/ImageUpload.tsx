@@ -302,7 +302,11 @@ export function ImageUpload({ userId }: ImageUploadProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      style={{ scrollMarginBottom: '120px' }} // Prevent keyboard from blocking submit button on mobile
+    >
       {/* Text Overlay Editor */}
       {showTextOverlay && preview ? (
         <ImageTextOverlay

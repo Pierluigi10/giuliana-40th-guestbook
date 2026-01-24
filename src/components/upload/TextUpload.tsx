@@ -12,18 +12,38 @@ interface TextUploadProps {
   userId: string
 }
 
+// Shake animation variants
+const shakeAnimation = {
+  shake: {
+    x: [0, -10, 10, -10, 10, 0],
+    transition: { duration: 0.4 }
+  }
+}
+
 export function TextUpload({ userId }: TextUploadProps) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
+  const [touched, setTouched] = useState(false)
+  const [shouldShake, setShouldShake] = useState(false)
 
   const minLength = 10
   const maxLength = 1000
   const isValid = text.length >= minLength && text.length <= maxLength
+  const showError = touched && !isValid && text.length > 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!isValid) {
+      // Trigger shake animation
+      setShouldShake(true)
+      setTimeout(() => setShouldShake(false), 400)
+
+      // Haptic feedback on mobile (if supported)
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(200)
+      }
+
       toast.error('Il messaggio deve essere tra 10 e 1000 caratteri', {
         description: 'Aggiungi qualche parola in più per rendere il messaggio ancora più speciale! 💝'
       })
@@ -86,8 +106,15 @@ export function TextUpload({ userId }: TextUploadProps) {
     'text-green-500'
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4"
+      style={{ scrollMarginBottom: '120px' }} // Prevent keyboard from blocking submit button on mobile
+    >
+      <motion.div
+        animate={shouldShake ? "shake" : ""}
+        variants={shakeAnimation}
+      >
         <label htmlFor="text" className="block text-sm font-medium mb-2">
           Scrivi qualcosa di speciale ✨
         </label>
@@ -95,9 +122,13 @@ export function TextUpload({ userId }: TextUploadProps) {
           id="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onBlur={() => setTouched(true)}
           placeholder="Scrivi un pensiero speciale per Giuliana..."
-          className="w-full min-h-[200px] rounded-md border border-input bg-background px-4 py-3 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple resize-none touch-manipulation"
+          className={`w-full min-h-[200px] rounded-md border bg-background px-4 py-3 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple resize-none touch-manipulation transition-colors ${
+            showError ? 'border-red-500 focus-visible:ring-red-500' : 'border-input'
+          }`}
           maxLength={maxLength}
+          autoFocus
         />
         <div className="flex justify-between items-center mt-2">
           <p className={`text-sm ${charCountColor}`}>
@@ -108,7 +139,12 @@ export function TextUpload({ userId }: TextUploadProps) {
             <p className="text-sm text-green-500">✓ Pronto per l'invio</p>
           )}
         </div>
-      </div>
+        {showError && (
+          <p className="text-sm text-red-500 mt-1">
+            ⚠️ Il messaggio deve avere almeno {minLength} caratteri
+          </p>
+        )}
+      </motion.div>
 
       <motion.button
         type="submit"

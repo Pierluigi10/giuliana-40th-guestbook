@@ -164,7 +164,10 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
       <div className="relative">
         {content.type === 'text' && (
           <div className={`bg-gradient-to-br ${gradient} p-4 md:p-8 min-h-[250px] md:min-h-[300px] flex items-center justify-center`}>
-            <p className="text-base md:text-lg lg:text-xl whitespace-pre-wrap leading-relaxed text-center px-2">
+            <p
+              className="text-base md:text-lg lg:text-xl whitespace-pre-wrap leading-relaxed text-center px-2 font-medium"
+              style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.08)' }} // Subtle shadow for WCAG contrast on gradients
+            >
               {DOMPurify.sanitize(content.text_content || '', {
                 ALLOWED_TAGS: [],
                 ALLOWED_ATTR: []
