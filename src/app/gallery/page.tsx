@@ -66,6 +66,13 @@ export default async function GalleryPage() {
           </p>
         </div>
 
+        {/* Birthday Countdown */}
+        <ContentErrorBoundary>
+          <div className="mb-8">
+            <BirthdayCountdown />
+          </div>
+        </ContentErrorBoundary>
+
         {/* Guest CTA to Upload */}
         {profile.role === 'guest' && (
           <div className="mb-8 max-w-2xl mx-auto">
@@ -82,19 +89,14 @@ export default async function GalleryPage() {
           </div>
         )}
 
-        {/* Birthday Countdown */}
-        <ContentErrorBoundary>
-          <div className="mb-8">
-            <BirthdayCountdown />
-          </div>
-        </ContentErrorBoundary>
-
-        {/* Statistics Dashboard */}
-        <ContentErrorBoundary>
-          <div className="mb-8">
-            <StatsDashboard initialStats={vipStats} />
-          </div>
-        </ContentErrorBoundary>
+        {/* Statistics Dashboard - only for admin and VIP */}
+        {(profile.role === 'admin' || profile.role === 'vip') && (
+          <ContentErrorBoundary>
+            <div className="mb-8">
+              <StatsDashboard initialStats={vipStats} />
+            </div>
+          </ContentErrorBoundary>
+        )}
 
         {/* Gallery View */}
         <ContentErrorBoundary>
