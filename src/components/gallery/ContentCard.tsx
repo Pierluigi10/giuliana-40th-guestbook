@@ -216,10 +216,10 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         </div>
 
         {content.type === 'text' && (
-          <div className={`${bgGradient} p-6 md:p-8 relative`}>
+          <div className={`${bgGradient} p-8 md:p-12 relative min-h-[200px] flex items-center justify-center`}>
             {/* Virgoletta SVG decorativa - inizio */}
             <svg
-              className="absolute top-4 left-4 w-8 h-8 md:w-10 md:h-10 text-birthday-purple/20"
+              className="absolute top-4 left-4 w-8 h-8 md:w-10 md:h-10 text-birthday-purple/10"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -228,7 +228,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
             </svg>
 
             <p
-              className="text-gray-800 text-base md:text-lg leading-relaxed font-serif relative z-10 px-4 md:px-6 whitespace-pre-wrap"
+              className="text-gray-900 text-xl md:text-2xl leading-relaxed font-serif relative z-10 px-6 md:px-8 whitespace-pre-wrap font-semibold"
             >
               {DOMPurify.sanitize(previewText || '', {
                 ALLOWED_TAGS: [],
@@ -238,7 +238,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
             {/* Virgoletta SVG decorativa - fine */}
             <svg
-              className="absolute bottom-4 right-4 w-8 h-8 md:w-10 md:h-10 text-birthday-purple/20 rotate-180"
+              className="absolute bottom-4 right-4 w-8 h-8 md:w-10 md:h-10 text-birthday-purple/10 rotate-180"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -543,7 +543,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
           <div className="mt-4 relative px-8">
             {/* Virgoletta SVG decorativa - inizio */}
             <svg
-              className="absolute top-0 left-0 w-10 h-10 text-birthday-purple/20"
+              className="absolute top-0 left-0 w-10 h-10 text-birthday-purple/10"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -551,7 +551,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
               <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
             </svg>
 
-            <p className="text-gray-800 text-lg leading-relaxed font-serif whitespace-pre-wrap">
+            <p className="text-gray-900 text-xl leading-relaxed font-serif whitespace-pre-wrap font-semibold">
               {DOMPurify.sanitize(content.text_content || '', {
                 ALLOWED_TAGS: [],
                 ALLOWED_ATTR: []
@@ -560,7 +560,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
             {/* Virgoletta SVG decorativa - fine */}
             <svg
-              className="absolute bottom-0 right-0 w-10 h-10 text-birthday-purple/20 rotate-180"
+              className="absolute bottom-0 right-0 w-10 h-10 text-birthday-purple/10 rotate-180"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
