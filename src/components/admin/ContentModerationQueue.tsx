@@ -92,7 +92,7 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
       })
       return next
     })
-  }, [filter, userFilter, dateFilter, searchQuery]) // Only reset when filters change
+  }, [filter, userFilter, dateFilter, searchQuery, filteredContent]) // Only reset when filters change
 
   const handleApprove = async (contentId: string) => {
     setLoadingId(contentId)

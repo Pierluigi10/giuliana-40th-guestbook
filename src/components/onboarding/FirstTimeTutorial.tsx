@@ -200,7 +200,7 @@ export function FirstTimeTutorial({ userId, onComplete, onTabChange }: FirstTime
       // Position tooltip
       if (tooltipRef.current) {
         const tooltip = tooltipRef.current
-        
+
         // Force reflow to get accurate dimensions
         tooltip.style.visibility = 'hidden'
         tooltip.style.display = 'block'
@@ -244,23 +244,27 @@ export function FirstTimeTutorial({ userId, onComplete, onTabChange }: FirstTime
       }
     }
 
-    // Wait a bit for tab changes to render
-    const timeout = setTimeout(() => {
+    // Wait a bit for tab changes to render, then retry after a longer delay
+    let initialTimeout: NodeJS.Timeout | undefined
+    let retryTimeout: NodeJS.Timeout | undefined
+
+    initialTimeout = setTimeout(() => {
       updatePosition()
-      
+
       // Retry after a longer delay if element still not found
-      const retryTimeout = setTimeout(() => {
+      retryTimeout = setTimeout(() => {
         updatePosition()
       }, 200)
-      return () => clearTimeout(retryTimeout)
     }, 150)
 
-    // Update on window resize
+    // Update on window resize and scroll
     window.addEventListener('resize', updatePosition)
     window.addEventListener('scroll', updatePosition, true)
 
     return () => {
-      clearTimeout(timeout)
+      // Clear both timeouts if they exist
+      if (initialTimeout) clearTimeout(initialTimeout)
+      if (retryTimeout) clearTimeout(retryTimeout)
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, true)
     }
@@ -284,15 +288,10 @@ export function FirstTimeTutorial({ userId, onComplete, onTabChange }: FirstTime
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 pointer-events-none"
       >
-        {/* Overlay with spotlight */}
+        {/* Overlay */}
         <div
           ref={overlayRef}
           className="absolute inset-0 bg-black/70"
-          style={{
-            clipPath: currentStep === 'welcome' || currentStep === 'complete'
-              ? 'none'
-              : `circle(var(--spotlight-radius, 200px) at var(--spotlight-x, 50%) var(--spotlight-y, 50%))`,
-          }}
         />
 
         {/* Tooltip */}

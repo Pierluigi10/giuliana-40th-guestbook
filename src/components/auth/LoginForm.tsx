@@ -111,6 +111,8 @@ export function LoginForm() {
     } catch (err) {
       setError('Si è verificato un errore durante l\'accesso')
       console.error(err)
+    } finally {
+      setLoading(false)
     }
   }
 

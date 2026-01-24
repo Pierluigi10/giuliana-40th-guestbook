@@ -26,14 +26,26 @@ export function ImageUpload({ userId }: ImageUploadProps) {
   const [progress, setProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [cameraAvailable, setCameraAvailable] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const mobileFileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  const fileReaderRef = useRef<FileReader | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const maxSize = 10 * 1024 * 1024 // 10MB
 
   useEffect(() => {
     setIsMobile(isMobileDevice())
     setCameraAvailable(isCameraAvailable())
+  }, [])
+
+  useEffect(() => {
+    abortControllerRef.current = new AbortController()
+    return () => {
+      abortControllerRef.current?.abort()
+      if (fileReaderRef.current) {
+        fileReaderRef.current.abort()
+      }
+    }
   }, [])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -55,7 +67,14 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     }
 
     setFile(file)
+
+    // Abort previous reader if exists
+    if (fileReaderRef.current) {
+      fileReaderRef.current.abort()
+    }
+
     const reader = new FileReader()
+    fileReaderRef.current = reader
     reader.onload = () => setPreview(reader.result as string)
     reader.readAsDataURL(file)
   }, [])
@@ -73,7 +92,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     setFile(null)
     setPreview(null)
     setProgress(0)
-    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (mobileFileInputRef.current) mobileFileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
   }
 
@@ -93,7 +112,14 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     }
 
     setFile(selectedFile)
+
+    // Abort previous reader if exists
+    if (fileReaderRef.current) {
+      fileReaderRef.current.abort()
+    }
+
     const reader = new FileReader()
+    fileReaderRef.current = reader
     reader.onload = () => setPreview(reader.result as string)
     reader.readAsDataURL(selectedFile)
   }
@@ -208,6 +234,13 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       setProgress(70)
       console.log('[Image Upload] File uploaded successfully to Storage')
 
+      // Check if operation was aborted before proceeding
+      if (abortControllerRef.current?.signal.aborted) {
+        console.log('[Image Upload] Operation aborted, cleaning up...')
+        await supabase.storage.from('content-media').remove([fileName])
+        return
+      }
+
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('content-media')
@@ -311,7 +344,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
                   : 'border-gray-300 hover:border-birthday-rose-gold from-birthday-champagne/20 to-white hover:from-birthday-champagne/40 hover:to-birthday-cream/20'
               }`}
             >
-              <input {...getInputProps()} ref={fileInputRef} />
+              <input {...getInputProps()} />
             <motion.div
               className="space-y-4"
               animate={isDragActive ? { y: [0, -8, 0] } : {}}
@@ -383,7 +416,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
               className="border-2 border-dashed border-birthday-rose-gold/40 rounded-xl p-8 text-center bg-gradient-to-br from-birthday-blush/5 to-white"
             >
               <input
-                ref={fileInputRef}
+                ref={mobileFileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={(e) => {

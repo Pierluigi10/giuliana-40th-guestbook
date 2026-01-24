@@ -23,8 +23,9 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const [progress, setProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [cameraAvailable, setCameraAvailable] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const mobileFileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const maxSize = 10 * 1024 * 1024 // 10MB
 
@@ -32,6 +33,22 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     setIsMobile(isMobileDevice())
     setCameraAvailable(isCameraAvailable())
   }, [])
+
+  useEffect(() => {
+    abortControllerRef.current = new AbortController()
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [])
+
+  useEffect(() => {
+    // Cleanup function that revokes the object URL when preview changes or component unmounts
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview)
+      }
+    }
+  }, [preview])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
@@ -117,7 +134,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     setFile(null)
     setPreview(null)
     setProgress(0)
-    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (mobileFileInputRef.current) mobileFileInputRef.current.value = ''
     if (cameraInputRef.current) cameraInputRef.current.value = ''
   }
 
@@ -188,6 +205,13 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
       setProgress(70)
       console.log('[Video Upload] File uploaded successfully to Storage')
+
+      // Check if operation was aborted before proceeding
+      if (abortControllerRef.current?.signal.aborted) {
+        console.log('[Video Upload] Operation aborted, cleaning up...')
+        await supabase.storage.from('content-media').remove([fileName])
+        return
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -287,7 +311,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                   : 'border-gray-300 hover:border-birthday-pink hover:bg-gray-50'
               }`}
             >
-              <input {...getInputProps()} ref={fileInputRef} />
+              <input {...getInputProps()} />
               <div className="space-y-3">
                 <div className="text-6xl">🎥</div>
                 {isDragActive ? (
@@ -335,7 +359,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           {isMobile && (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               <input
-                ref={fileInputRef}
+                ref={mobileFileInputRef}
                 type="file"
                 accept="video/mp4,video/quicktime"
                 onChange={handleFileInputChange}

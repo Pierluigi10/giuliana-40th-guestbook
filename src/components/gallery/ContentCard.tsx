@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
@@ -69,17 +69,24 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
   const isLongText = content.text_content && content.text_content.length > 150
   const previewText = isLongText ? content.text_content!.slice(0, 150) + '...' : content.text_content
 
+  // Use ref to track showEmojiPicker state for keyboard listener
+  const showEmojiPickerRef = useRef(showEmojiPicker)
+
+  useEffect(() => {
+    showEmojiPickerRef.current = showEmojiPicker
+  }, [showEmojiPicker])
+
   // Keyboard navigation: ESC key closes emoji picker
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showEmojiPicker) {
+      if (e.key === 'Escape' && showEmojiPickerRef.current) {
         setShowEmojiPicker(false)
       }
     }
 
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [showEmojiPicker])
+  }, []) // Empty dependency array - only mount/unmount
 
   // Count reactions by emoji
   const reactionCounts = reactions.reduce((acc, r) => {

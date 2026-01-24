@@ -85,6 +85,10 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
 
       if (result.error) {
         console.error('Error loading more content:', result.error)
+        toast.error('Errore nel caricamento 😔', {
+          description: 'Non è stato possibile caricare altri contenuti. Riprova tra poco!'
+        })
+        setIsLoadingMore(false)
         return
       }
 
@@ -97,6 +101,9 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       }
     } catch (error) {
       console.error('Error loading more content:', error)
+      toast.error('Errore nel caricamento 😔', {
+        description: 'Non è stato possibile caricare altri contenuti. Riprova tra poco!'
+      })
     } finally {
       setIsLoadingMore(false)
     }
@@ -224,15 +231,15 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
           })
 
           // Trigger confetti and notification
-          const contentType = newContent[0].type === 'text' ? 'messaggio' : 
+          const contentType = newContent[0].type === 'text' ? 'messaggio' :
                              newContent[0].type === 'image' ? 'foto' : 'video'
-          const message = newContent.length === 1 
+          const message = newContent.length === 1
             ? `Nuova ${contentType} aggiunta! 🎉`
             : `${newContent.length} nuovi contenuti aggiunti! 🎉`
-          
+
           triggerConfetti(message, 'new-content')
           setNewContentNotification(message)
-          
+
           // Play sound if enabled
           if (soundEnabled) {
             playCelebrationSound()
@@ -243,6 +250,9 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
         }
       } catch (error) {
         console.error('Error checking for new content:', error)
+        toast.error('Errore nell\'aggiornamento', {
+          description: 'Impossibile verificare nuovi contenuti.'
+        })
       }
     }
 
