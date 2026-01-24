@@ -16,6 +16,9 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // Honeypot field - invisible to users, only bots will fill it
+  const [website, setWebsite] = useState('')
+
   // Field-specific validation errors
   const [fieldErrors, setFieldErrors] = useState({
     email: '',
@@ -158,6 +161,12 @@ export function RegisterForm() {
     e.preventDefault()
     setError(null)
 
+    // Honeypot check - if filled, it's a bot
+    if (website) {
+      setError('Registrazione non valida')
+      return
+    }
+
     // Final validation check (should already be validated by real-time validation)
     if (!isFormValid()) {
       setError('Compila correttamente tutti i campi')
@@ -177,6 +186,7 @@ export function RegisterForm() {
           email,
           password,
           fullName,
+          website, // Send honeypot to backend for additional validation
         }),
       })
 
@@ -220,6 +230,20 @@ export function RegisterForm() {
           {error}
         </div>
       )}
+
+      {/* Honeypot field - hidden from real users, only bots will fill it */}
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="website">Website</label>
+        <input
+          id="website"
+          name="website"
+          type="text"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
 
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium mb-2">
