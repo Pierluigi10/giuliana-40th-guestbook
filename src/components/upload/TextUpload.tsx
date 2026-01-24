@@ -95,7 +95,7 @@ export function TextUpload({ userId }: TextUploadProps) {
           id="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Cara Giuliana, per i tuoi 40 anni voglio dirti che..."
+          placeholder="Scrivi un pensiero speciale per Giuliana..."
           className="w-full min-h-[200px] rounded-md border border-input bg-background px-4 py-3 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple resize-none touch-manipulation"
           maxLength={maxLength}
         />
@@ -115,7 +115,7 @@ export function TextUpload({ userId }: TextUploadProps) {
         disabled={!isValid || loading}
         whileHover={{ scale: isValid && !loading ? 1.02 : 1 }}
         whileTap={{ scale: isValid && !loading ? 0.98 : 1 }}
-        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
+        className="w-full h-14 rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
         {loading ? '✨ Magia in corso...' : '💝 Regala le tue parole'}

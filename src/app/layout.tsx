@@ -93,7 +93,7 @@ export default function RootLayout({
       <body className={inter.className} suppressHydrationWarning>
         <TopLoadingBar />
         {children}
-        <Toaster position="top-right" richColors />
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   )

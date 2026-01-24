@@ -313,22 +313,22 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       ) : !preview ? (
         <>
           {/* Drop Zone */}
-          <motion.div
-            {...getRootProps()}
-            whileHover={{ scale: 1.02, boxShadow: '0 12px 40px rgba(212, 165, 165, 0.25)' }}
-            whileTap={{ scale: 0.98 }}
-            animate={isDragActive ? {
-              scale: [1, 1.02, 1],
-              borderColor: ['#9D4EDD', '#FFB6C1', '#9D4EDD']
-            } : {}}
-            transition={{ duration: 0.3 }}
-            className={`border-3 border-dashed rounded-2xl p-10 md:p-16 text-center cursor-pointer transition-all bg-gradient-to-br ${
-              isDragActive
-                ? 'border-birthday-purple from-birthday-purple/10 to-birthday-blush/10'
-                : 'border-gray-300 hover:border-birthday-rose-gold from-birthday-champagne/20 to-white hover:from-birthday-champagne/40 hover:to-birthday-cream/20'
-            }`}
-          >
-            <input {...getInputProps()} ref={fileInputRef} />
+          <div {...getRootProps()}>
+            <motion.div
+              whileHover={{ scale: 1.02, boxShadow: '0 12px 40px rgba(212, 165, 165, 0.25)' }}
+              whileTap={{ scale: 0.98 }}
+              animate={isDragActive ? {
+                scale: [1, 1.02, 1],
+                borderColor: ['#9D4EDD', '#FFB6C1', '#9D4EDD']
+              } : {}}
+              transition={{ duration: 0.3 }}
+              className={`border-3 border-dashed rounded-2xl p-10 md:p-16 text-center cursor-pointer transition-all bg-gradient-to-br ${
+                isDragActive
+                  ? 'border-birthday-purple from-birthday-purple/10 to-birthday-blush/10'
+                  : 'border-gray-300 hover:border-birthday-rose-gold from-birthday-champagne/20 to-white hover:from-birthday-champagne/40 hover:to-birthday-cream/20'
+              }`}
+            >
+              <input {...getInputProps()} ref={fileInputRef} />
             <motion.div
               className="space-y-4"
               animate={isDragActive ? { y: [0, -8, 0] } : {}}
@@ -356,7 +356,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
                 </>
               )}
             </motion.div>
-          </motion.div>
+            </motion.div>
+          </div>
 
           {/* Camera Access Button (Mobile) */}
           {isMobile && cameraAvailable && (
@@ -503,7 +504,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
         disabled={!file || loading}
         whileHover={{ scale: file && !loading ? 1.02 : 1 }}
         whileTap={{ scale: file && !loading ? 0.98 : 1 }}
-        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
+        className="w-full h-14 rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
         {loading ? '✨ Magia in corso...' : '✨ Regala un ricordo'}
