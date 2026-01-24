@@ -41,11 +41,11 @@ export default async function UploadPage() {
 
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-birthday-pink to-birthday-purple bg-clip-text text-transparent">
-            Carica il tuo messaggio
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple bg-clip-text text-transparent">
+            Lascia un segno speciale ✨
           </h1>
           <p className="text-muted-foreground">
-            Ciao {profile?.full_name}! Condividi un messaggio, foto o video per Giuliana 🎉
+            Ciao {profile?.full_name}! Regala un ricordo indimenticabile per i 40 anni di Giuliana 🎂💝
           </p>
         </div>
 

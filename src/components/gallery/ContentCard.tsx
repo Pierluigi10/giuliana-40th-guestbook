@@ -101,7 +101,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         setReactions(prev => [...prev, result.reaction!])
         
         // Small confetti burst for reaction
-        const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+        const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
         confetti({
           particleCount: 20,
           spread: 30,
@@ -136,10 +136,10 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
   const canDelete = userRole === 'admin' || userRole === 'vip' || content.user_id === userId
 
   const gradients = [
-    'from-birthday-pink/20 to-birthday-purple/20',
+    'from-birthday-rose-gold/30 to-birthday-blush/20',
+    'from-birthday-blush/20 to-birthday-purple/20',
     'from-birthday-purple/20 to-birthday-gold/20',
-    'from-birthday-gold/20 to-birthday-sky/20',
-    'from-birthday-sky/20 to-birthday-pink/20',
+    'from-birthday-mauve/20 to-birthday-rose-gold/20',
   ]
 
   const gradient = gradients[content.id.charCodeAt(0) % gradients.length]
@@ -158,7 +158,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         y: -4,
         transition: { duration: 0.2 }
       }}
-      className="bg-white rounded-lg shadow-lg overflow-hidden transition-all transform"
+      className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg overflow-hidden transition-all transform border border-white/20"
     >
       {/* Content - Prominente, stile Instagram */}
       <div className="relative">

@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
+import { motion } from 'framer-motion'
 import imageCompression from 'browser-image-compression'
 import { saveImageContentRecord } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
@@ -256,7 +257,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
 
         // Celebration confetti!
-        const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+        const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
         confetti({
           particleCount: 50,
           spread: 60,
@@ -312,17 +313,34 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       ) : !preview ? (
         <>
           {/* Drop Zone */}
-          <div
+          <motion.div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 md:p-12 text-center cursor-pointer transition-all ${
+            whileHover={{ scale: 1.02, boxShadow: '0 12px 40px rgba(212, 165, 165, 0.25)' }}
+            whileTap={{ scale: 0.98 }}
+            animate={isDragActive ? {
+              scale: [1, 1.02, 1],
+              borderColor: ['#9D4EDD', '#FFB6C1', '#9D4EDD']
+            } : {}}
+            transition={{ duration: 0.3 }}
+            className={`border-3 border-dashed rounded-2xl p-10 md:p-16 text-center cursor-pointer transition-all bg-gradient-to-br ${
               isDragActive
-                ? 'border-birthday-purple bg-birthday-purple/10'
-                : 'border-gray-300 hover:border-birthday-pink hover:bg-gray-50'
+                ? 'border-birthday-purple from-birthday-purple/10 to-birthday-blush/10'
+                : 'border-gray-300 hover:border-birthday-rose-gold from-birthday-champagne/20 to-white hover:from-birthday-champagne/40 hover:to-birthday-cream/20'
             }`}
           >
             <input {...getInputProps()} ref={fileInputRef} />
-            <div className="space-y-3">
-              <div className="text-6xl">📸</div>
+            <motion.div
+              className="space-y-4"
+              animate={isDragActive ? { y: [0, -8, 0] } : {}}
+              transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0 }}
+            >
+              <motion.div
+                className="text-8xl md:text-9xl"
+                animate={{ rotate: isDragActive ? [0, -10, 10, -10, 0] : 0 }}
+                transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0 }}
+              >
+                📸
+              </motion.div>
               {isDragActive ? (
                 <p className="text-lg font-medium text-birthday-purple">
                   Rilascia qui la foto!
@@ -330,19 +348,23 @@ export function ImageUpload({ userId }: ImageUploadProps) {
               ) : (
                 <>
                   <p className="text-lg font-medium">
-                    {isMobile ? 'Scegli una foto' : 'Trascina qui una foto oppure clicca per selezionare'}
+                    {isMobile ? 'Cattura un momento speciale ✨' : 'Cattura un ricordo indimenticabile per Giuliana'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Formati supportati: JPG, PNG, GIF, WEBP (Max 10MB)
+                    {isMobile ? 'Trascina o scegli una foto' : 'Trascina qui oppure clicca per selezionare'} • Max 10MB
                   </p>
                 </>
               )}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Camera Access Button (Mobile) */}
           {isMobile && cameraAvailable && (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <motion.div
+              whileHover={{ scale: 1.02, boxShadow: '0 8px 25px rgba(157, 78, 221, 0.2)' }}
+              whileTap={{ scale: 0.98 }}
+              className="border-2 border-dashed border-birthday-purple/40 rounded-xl p-8 text-center bg-gradient-to-br from-birthday-purple/5 to-white"
+            >
               <input
                 ref={cameraInputRef}
                 type="file"
@@ -354,18 +376,28 @@ export function ImageUpload({ userId }: ImageUploadProps) {
               />
               <label
                 htmlFor="camera-input"
-                className="cursor-pointer flex flex-col items-center gap-2"
+                className="cursor-pointer flex flex-col items-center gap-3"
               >
-                <Camera className="w-8 h-8 text-birthday-purple" />
-                <span className="text-sm font-medium">Scatta una foto</span>
-                <span className="text-xs text-muted-foreground">Usa la fotocamera del dispositivo</span>
+                <motion.div
+                  whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-16 h-16 bg-gradient-to-br from-birthday-purple to-birthday-blush rounded-full flex items-center justify-center shadow-lg"
+                >
+                  <Camera className="w-10 h-10 text-white" />
+                </motion.div>
+                <span className="text-base font-semibold text-birthday-purple">Cattura l'attimo 📸</span>
+                <span className="text-xs text-muted-foreground">Scatta una foto ora</span>
               </label>
-            </div>
+            </motion.div>
           )}
 
           {/* Alternative: File Picker Button (Mobile) */}
           {isMobile && (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <motion.div
+              whileHover={{ scale: 1.02, boxShadow: '0 8px 25px rgba(255, 182, 193, 0.2)' }}
+              whileTap={{ scale: 0.98 }}
+              className="border-2 border-dashed border-birthday-rose-gold/40 rounded-xl p-8 text-center bg-gradient-to-br from-birthday-blush/5 to-white"
+            >
               <input
                 ref={fileInputRef}
                 type="file"
@@ -379,13 +411,19 @@ export function ImageUpload({ userId }: ImageUploadProps) {
               />
               <label
                 htmlFor="file-input-mobile"
-                className="cursor-pointer flex flex-col items-center gap-2"
+                className="cursor-pointer flex flex-col items-center gap-3"
               >
-                <ImageIcon className="w-8 h-8 text-birthday-pink" />
-                <span className="text-sm font-medium">Scegli dalla galleria</span>
-                <span className="text-xs text-muted-foreground">Seleziona una foto esistente</span>
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 0.5 }}
+                  className="w-16 h-16 bg-gradient-to-br from-birthday-rose-gold to-birthday-blush rounded-full flex items-center justify-center shadow-lg"
+                >
+                  <ImageIcon className="w-10 h-10 text-white" />
+                </motion.div>
+                <span className="text-base font-semibold text-birthday-rose-gold">Sfoglia i ricordi 🖼️</span>
+                <span className="text-xs text-muted-foreground">Scegli dalla tua galleria</span>
               </label>
-            </div>
+            </motion.div>
           )}
         </>
       ) : (
@@ -460,17 +498,19 @@ export function ImageUpload({ userId }: ImageUploadProps) {
         </div>
       )}
 
-      <button
+      <motion.button
         type="submit"
         disabled={!file || loading}
-        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
+        whileHover={{ scale: file && !loading ? 1.02 : 1 }}
+        whileTap={{ scale: file && !loading ? 0.98 : 1 }}
+        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
-        {loading ? '✨ Caricamento in corso...' : '📸 Carica Foto'}
-      </button>
+        {loading ? '✨ Magia in corso...' : '✨ Regala un ricordo'}
+      </motion.button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Facciamo un rapido check e la tua foto sarà presto in galleria! Giuliana la adorerà! 😊✨
+        Il tuo ricordo sarà presto parte della festa di Giuliana! 💝✨
       </p>
     </form>
   )

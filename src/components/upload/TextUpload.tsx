@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
 import { uploadTextContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
@@ -50,7 +51,7 @@ export function TextUpload({ userId }: TextUploadProps) {
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
         
         // Celebration confetti!
-        const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+        const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
         confetti({
           particleCount: 50,
           spread: 60,
@@ -88,13 +89,13 @@ export function TextUpload({ userId }: TextUploadProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="text" className="block text-sm font-medium mb-2">
-          Il tuo messaggio per Giuliana ✨
+          Scrivi qualcosa di speciale ✨
         </label>
         <textarea
           id="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Scrivi un messaggio speciale per il compleanno di Giuliana..."
+          placeholder="Cara Giuliana, per i tuoi 40 anni voglio dirti che..."
           className="w-full min-h-[200px] rounded-md border border-input bg-background px-4 py-3 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple resize-none touch-manipulation"
           maxLength={maxLength}
         />
@@ -109,17 +110,19 @@ export function TextUpload({ userId }: TextUploadProps) {
         </div>
       </div>
 
-      <button
+      <motion.button
         type="submit"
         disabled={!isValid || loading}
-        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
+        whileHover={{ scale: isValid && !loading ? 1.02 : 1 }}
+        whileTap={{ scale: isValid && !loading ? 0.98 : 1 }}
+        className="w-full min-h-[44px] rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
-        {loading ? '✨ Invio in corso...' : '📨 Invia Messaggio'}
-      </button>
+        {loading ? '✨ Magia in corso...' : '💝 Regala le tue parole'}
+      </motion.button>
 
       <p className="text-xs text-muted-foreground text-center">
-        Facciamo un rapido check e il tuo messaggio sarà presto in galleria! Giuliana lo adorerà! 😊✨
+        Le tue parole saranno presto parte della festa di Giuliana! 💝✨
       </p>
     </form>
   )

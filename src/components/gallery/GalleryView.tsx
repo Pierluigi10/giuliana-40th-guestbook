@@ -130,7 +130,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       const duration = 3 * 1000
       const end = Date.now() + duration
 
-      const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
+      const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
 
       const frame = () => {
         confetti({
@@ -279,10 +279,10 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="region" aria-label="Galleria dei contenuti">
       {/* Sound Toggle (only for VIP/Admin) */}
       {(userRole === 'vip' || userRole === 'admin') && (
-        <div className="bg-white rounded-lg shadow-lg p-3 md:p-4 flex items-center justify-end">
+        <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-3 md:p-4 flex items-center justify-end border border-white/20">
           <label className="flex items-center gap-2 cursor-pointer touch-manipulation min-h-[44px]">
             <input
               type="checkbox"
@@ -324,7 +324,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-lg p-3 md:p-4">
+      <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-3 md:p-4 border border-white/20">
         <div className="flex flex-wrap justify-center gap-2 md:gap-3">
           {filters.map((f) => (
             <motion.button

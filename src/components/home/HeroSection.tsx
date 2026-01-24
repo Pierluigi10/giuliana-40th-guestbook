@@ -13,7 +13,7 @@ export function HeroSection() {
     // Confetti animation on mount
     const duration = 3 * 1000
     const animationEnd = Date.now() + duration
-    const colors = ['#FF69B4', '#9D4EDD', '#FFD700'] // birthday colors
+    const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700'] // Rose Gold palette
 
     const randomInRange = (min: number, max: number) => {
       return Math.random() * (max - min) + min
@@ -128,7 +128,11 @@ export function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          I tuoi amici ti festeggiano con messaggi, foto e video speciali
+          Il Libro dei Ricordi per i tuoi 40 anni ✨
+          <br />
+          <span className="text-sm sm:text-base md:text-lg opacity-80 mt-2 block">
+            Un regalo digitale fatto di parole, sorrisi e momenti indimenticabili
+          </span>
         </motion.p>
 
         {/* Icon indicators */}
@@ -165,7 +169,7 @@ export function HeroSection() {
             className="w-full sm:w-auto min-w-[200px] min-h-[44px] bg-gradient-to-r from-birthday-pink to-birthday-purple hover:from-birthday-pink/90 hover:to-birthday-purple/90 active:from-birthday-pink/80 active:to-birthday-purple/80 text-white font-semibold text-base md:text-lg h-12 touch-manipulation"
           >
             <Link href="/login" aria-label="Accedi al guestbook">
-              Accedi e Inizia
+              ✨ Inizia la Magia
             </Link>
           </Button>
           <Button

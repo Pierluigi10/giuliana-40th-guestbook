@@ -44,10 +44,17 @@ const config: Config = {
           foreground: 'hsl(var(--card-foreground))',
         },
         birthday: {
-          pink: '#FF69B4',
-          purple: '#9D4EDD',
-          gold: '#FFD700',
-          sky: '#87CEEB',
+          // Elegant Rose Gold palette
+          'rose-gold': '#D4A5A5',      // Main Rose Gold - soft, warm, elegant
+          'blush': '#FFB6C1',           // Soft Blush Pink - delicate and warm
+          'purple': '#9D4EDD',          // Vibrant Purple - festive accent
+          'champagne': '#FFF8F0',       // Champagne - warm background
+          'gold': '#FFD700',            // Gold - celebration accent
+          'cream': '#FAF3E0',           // Warm Cream - soft background
+          'mauve': '#B58DB6',           // Soft Mauve - gentle accent
+
+          // Legacy colors (for backward compatibility)
+          pink: '#FFB6C1',              // Updated to softer blush
         },
       },
       borderRadius: {
