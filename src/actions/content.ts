@@ -60,6 +60,7 @@ export async function uploadTextContent(textContent: string) {
     // Send email notification to admin (non-blocking)
     const { data: profile } = await selectFullProfileById(supabase, user.id)
     if (profile) {
+      console.log('[UPLOAD] Invio email notifica admin...')
       await sendContentNotification({
         userName: profile.full_name,
         userEmail: profile.email,
@@ -135,7 +136,7 @@ export async function saveImageContentRecord(mediaUrl: string) {
     console.log('[Image Upload] Content record inserted successfully')
 
     // Send email notification to admin (non-blocking)
-    console.log('[Image Upload] Sending email notification...')
+    console.log('[UPLOAD] Invio email notifica admin...')
     const { data: profile } = await selectFullProfileById(supabase, user.id)
     if (profile) {
       await sendContentNotification({
@@ -263,7 +264,7 @@ export async function uploadImageContent(formData: FormData) {
     console.log('[Image Upload] Content record inserted successfully')
 
     // Send email notification to admin (non-blocking)
-    console.log('[Image Upload] Sending email notification...')
+    console.log('[UPLOAD] Invio email notifica admin...')
     const { data: profile } = await selectFullProfileById(supabase, user.id)
     if (profile) {
       await sendContentNotification({
@@ -343,7 +344,7 @@ export async function saveVideoContentRecord(mediaUrl: string) {
     console.log('[Video Upload] Content record inserted successfully')
 
     // Send email notification to admin (non-blocking)
-    console.log('[Video Upload] Sending email notification...')
+    console.log('[UPLOAD] Invio email notifica admin...')
     const { data: profile } = await selectFullProfileById(supabase, user.id)
     if (profile) {
       await sendContentNotification({
@@ -539,6 +540,7 @@ export async function approveContent(contentId: string) {
 
     // Send email notification to content author (non-blocking)
     if (contentData.profiles?.email && contentData.profiles?.full_name) {
+      console.log('[APPROVAL] Invio email conferma utente...')
       await sendApprovalNotification({
         userName: contentData.profiles.full_name,
         userEmail: contentData.profiles.email,
@@ -616,10 +618,9 @@ export async function deleteContent(contentId: string) {
     // Check if user has permission to delete
     const { data: profile } = await selectProfileById(supabase, user.id)
     const isAdmin = profile?.role === 'admin'
-    const isVip = profile?.role === 'vip'
     const isOwner = content.user_id === user.id
 
-    if (!isAdmin && !isVip && !isOwner) {
+    if (!isAdmin && !isOwner) {
       return { success: false, error: 'Non hai il permesso di eliminare questo contenuto' }
     }
 

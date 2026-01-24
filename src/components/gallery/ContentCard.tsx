@@ -133,7 +133,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
     }
   }
 
-  const canDelete = userRole === 'admin' || userRole === 'vip' || content.user_id === userId
+  const canDelete = userRole === 'admin' || content.user_id === userId
 
   const gradients = [
     'from-birthday-rose-gold/30 to-birthday-blush/20',
@@ -259,19 +259,20 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                   onClick={() => setShowDeleteConfirm(false)}
                 />
                 <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl p-3 md:p-3 z-20 min-w-[200px] md:min-w-[200px]">
-                  <p className="text-sm md:text-sm mb-3 text-gray-700">Eliminare questo contenuto?</p>
+                  <p className="text-sm md:text-sm font-semibold mb-1 text-gray-900">Eliminare questo contenuto?</p>
+                  <p className="text-xs md:text-xs mb-3 text-gray-600">Questa azione non può essere annullata</p>
                   <div className="flex gap-2">
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="flex-1 min-h-[44px] bg-red-500 text-white px-3 py-2 rounded text-sm md:text-sm hover:bg-red-600 active:bg-red-700 disabled:opacity-50 touch-manipulation"
+                      className="flex-1 min-h-[44px] bg-red-500 text-white px-3 py-2 rounded text-sm md:text-sm font-medium hover:bg-red-600 active:bg-red-700 disabled:opacity-50 touch-manipulation"
                     >
-                      {isDeleting ? 'Eliminazione...' : 'Elimina'}
+                      {isDeleting ? 'Eliminazione...' : 'Sì, elimina'}
                     </button>
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
                       disabled={isDeleting}
-                      className="flex-1 min-h-[44px] bg-gray-200 px-3 py-2 rounded text-sm md:text-sm hover:bg-gray-300 active:bg-gray-400 disabled:opacity-50 touch-manipulation"
+                      className="flex-1 min-h-[44px] bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm md:text-sm font-medium hover:bg-gray-300 active:bg-gray-400 disabled:opacity-50 touch-manipulation"
                     >
                       Annulla
                     </button>
