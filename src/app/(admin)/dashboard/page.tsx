@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { AdminStats } from '@/components/admin/AdminStats'
 import { StorageMonitor } from '@/components/admin/StorageMonitor'
 import { Header } from '@/components/layout/Header'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Dashboard Admin',
@@ -49,6 +50,37 @@ export default async function AdminDashboardPage() {
           <p className="text-muted-foreground">
             Panoramica completa dello stato dell&apos;applicazione
           </p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            href="/approve-content"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <h3 className="font-semibold text-lg mb-1">Modera Contenuti</h3>
+            <p className="text-sm text-muted-foreground">
+              Approva o rifiuta i contenuti caricati
+            </p>
+          </Link>
+          <Link
+            href="/manage-users"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <h3 className="font-semibold text-lg mb-1">Gestione Utenti</h3>
+            <p className="text-sm text-muted-foreground">
+              Visualizza ed elimina gli utenti
+            </p>
+          </Link>
+          <Link
+            href="/export"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <h3 className="font-semibold text-lg mb-1">Esporta Dati</h3>
+            <p className="text-sm text-muted-foreground">
+              Esporta tutti i contenuti approvati
+            </p>
+          </Link>
         </div>
 
         {/* Storage Monitor */}
