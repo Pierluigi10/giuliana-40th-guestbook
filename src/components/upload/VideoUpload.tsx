@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
-import { uploadVideoContent } from '@/actions/content'
+import { saveVideoContentRecord } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import { checkUploadRateLimit } from '@/lib/utils'
 import { isMobileDevice, isCameraAvailable } from '@/lib/mobile-utils'
 import { Camera, Video } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface VideoUploadProps {
   userId: string
@@ -29,6 +31,45 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     setIsMobile(isMobileDevice())
     setCameraAvailable(isCameraAvailable())
   }, [])
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0]
+    if (!file) return
+
+    if (file.size > maxSize) {
+      toast.error('Video troppo grande! 📏', {
+        description: 'Il file supera i 10MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
+      })
+      return
+    }
+
+    if (!file.type.startsWith('video/')) {
+      toast.error('Formato non supportato 🎥', {
+        description: 'Usa MP4 o MOV per il tuo video. Stiamo preparando tutto per Giuliana! ✨'
+      })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.warning('Video grande rilevato! ⏳', {
+        description: 'Il caricamento potrebbe richiedere qualche momento in più. Vale la pena aspettare per un video così speciale! 🎬💝'
+      })
+    }
+
+    setFile(file)
+    const url = URL.createObjectURL(file)
+    setPreview(url)
+  }, [])
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'video/*': ['.mp4', '.mov', '.quicktime']
+    },
+    maxFiles: 1,
+    maxSize,
+    disabled: isMobile, // Disable drag-and-drop on mobile
+  })
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.size > maxSize) {
@@ -99,22 +140,81 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     }
 
     setLoading(true)
-    setProgress(10)
+    setProgress(5)
+
+    let fileName = ''
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      // Upload directly to Supabase Storage (client-side)
+      const supabase = createClient()
 
-      setProgress(30)
-      const result = await uploadVideoContent(formData)
-      setProgress(90)
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      fileName = `${userId}/${crypto.randomUUID()}.${fileExt}`
+
+      setProgress(10)
+      console.log('[Video Upload] Starting direct upload to Supabase Storage...')
+
+      // Upload file directly to Supabase Storage with retry logic
+      let uploadError: any
+      let uploadAttempts = 0
+      const maxRetries = 2
+
+      while (uploadAttempts <= maxRetries) {
+        const { error } = await supabase.storage
+          .from('content-media')
+          .upload(fileName, file, {
+            contentType: file.type,
+            upsert: false,
+          })
+
+        uploadError = error
+
+        if (!uploadError) {
+          break // Upload successful
+        }
+
+        uploadAttempts++
+        if (uploadAttempts <= maxRetries) {
+          console.log(`[Video Upload] Retry attempt ${uploadAttempts}/${maxRetries}...`)
+          toast.info('Riprovo il caricamento... 🔄', {
+            description: `Tentativo ${uploadAttempts} di ${maxRetries + 1}`
+          })
+          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1s before retry
+        }
+      }
+
+      if (uploadError) {
+        console.error('[Video Upload] Storage upload error:', uploadError)
+        toast.error('Errore durante il caricamento del file 📤', {
+          description: uploadError.message || 'Riprova tra un momento!'
+        })
+        setProgress(0)
+        setLoading(false)
+        return
+      }
+
+      setProgress(70)
+      console.log('[Video Upload] File uploaded successfully to Storage')
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('content-media')
+        .getPublicUrl(fileName)
+
+      console.log('[Video Upload] Public URL:', publicUrl)
+      setProgress(80)
+
+      // Save content record to database via server action
+      const result = await saveVideoContentRecord(publicUrl)
+      setProgress(95)
 
       if (result.success) {
         const count = result.contentCount || 0
-        const countMessage = count === 1 
-          ? 'Questo è il tuo primo video! 🎊' 
+        const countMessage = count === 1
+          ? 'Questo è il tuo primo video! 🎊'
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
-        
+
         // Celebration confetti!
         const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
         confetti({
@@ -123,7 +223,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           origin: { x: 0.5, y: 0.5 },
           colors,
         })
-        
+
         toast.success('🎉 Il tuo video è stato caricato!', {
           description: `Giuliana lo vedrà presto! ${countMessage}`,
           duration: 5000
@@ -131,12 +231,25 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         handleRemove()
         setProgress(100)
       } else {
+        // If DB save fails, clean up the uploaded file
+        await supabase.storage.from('content-media').remove([fileName])
+
         toast.error('Ops! Qualcosa è andato storto 😔', {
           description: result.error || 'Riprova tra un momento, stiamo sistemando tutto per te!',
         })
         setProgress(0)
       }
     } catch (error) {
+      // Clean up on unexpected error
+      if (fileName) {
+        try {
+          const supabase = createClient()
+          await supabase.storage.from('content-media').remove([fileName])
+        } catch (cleanupError) {
+          console.error('[Video Upload] Cleanup error:', cleanupError)
+        }
+      }
+
       toast.error('Si è verificato un errore', {
         description: 'Non ti preoccupare, riprova tra un attimo! Il tuo video è importante per Giuliana 🎬💝'
       })
@@ -154,33 +267,32 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         <>
           {/* Desktop Drop Zone */}
           {!isMobile && (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 md:p-12 text-center">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="video/mp4,video/quicktime"
-                onChange={handleFileInputChange}
-                className="hidden"
-                id="video-input"
-              />
-              <label
-                htmlFor="video-input"
-                className="cursor-pointer block space-y-3"
-              >
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-8 md:p-12 text-center cursor-pointer transition-all ${
+                isDragActive
+                  ? 'border-birthday-purple bg-birthday-purple/10'
+                  : 'border-gray-300 hover:border-birthday-pink hover:bg-gray-50'
+              }`}
+            >
+              <input {...getInputProps()} ref={fileInputRef} />
+              <div className="space-y-3">
                 <div className="text-6xl">🎥</div>
-                <p className="text-lg font-medium">
-                  Clicca per selezionare un video
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Formati supportati: MP4, MOV (Max 10MB)
-                </p>
-                <button
-                  type="button"
-                  className="mt-4 inline-block rounded-md bg-birthday-purple px-6 py-2 text-white hover:bg-birthday-purple/90 transition-colors"
-                >
-                  Seleziona Video
-                </button>
-              </label>
+                {isDragActive ? (
+                  <p className="text-lg font-medium text-birthday-purple">
+                    Rilascia qui il video!
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-lg font-medium">
+                      Trascina qui un video oppure clicca per selezionare
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Formati supportati: MP4, MOV (Max 10MB)
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           )}
 

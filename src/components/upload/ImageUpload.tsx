@@ -5,13 +5,14 @@ import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 import imageCompression from 'browser-image-compression'
-import { uploadImageContent } from '@/actions/content'
+import { saveImageContentRecord } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import Image from 'next/image'
 import { checkUploadRateLimit } from '@/lib/utils'
 import { isMobileDevice, isCameraAvailable, getImageCompressionOptions } from '@/lib/mobile-utils'
 import { ImageTextOverlay } from './ImageTextOverlay'
 import { Camera, Image as ImageIcon, Type } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface ImageUploadProps {
   userId: string
@@ -145,6 +146,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     setLoading(true)
     setProgress(0)
 
+    let fileName = '' // Declare outside try block for cleanup access
+
     try {
       let fileToUpload = file
 
@@ -154,7 +157,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
 
       if (shouldCompress) {
         toast.info('Ottimizzazione immagine in corso... 🎨', {
-          description: isMobile 
+          description: isMobile
             ? 'Ottimizziamo la foto per il mobile! 📱'
             : 'Stiamo preparando la tua foto per renderla perfetta per Giuliana!'
         })
@@ -182,19 +185,76 @@ export function ImageUpload({ userId }: ImageUploadProps) {
 
       setProgress(10)
 
-      const formData = new FormData()
-      formData.append('file', fileToUpload)
+      // Upload directly to Supabase Storage (client-side)
+      const supabase = createClient()
 
-      setProgress(30)
-      const result = await uploadImageContent(formData)
-      setProgress(90)
+      // Generate unique filename
+      const fileExt = fileToUpload.name.split('.').pop()
+      fileName = `${userId}/${crypto.randomUUID()}.${fileExt}`
+
+      setProgress(15)
+      console.log('[Image Upload] Starting direct upload to Supabase Storage...')
+
+      // Upload file directly to Supabase Storage with retry logic
+      let uploadError: any
+      let uploadAttempts = 0
+      const maxRetries = 2
+
+      while (uploadAttempts <= maxRetries) {
+        const { error } = await supabase.storage
+          .from('content-media')
+          .upload(fileName, fileToUpload, {
+            contentType: fileToUpload.type,
+            upsert: false,
+          })
+
+        uploadError = error
+
+        if (!uploadError) {
+          break // Upload successful
+        }
+
+        uploadAttempts++
+        if (uploadAttempts <= maxRetries) {
+          console.log(`[Image Upload] Retry attempt ${uploadAttempts}/${maxRetries}...`)
+          toast.info('Riprovo il caricamento... 🔄', {
+            description: `Tentativo ${uploadAttempts} di ${maxRetries + 1}`
+          })
+          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1s before retry
+        }
+      }
+
+      if (uploadError) {
+        console.error('[Image Upload] Storage upload error:', uploadError)
+        toast.error('Errore durante il caricamento del file 📤', {
+          description: uploadError.message || 'Riprova tra un momento!'
+        })
+        setProgress(0)
+        setLoading(false)
+        return
+      }
+
+      setProgress(70)
+      console.log('[Image Upload] File uploaded successfully to Storage')
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('content-media')
+        .getPublicUrl(fileName)
+
+      console.log('[Image Upload] Public URL:', publicUrl)
+      setProgress(80)
+
+      // Save content record to database via server action
+      const result = await saveImageContentRecord(publicUrl)
+      setProgress(95)
 
       if (result.success) {
         const count = result.contentCount || 0
-        const countMessage = count === 1 
-          ? 'Questa è la tua prima foto! 🎊' 
+        const countMessage = count === 1
+          ? 'Questa è la tua prima foto! 🎊'
           : `Hai già caricato ${count} contenuti! Continua così! 🌟`
-        
+
         // Celebration confetti!
         const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
         confetti({
@@ -203,7 +263,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
           origin: { x: 0.5, y: 0.5 },
           colors,
         })
-        
+
         toast.success('🎉 La tua foto è stata caricata!', {
           description: `Giuliana la vedrà presto! ${countMessage}`,
           duration: 5000
@@ -211,12 +271,25 @@ export function ImageUpload({ userId }: ImageUploadProps) {
         handleRemove()
         setProgress(100)
       } else {
+        // If DB save fails, clean up the uploaded file
+        await supabase.storage.from('content-media').remove([fileName])
+
         toast.error('Ops! Qualcosa è andato storto 😔', {
           description: result.error || 'Riprova tra un momento, stiamo sistemando tutto per te!',
         })
         setProgress(0)
       }
     } catch (error) {
+      // Clean up on unexpected error
+      if (fileName) {
+        try {
+          const supabase = createClient()
+          await supabase.storage.from('content-media').remove([fileName])
+        } catch (cleanupError) {
+          console.error('[Image Upload] Cleanup error:', cleanupError)
+        }
+      }
+
       toast.error('Si è verificato un errore', {
         description: 'Non ti preoccupare, riprova tra un attimo! La tua foto è importante per Giuliana 📸💝'
       })

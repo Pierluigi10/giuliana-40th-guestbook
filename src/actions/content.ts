@@ -80,6 +80,86 @@ export async function uploadTextContent(textContent: string) {
   }
 }
 
+// New: Save image content record (client uploads file directly to Supabase Storage)
+export async function saveImageContentRecord(mediaUrl: string) {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Non autenticato' }
+    }
+
+    // Check rate limit: max 1 upload per minute
+    const { data: lastUpload } = await supabase
+      .from('content')
+      .select('created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle() as { data: { created_at: string } | null }
+
+    if (lastUpload) {
+      const elapsed = Date.now() - new Date(lastUpload.created_at).getTime()
+      const oneMinute = 60 * 1000
+
+      if (elapsed < oneMinute) {
+        const remainingSeconds = Math.ceil((oneMinute - elapsed) / 1000)
+        return {
+          success: false,
+          error: `Attendi ${remainingSeconds} secondi prima di caricare un altro contenuto`
+        }
+      }
+    }
+
+    if (!mediaUrl) {
+      return { success: false, error: 'URL del file mancante' }
+    }
+
+    // Insert content record
+    const imageData: ContentInsert = {
+      user_id: user.id,
+      type: 'image',
+      media_url: mediaUrl,
+      status: 'pending',
+    }
+    console.log('[Image Upload] Inserting content record...')
+    const { error: insertError } = await insertContent(supabase, imageData)
+
+    if (insertError) {
+      console.error('[Image Upload] Database insert error:', insertError)
+      return { success: false, error: 'Errore durante il salvataggio' }
+    }
+    console.log('[Image Upload] Content record inserted successfully')
+
+    // Send email notification to admin (non-blocking)
+    console.log('[Image Upload] Sending email notification...')
+    const { data: profile } = await selectFullProfileById(supabase, user.id)
+    if (profile) {
+      await sendContentNotification({
+        userName: profile.full_name,
+        userEmail: profile.email,
+        contentType: 'image',
+      })
+    }
+    console.log('[Image Upload] Email notification completed')
+
+    // Get user content count for feedback message
+    const { count } = await getUserContentCount(supabase, user.id)
+    const contentCount = count || 0
+
+    revalidatePath('/guest/upload')
+    console.log('[Image Upload] Upload completed successfully!')
+    return { success: true, contentCount }
+  } catch (error) {
+    console.error('[Image Upload] Unexpected error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Errore del server'
+    return { success: false, error: errorMessage }
+  }
+}
+
+// Deprecated: Use saveImageContentRecord instead (kept for backward compatibility)
 export async function uploadImageContent(formData: FormData) {
   try {
     const supabase = await createClient()
@@ -206,6 +286,86 @@ export async function uploadImageContent(formData: FormData) {
   }
 }
 
+// New: Save video content record (client uploads file directly to Supabase Storage)
+export async function saveVideoContentRecord(mediaUrl: string) {
+  try {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Non autenticato' }
+    }
+
+    // Check rate limit: max 1 upload per minute
+    const { data: lastUpload } = await supabase
+      .from('content')
+      .select('created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle() as { data: { created_at: string } | null }
+
+    if (lastUpload) {
+      const elapsed = Date.now() - new Date(lastUpload.created_at).getTime()
+      const oneMinute = 60 * 1000
+
+      if (elapsed < oneMinute) {
+        const remainingSeconds = Math.ceil((oneMinute - elapsed) / 1000)
+        return {
+          success: false,
+          error: `Attendi ${remainingSeconds} secondi prima di caricare un altro contenuto`
+        }
+      }
+    }
+
+    if (!mediaUrl) {
+      return { success: false, error: 'URL del file mancante' }
+    }
+
+    // Insert content record
+    const videoData: ContentInsert = {
+      user_id: user.id,
+      type: 'video',
+      media_url: mediaUrl,
+      status: 'pending',
+    }
+    console.log('[Video Upload] Inserting content record...')
+    const { error: insertError } = await insertContent(supabase, videoData)
+
+    if (insertError) {
+      console.error('[Video Upload] Database insert error:', insertError)
+      return { success: false, error: 'Errore durante il salvataggio' }
+    }
+    console.log('[Video Upload] Content record inserted successfully')
+
+    // Send email notification to admin (non-blocking)
+    console.log('[Video Upload] Sending email notification...')
+    const { data: profile } = await selectFullProfileById(supabase, user.id)
+    if (profile) {
+      await sendContentNotification({
+        userName: profile.full_name,
+        userEmail: profile.email,
+        contentType: 'video',
+      })
+    }
+    console.log('[Video Upload] Email notification completed')
+
+    // Get user content count for feedback message
+    const { count } = await getUserContentCount(supabase, user.id)
+    const contentCount = count || 0
+
+    revalidatePath('/guest/upload')
+    console.log('[Video Upload] Upload completed successfully!')
+    return { success: true, contentCount }
+  } catch (error) {
+    console.error('[Video Upload] Unexpected error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Errore del server'
+    return { success: false, error: errorMessage }
+  }
+}
+
+// Deprecated: Use saveVideoContentRecord instead (kept for backward compatibility)
 export async function uploadVideoContent(formData: FormData) {
   try {
     const supabase = await createClient()
@@ -259,7 +419,7 @@ export async function uploadVideoContent(formData: FormData) {
     const fileName = `${user.id}/${crypto.randomUUID()}.${fileExt}`
 
     // Upload to storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('content-media')
       .upload(fileName, file, {
         contentType: file.type,
