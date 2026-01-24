@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { TopLoadingBar } from '@/components/loading/TopLoadingBar'
+import { GlobalErrorBoundary } from '@/components/error-boundary'
 import './globals.css'
 import './nprogress-styles.css'
 
@@ -91,9 +92,11 @@ export default function RootLayout({
   return (
     <html lang="it">
       <body className={inter.className} suppressHydrationWarning>
-        <TopLoadingBar />
-        {children}
-        <Toaster position="top-center" richColors />
+        <GlobalErrorBoundary>
+          <TopLoadingBar />
+          {children}
+          <Toaster position="top-center" richColors />
+        </GlobalErrorBoundary>
       </body>
     </html>
   )
