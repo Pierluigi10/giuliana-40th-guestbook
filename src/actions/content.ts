@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import type { ContentInsert, ContentUpdate } from '@/lib/supabase/types'
 import { insertContent, updateContent, selectProfileById, selectFullProfileById, getUserContentCount } from '@/lib/supabase/queries'
 import { sendContentNotification, sendApprovalNotification } from '@/lib/email'
+import { validateImageMetadata, validateVideoMetadata } from '@/lib/media-validation'
 
 export async function uploadTextContent(textContent: string) {
   try {
@@ -118,6 +119,17 @@ export async function saveImageContentRecord(mediaUrl: string) {
     if (!mediaUrl) {
       return { success: false, error: 'URL del file mancante' }
     }
+
+    // SERVER-SIDE VALIDATION: Verify file metadata and permissions
+    console.log('[Image Upload] Validating file metadata...')
+    const validation = await validateImageMetadata(mediaUrl, user.id)
+
+    if (!validation.valid) {
+      console.error('[Image Upload] Validation failed:', validation.error)
+      return { success: false, error: validation.error || 'File non valido' }
+    }
+
+    console.log('[Image Upload] Validation passed:', validation.metadata)
 
     // Insert content record
     const imageData: ContentInsert = {
@@ -326,6 +338,17 @@ export async function saveVideoContentRecord(mediaUrl: string) {
     if (!mediaUrl) {
       return { success: false, error: 'URL del file mancante' }
     }
+
+    // SERVER-SIDE VALIDATION: Verify file metadata and permissions
+    console.log('[Video Upload] Validating file metadata...')
+    const validation = await validateVideoMetadata(mediaUrl, user.id)
+
+    if (!validation.valid) {
+      console.error('[Video Upload] Validation failed:', validation.error)
+      return { success: false, error: validation.error || 'File non valido' }
+    }
+
+    console.log('[Video Upload] Validation passed:', validation.metadata)
 
     // Insert content record
     const videoData: ContentInsert = {
