@@ -165,16 +165,23 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
 
   const canDelete = userRole === 'admin' || content.user_id === userId
 
-  // Colori pastello soft per gli sfondi
-  const backgroundColors = [
-    'bg-pink-50',
-    'bg-purple-50',
-    'bg-rose-50',
-    'bg-indigo-50',
-    'bg-fuchsia-50',
+  // Gradienti soft per gli sfondi (più interessanti dei colori piatti)
+  const backgroundGradients = [
+    'bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100',
+    'bg-gradient-to-br from-purple-50 via-indigo-50 to-purple-100',
+    'bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-100',
+    'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-100',
+    'bg-gradient-to-br from-fuchsia-50 via-pink-50 to-rose-100',
   ]
 
-  const bgColor = backgroundColors[content.id.charCodeAt(0) % backgroundColors.length]
+  const bgGradient = backgroundGradients[content.id.charCodeAt(0) % backgroundGradients.length]
+
+  // Badge icone per tipo di contenuto
+  const contentTypeConfig = {
+    text: { icon: '📝', label: 'Messaggio', ariaLabel: 'Contenuto di tipo messaggio' },
+    image: { icon: '📸', label: 'Foto', ariaLabel: 'Contenuto di tipo foto' },
+    video: { icon: '🎥', label: 'Video', ariaLabel: 'Contenuto di tipo video' },
+  }
 
   return (
     <motion.div
@@ -194,20 +201,55 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
     >
       {/* Content - Prominente, stile Pinterest */}
       <div className="relative">
+        {/* Badge tipo contenuto - visibile nell'angolo in alto a sinistra */}
+        <div
+          className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-md flex items-center gap-1.5"
+          role="status"
+          aria-label={contentTypeConfig[content.type].ariaLabel}
+        >
+          <span className="text-sm" aria-hidden="true">
+            {contentTypeConfig[content.type].icon}
+          </span>
+          <span className="text-xs font-semibold text-gray-700 hidden sm:inline">
+            {contentTypeConfig[content.type].label}
+          </span>
+        </div>
+
         {content.type === 'text' && (
-          <div className={`${bgColor} p-6 md:p-8`}>
-            <p
-              className="text-gray-800 text-base md:text-lg leading-relaxed italic whitespace-pre-wrap"
+          <div className={`${bgGradient} p-6 md:p-8 relative`}>
+            {/* Virgoletta SVG decorativa - inizio */}
+            <svg
+              className="absolute top-4 left-4 w-8 h-8 md:w-10 md:h-10 text-birthday-purple/20"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              "{DOMPurify.sanitize(previewText || '', {
+              <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+            </svg>
+
+            <p
+              className="text-gray-800 text-base md:text-lg leading-relaxed font-serif relative z-10 px-4 md:px-6 whitespace-pre-wrap"
+            >
+              {DOMPurify.sanitize(previewText || '', {
                 ALLOWED_TAGS: [],
                 ALLOWED_ATTR: []
-              })}"
+              })}
             </p>
+
+            {/* Virgoletta SVG decorativa - fine */}
+            <svg
+              className="absolute bottom-4 right-4 w-8 h-8 md:w-10 md:h-10 text-birthday-purple/20 rotate-180"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+            </svg>
+
             {isLongText && (
               <button
                 onClick={() => setShowFullText(true)}
-                className="mt-4 text-sm text-birthday-purple hover:text-birthday-pink font-semibold transition-colors"
+                className="mt-4 text-sm text-birthday-purple hover:text-birthday-pink font-semibold transition-colors relative z-10"
               >
                 Leggi tutto →
               </button>
@@ -216,62 +258,88 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         )}
 
         {content.type === 'image' && content.media_url && (
-          <motion.div
-            className="relative overflow-hidden cursor-pointer group bg-black"
-            onClick={onOpenLightbox}
-          >
-            <Image
-              src={content.media_url}
-              alt="Content"
-              width={800}
-              height={600}
-              loading="lazy"
-              className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-            />
+          <div>
             <motion.div
-              className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
+              className="relative overflow-hidden cursor-pointer group bg-black"
+              onClick={onOpenLightbox}
             >
-              <motion.span
-                className="text-white text-sm bg-black/70 px-4 py-2 rounded-full backdrop-blur-sm"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ opacity: 1, scale: 1 }}
+              <Image
+                src={content.media_url}
+                alt="Content"
+                width={800}
+                height={600}
+                loading="lazy"
+                className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <motion.div
+                className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center"
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
                 transition={{ duration: 0.2 }}
               >
-                Clicca per ingrandire
-              </motion.span>
+                <motion.span
+                  className="text-white text-sm bg-black/70 px-4 py-2 rounded-full backdrop-blur-sm"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileHover={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  Clicca per ingrandire
+                </motion.span>
+              </motion.div>
             </motion.div>
-          </motion.div>
+            {/* Caption se presente text_content */}
+            {content.text_content && (
+              <div className="px-4 py-3 bg-gray-50">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {DOMPurify.sanitize(content.text_content, {
+                    ALLOWED_TAGS: [],
+                    ALLOWED_ATTR: []
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {content.type === 'video' && content.media_url && (
-          <motion.div
-            className="relative overflow-hidden cursor-pointer bg-black"
-            onClick={onOpenLightbox}
-          >
-            <video
-              src={content.media_url}
-              className="w-full h-48 object-cover"
-              preload="metadata"
-            />
+          <div>
             <motion.div
-              className="absolute inset-0 flex items-center justify-center bg-black/30"
-              whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-              transition={{ duration: 0.2 }}
+              className="relative overflow-hidden cursor-pointer bg-black"
+              onClick={onOpenLightbox}
             >
+              <video
+                src={content.media_url}
+                className="w-full h-48 object-cover"
+                preload="metadata"
+              />
               <motion.div
-                className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 1)' }}
+                className="absolute inset-0 flex items-center justify-center bg-black/30"
+                whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
                 transition={{ duration: 0.2 }}
               >
-                <svg className="w-8 h-8 text-birthday-purple ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
+                <motion.div
+                  className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 1)' }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <svg className="w-8 h-8 text-birthday-purple ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </motion.div>
               </motion.div>
             </motion.div>
-          </motion.div>
+            {/* Caption se presente text_content */}
+            {content.text_content && (
+              <div className="px-4 py-3 bg-gray-50">
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {DOMPurify.sanitize(content.text_content, {
+                    ALLOWED_TAGS: [],
+                    ALLOWED_ATTR: []
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Delete button overlay - top right */}
@@ -472,13 +540,33 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
               </div>
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
-            <p className="text-gray-800 text-lg leading-relaxed italic whitespace-pre-wrap">
-              "{DOMPurify.sanitize(content.text_content || '', {
+          <div className="mt-4 relative px-8">
+            {/* Virgoletta SVG decorativa - inizio */}
+            <svg
+              className="absolute top-0 left-0 w-10 h-10 text-birthday-purple/20"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+            </svg>
+
+            <p className="text-gray-800 text-lg leading-relaxed font-serif whitespace-pre-wrap">
+              {DOMPurify.sanitize(content.text_content || '', {
                 ALLOWED_TAGS: [],
                 ALLOWED_ATTR: []
-              })}"
+              })}
             </p>
+
+            {/* Virgoletta SVG decorativa - fine */}
+            <svg
+              className="absolute bottom-0 right-0 w-10 h-10 text-birthday-purple/20 rotate-180"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+            </svg>
           </div>
         </DialogContent>
       </Dialog>

@@ -365,6 +365,31 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       {/* Masonry Grid */}
       {isLoading ? (
         <ContentCardSkeletonGrid count={9} />
+      ) : filteredContent.length === 0 ? (
+        // Empty state per filtri specifici
+        <motion.div
+          key={filter}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white rounded-lg shadow-lg p-12 text-center"
+        >
+          <div className="text-6xl mb-4">
+            {filter === 'text' && '✍️'}
+            {filter === 'image' && '📸'}
+            {filter === 'video' && '🎥'}
+          </div>
+          <h3 className="text-2xl font-bold mb-2">
+            {filter === 'text' && 'Ancora nessun messaggio'}
+            {filter === 'image' && 'Ancora nessuna foto'}
+            {filter === 'video' && 'Ancora nessun video'}
+          </h3>
+          <p className="text-muted-foreground">
+            {filter === 'text' && 'Sii il primo a lasciare un messaggio! ✨'}
+            {filter === 'image' && 'Condividi i tuoi ricordi in foto! 📷'}
+            {filter === 'video' && 'Dai inizio alle danze con un video! 🎬'}
+          </p>
+        </motion.div>
       ) : (
         <>
           <AnimatePresence mode="wait">
