@@ -192,21 +192,13 @@ export function GalleryTutorial({ userId }: GalleryTutorialProps) {
           {/* Action buttons */}
           <div className="flex flex-col gap-3">
             {currentStep === 'upload-cta' ? (
-              <>
-                <button
-                  onClick={handleUploadRedirect}
-                  className="w-full px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md"
-                >
-                  <Upload className="w-5 h-5" />
-                  Carica contenuto
-                </button>
-                <button
-                  onClick={handleNext}
-                  className="w-full px-6 py-3 text-base font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Continua il tour
-                </button>
-              </>
+              <button
+                onClick={handleUploadRedirect}
+                className="w-full px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md"
+              >
+                <Upload className="w-5 h-5" />
+                Carica contenuto
+              </button>
             ) : currentStep === 'complete' ? (
               <button
                 onClick={handleComplete}
