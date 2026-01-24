@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react'
 import type { VIPStats } from '@/lib/supabase/queries'
 import { Card } from '@/components/ui/card'
 import { MilestoneCelebrations } from './MilestoneCelebrations'
+import { fetchWithRetry, analyzeNetworkError } from '@/lib/network-errors'
+import { toast } from 'sonner'
 
 interface StatsDashboardProps {
   initialStats: VIPStats | null
@@ -16,17 +18,33 @@ export function StatsDashboard({ initialStats }: StatsDashboardProps) {
 
   // Refresh stats periodically (every 30 seconds)
   useEffect(() => {
+    let failureCount = 0
+    const maxFailures = 3
+
     const interval = setInterval(async () => {
       try {
         setIsRefreshing(true)
-        const response = await fetch('/api/vip/stats')
-        if (response.ok) {
-          const data = await response.json()
-          previousStats.current = stats
-          setStats(data)
-        }
+        const response = await fetchWithRetry('/api/vip/stats', {
+          timeout: 10000,
+          maxRetries: 1
+        })
+
+        const data = await response.json()
+        previousStats.current = stats
+        setStats(data)
+        failureCount = 0 // Reset on success
       } catch (error) {
-        console.error('Failed to refresh stats:', error)
+        console.error('[StatsDashboard] Failed to refresh stats:', error)
+        failureCount++
+
+        // Show error toast only after multiple failures
+        if (failureCount >= maxFailures) {
+          const errorInfo = analyzeNetworkError(error)
+          toast.error('Aggiornamento statistiche non riuscito', {
+            description: errorInfo.userMessage,
+            duration: 3000
+          })
+        }
         // Keep showing previous stats on error
       } finally {
         setIsRefreshing(false)
@@ -34,7 +52,7 @@ export function StatsDashboard({ initialStats }: StatsDashboardProps) {
     }, 30000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [stats])
 
   if (!stats) {
     return (

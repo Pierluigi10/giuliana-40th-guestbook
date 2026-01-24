@@ -6,6 +6,7 @@ import { approveContent, rejectContent, bulkApproveContent, bulkRejectContent } 
 import { Spinner } from '@/components/loading/Spinner'
 import Image from 'next/image'
 import DOMPurify from 'isomorphic-dompurify'
+import { analyzeNetworkError } from '@/lib/network-errors'
 
 interface Content {
   id: string
@@ -108,11 +109,17 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
           return next
         })
       } else {
-        toast.error(result.error || 'Errore durante l\'approvazione')
+        const errorInfo = analyzeNetworkError(result.error)
+        toast.error('Errore approvazione', {
+          description: errorInfo.userMessage
+        })
       }
     } catch (error) {
-      toast.error('Si è verificato un errore')
-      console.error(error)
+      console.error('[ContentModeration] Approve error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Errore approvazione', {
+        description: errorInfo.userMessage
+      })
     } finally {
       setLoadingId(null)
     }
@@ -133,11 +140,17 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
           return next
         })
       } else {
-        toast.error(result.error || 'Errore durante il rifiuto')
+        const errorInfo = analyzeNetworkError(result.error)
+        toast.error('Errore rifiuto', {
+          description: errorInfo.userMessage
+        })
       }
     } catch (error) {
-      toast.error('Si è verificato un errore')
-      console.error(error)
+      console.error('[ContentModeration] Reject error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Errore rifiuto', {
+        description: errorInfo.userMessage
+      })
     } finally {
       setLoadingId(null)
     }
@@ -179,11 +192,17 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
         setContent((prev) => prev.filter((item) => !selectedIds.has(item.id)))
         setSelectedIds(new Set())
       } else {
-        toast.error(result.error || 'Errore durante l\'approvazione')
+        const errorInfo = analyzeNetworkError(result.error)
+        toast.error('Errore approvazione multipla', {
+          description: errorInfo.userMessage
+        })
       }
     } catch (error) {
-      toast.error('Si è verificato un errore')
-      console.error(error)
+      console.error('[ContentModeration] Bulk approve error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Errore approvazione multipla', {
+        description: errorInfo.userMessage
+      })
     } finally {
       setBulkLoading(false)
     }
@@ -205,11 +224,17 @@ export function ContentModerationQueue({ initialContent }: ContentModerationQueu
         setContent((prev) => prev.filter((item) => !selectedIds.has(item.id)))
         setSelectedIds(new Set())
       } else {
-        toast.error(result.error || 'Errore durante il rifiuto')
+        const errorInfo = analyzeNetworkError(result.error)
+        toast.error('Errore rifiuto multiplo', {
+          description: errorInfo.userMessage
+        })
       }
     } catch (error) {
-      toast.error('Si è verificato un errore')
-      console.error(error)
+      console.error('[ContentModeration] Bulk reject error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Errore rifiuto multiplo', {
+        description: errorInfo.userMessage
+      })
     } finally {
       setBulkLoading(false)
     }

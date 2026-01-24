@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Download, FileArchive, FileText, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { fetchWithRetry, analyzeNetworkError } from '@/lib/network-errors'
 
 export function ExportContent() {
   const [isExporting, setIsExporting] = useState(false)
@@ -15,17 +16,15 @@ export function ExportContent() {
     setExportFormat(format)
 
     try {
-      const response = await fetch(`/api/admin/export?format=${format}`)
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Export failed')
-      }
+      const response = await fetchWithRetry(`/api/admin/export?format=${format}`, {
+        timeout: 60000, // 60 seconds for large exports
+        maxRetries: 1
+      })
 
       // Get filename from Content-Disposition header or use default
       const contentDisposition = response.headers.get('Content-Disposition')
       let filename = `guestbook-export-${new Date().toISOString().split('T')[0]}.${format === 'zip' ? 'zip' : 'pdf'}`
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/)
         if (filenameMatch) {
@@ -50,12 +49,11 @@ export function ExportContent() {
           : 'Export PDF completato con successo!'
       )
     } catch (error) {
-      console.error('Export error:', error)
-      toast.error(
-        error instanceof Error
-          ? `Errore durante l'export: ${error.message}`
-          : "Errore durante l'export"
-      )
+      console.error('[ExportContent] Export error:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Errore durante l\'export', {
+        description: errorInfo.userMessage
+      })
     } finally {
       setIsExporting(false)
       setExportFormat(null)

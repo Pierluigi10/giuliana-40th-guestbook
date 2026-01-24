@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { AlertTriangle, Database, Image, Video } from 'lucide-react'
+import { fetchWithRetry, analyzeNetworkError } from '@/lib/network-errors'
+import { toast } from 'sonner'
 
 interface StorageStats {
   totalMB: number
@@ -24,13 +26,19 @@ export function StorageMonitor() {
 
   async function fetchStats() {
     try {
-      const res = await fetch('/api/storage/stats')
-      if (res.ok) {
-        const data = await res.json()
-        setStats(data)
-      }
+      const res = await fetchWithRetry('/api/storage/stats', {
+        timeout: 10000,
+        maxRetries: 2
+      })
+      const data = await res.json()
+      setStats(data)
     } catch (error) {
-      console.error('Failed to fetch storage stats:', error)
+      console.error('[StorageMonitor] Failed to fetch stats:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Caricamento statistiche storage non riuscito', {
+        description: errorInfo.userMessage,
+        duration: 4000
+      })
     } finally {
       setLoading(false)
     }

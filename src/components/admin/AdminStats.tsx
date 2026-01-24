@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { Users, FileText, Image, Video, CheckCircle, XCircle, Clock, TrendingUp, Activity } from 'lucide-react'
 import type { AdminStats } from '@/lib/supabase/queries'
+import { fetchWithRetry, analyzeNetworkError } from '@/lib/network-errors'
+import { toast } from 'sonner'
 
 export function AdminStats() {
   const [stats, setStats] = useState<AdminStats | null>(null)
@@ -14,13 +16,19 @@ export function AdminStats() {
 
   async function fetchStats() {
     try {
-      const res = await fetch('/api/admin/stats')
-      if (res.ok) {
-        const data = await res.json()
-        setStats(data)
-      }
+      const res = await fetchWithRetry('/api/admin/stats', {
+        timeout: 10000,
+        maxRetries: 2
+      })
+      const data = await res.json()
+      setStats(data)
     } catch (error) {
-      console.error('Failed to fetch admin stats:', error)
+      console.error('[AdminStats] Failed to fetch stats:', error)
+      const errorInfo = analyzeNetworkError(error)
+      toast.error('Caricamento statistiche non riuscito', {
+        description: errorInfo.userMessage,
+        duration: 4000
+      })
     } finally {
       setLoading(false)
     }
