@@ -11,6 +11,7 @@ import { isMobileDevice, isCameraAvailable } from '@/lib/mobile-utils'
 import { Camera, Video } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { analyzeNetworkError, uploadWithRetry } from '@/lib/network-errors'
+import { compressVideo } from '@/lib/video-compression'
 
 interface VideoUploadProps {
   userId: string
@@ -21,6 +22,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [isCompressing, setIsCompressing] = useState(false)
+  const [compressionProgress, setCompressionProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [cameraAvailable, setCameraAvailable] = useState(false)
   const mobileFileInputRef = useRef<HTMLInputElement>(null)
@@ -160,25 +163,85 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     setLoading(true)
     setProgress(5)
 
+    let fileToUpload = file
+    let compressionSkipped = false
+
+    // STEP 1: Comprimi video se > 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      setIsCompressing(true)
+      setProgress(5)
+
+      toast.info('Compressione video... 🎬', {
+        description: 'Ottimizzazione in corso per Giuliana!'
+      })
+
+      try {
+        console.log('[Video Upload] Starting compression...')
+
+        fileToUpload = await compressVideo(file, {
+          quality: 'medium',
+          onProgress: (prog) => {
+            setCompressionProgress(prog)
+            setProgress(5 + (prog * 0.4)) // 5% → 45%
+          }
+        })
+
+        setIsCompressing(false)
+        setProgress(50)
+
+        const originalMB = (file.size / 1024 / 1024).toFixed(2)
+        const compressedMB = (fileToUpload.size / 1024 / 1024).toFixed(2)
+
+        toast.success('Video compresso! 📦', {
+          description: `${originalMB}MB → ${compressedMB}MB`
+        })
+
+      } catch (compressionError) {
+        console.error('[Video Upload] Compression failed:', compressionError)
+
+        toast.warning('Compressione fallita ⚠️', {
+          description: 'Continuo con video originale'
+        })
+
+        fileToUpload = file
+        compressionSkipped = true
+        setIsCompressing(false)
+        setProgress(10)
+      }
+    } else {
+      setProgress(10)
+    }
+
+    // Validate file size after compression (must be < 10MB)
+    if (fileToUpload.size > 10 * 1024 * 1024) {
+      toast.error('Video ancora troppo grande! 📏', {
+        description: compressionSkipped
+          ? 'Compressione fallita. Riduci dimensioni manualmente.'
+          : 'Video supera 10MB anche dopo compressione'
+      })
+      setLoading(false)
+      setIsCompressing(false)
+      return
+    }
+
     let fileName = ''
 
     try {
-      // Upload directly to Supabase Storage (client-side)
+      // STEP 2: Upload to Supabase Storage
       const supabase = createClient()
 
       // Generate unique filename
-      const fileExt = file.name.split('.').pop()
+      const fileExt = fileToUpload.name.split('.').pop()
       fileName = `${userId}/${crypto.randomUUID()}.${fileExt}`
 
-      setProgress(10)
       console.log('[Video Upload] Starting direct upload to Supabase Storage...')
 
       // Upload file directly to Supabase Storage with retry logic
       const uploadResult = await uploadWithRetry(
         () => supabase.storage
           .from('content-media')
-          .upload(fileName, file, {
-            contentType: file.type,
+          .upload(fileName, fileToUpload, {
+            contentType: fileToUpload.type,
             upsert: false,
           }),
         {
@@ -289,6 +352,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       setProgress(0)
     } finally {
       setLoading(false)
+      setIsCompressing(false)
+      setCompressionProgress(0)
     }
   }
 
@@ -420,8 +485,26 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         </div>
       )}
 
-      {/* Progress Bar - Enhanced for Mobile */}
-      {loading && (
+      {/* Compression Progress */}
+      {isCompressing && (
+        <div className="space-y-3 mb-4">
+          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-birthday-gold via-birthday-purple to-birthday-pink h-full transition-all duration-300 ease-out"
+              style={{ width: `${compressionProgress}%` }}
+            />
+          </div>
+          <p className="text-sm text-center text-foreground font-medium">
+            🎬 Compressione video: {compressionProgress}%
+          </p>
+          <p className="text-xs text-center text-muted-foreground">
+            Attendere prego... Può richiedere fino a 30 secondi
+          </p>
+        </div>
+      )}
+
+      {/* Upload Progress Bar - Enhanced for Mobile */}
+      {loading && !isCompressing && (
         <div className="space-y-3">
           <div className="w-full bg-gray-200 rounded-full overflow-hidden" style={{ height: isMobile ? '8px' : '6px' }}>
             <div
