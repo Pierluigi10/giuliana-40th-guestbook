@@ -30,7 +30,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  const maxSize = 10 * 1024 * 1024 // 10MB
+  const maxSize = 15 * 1024 * 1024 // 15MB
 
   useEffect(() => {
     setIsMobile(isMobileDevice())
@@ -59,7 +59,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
     if (file.size > maxSize) {
       toast.error('Video troppo grande! 📏', {
-        description: 'Il file supera i 10MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
+        description: 'Il file supera i 15MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
       })
       return
     }
@@ -95,7 +95,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.size > maxSize) {
       toast.error('Video troppo grande! 📏', {
-        description: 'Il file supera i 10MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
+        description: 'Il file supera i 15MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
       })
       return
     }
@@ -166,8 +166,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     let fileToUpload = file
     let compressionSkipped = false
 
-    // STEP 1: Comprimi video se > 5MB
-    if (file.size > 5 * 1024 * 1024) {
+    // STEP 1: Comprimi video se > 10MB
+    if (file.size > 10 * 1024 * 1024) {
       setIsCompressing(true)
       setProgress(5)
 
@@ -212,12 +212,12 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       setProgress(10)
     }
 
-    // Validate file size after compression (must be < 10MB)
-    if (fileToUpload.size > 10 * 1024 * 1024) {
+    // Validate file size after compression (must be < 15MB)
+    if (fileToUpload.size > 15 * 1024 * 1024) {
       toast.error('Video ancora troppo grande! 📏', {
         description: compressionSkipped
           ? 'Compressione fallita. Riduci dimensioni manualmente.'
-          : 'Video supera 10MB anche dopo compressione'
+          : 'Video supera 15MB anche dopo compressione'
       })
       setLoading(false)
       setIsCompressing(false)
@@ -389,7 +389,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                       Trascina qui un video oppure clicca per selezionare
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Formati supportati: MP4, MOV (Max 10MB)
+                      Formati supportati: MP4, MOV • Max 15MB • Compressione automatica se necessario
                     </p>
                   </>
                 )}

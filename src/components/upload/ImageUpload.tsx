@@ -367,7 +367,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
                     {isMobile ? 'Cattura un momento speciale ✨' : 'Cattura un ricordo indimenticabile per Giuliana'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {isMobile ? 'Trascina o scegli una foto' : 'Trascina qui oppure clicca per selezionare'} • Max 10MB
+                    {isMobile ? 'Trascina o scegli una foto' : 'Trascina qui oppure clicca per selezionare'} • Max 10MB • Compressione automatica
                   </p>
                 </>
               )}
