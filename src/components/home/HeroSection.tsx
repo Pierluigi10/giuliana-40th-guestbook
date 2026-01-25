@@ -158,27 +158,36 @@ export function HeroSection() {
 
         {/* CTA Buttons */}
         <motion.div
-          className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4 px-4 w-full"
+          className="flex flex-col items-center justify-center gap-4 pt-4 px-4 w-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.8 }}
         >
-          <Link
-            href="/login"
-            aria-label="Accedi al guestbook"
-            className="group relative inline-flex items-center justify-center w-full sm:w-auto min-w-[200px] min-h-[44px] px-8 py-4 font-bold text-white transition-all duration-200 bg-birthday-pink rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-birthday-pink hover:bg-birthday-pink/90 touch-manipulation"
-          >
-            <span className="absolute inset-0 w-full h-full mt-1 ml-1 transition-all duration-300 ease-in-out bg-birthday-purple rounded-xl group-hover:mt-0 group-hover:ml-0 -z-10"></span>
-            <span className="absolute inset-0 w-full h-full bg-white rounded-xl -z-20"></span>
+          {/* Primary CTA con sottotitolo */}
+          <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
+            <Link
+              href="/login"
+              aria-label="Accedi al guestbook"
+              className="group relative inline-flex items-center justify-center w-full sm:w-auto min-w-[200px] min-h-[44px] px-8 py-4 font-bold text-white transition-all duration-200 bg-birthday-pink rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-birthday-pink hover:bg-birthday-pink/90 touch-manipulation"
+            >
+              <span className="absolute inset-0 w-full h-full mt-1 ml-1 transition-all duration-300 ease-in-out bg-birthday-purple rounded-xl group-hover:mt-0 group-hover:ml-0 -z-10"></span>
+              <span className="absolute inset-0 w-full h-full bg-white rounded-xl -z-20"></span>
 
-            <Heart
-              className="w-5 h-5 mr-3 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12"
-              fill="currentColor"
-            />
+              <Heart
+                className="w-5 h-5 mr-3 transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12"
+                fill="currentColor"
+              />
 
-            Regala un ricordo
-          </Link>
+              Regala un ricordo
+            </Link>
 
+            {/* Sottotitolo discreto */}
+            <p className="text-xs text-muted-foreground text-center">
+              Hai già un account? <span className="font-medium text-birthday-purple">Accedi qui sopra</span>
+            </p>
+          </div>
+
+          {/* Secondary CTA - Registrazione */}
           <Button
             asChild
             size="lg"
