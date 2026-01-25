@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff } from 'lucide-react'
+import { registerSchema } from '@/lib/validation/schemas'
 
 export function RegisterForm() {
   const router = useRouter()
@@ -161,15 +162,23 @@ export function RegisterForm() {
     e.preventDefault()
     setError(null)
 
-    // Honeypot check - if filled, it's a bot
-    if (website) {
-      setError('Registrazione non valida')
+    // Final Zod validation (in addition to real-time validation)
+    const validationResult = registerSchema.safeParse({
+      email,
+      password,
+      fullName,
+      website,
+    })
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]
+      setError(firstError.message)
       return
     }
 
-    // Final validation check (should already be validated by real-time validation)
-    if (!isFormValid()) {
-      setError('Compila correttamente tutti i campi')
+    // Additional check: confirm password match (not in registerSchema)
+    if (password !== confirmPassword) {
+      setError('Le password non coincidono')
       return
     }
 

@@ -8,6 +8,7 @@ import { uploadTextContent } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import { checkUploadRateLimit } from '@/lib/utils'
 import { analyzeNetworkError } from '@/lib/network-errors'
+import { textContentSchema } from '@/lib/validation/schemas'
 
 interface TextUploadProps {
   userId: string
@@ -35,7 +36,11 @@ export function TextUpload({ userId }: TextUploadProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!isValid) {
+    // Final Zod validation (in addition to real-time validation)
+    const validationResult = textContentSchema.safeParse(text)
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]
+
       // Trigger shake animation
       setShouldShake(true)
       setTimeout(() => setShouldShake(false), 400)
@@ -45,7 +50,7 @@ export function TextUpload({ userId }: TextUploadProps) {
         navigator.vibrate(200)
       }
 
-      toast.error('Il messaggio deve essere tra 10 e 1000 caratteri', {
+      toast.error(firstError.message, {
         description: 'Aggiungi qualche parola in più per rendere il messaggio ancora più speciale! 💝'
       })
       return

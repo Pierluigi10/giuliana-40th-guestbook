@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import type { Database } from '@/types/database'
+import { registerSchema } from '@/lib/validation/schemas'
 
 // Create admin client with service role key for auto-confirming emails
 function createAdminClient() {
@@ -169,47 +170,37 @@ export function getBlockedAttempts(): BlockedAttempt[] {
 
 export async function POST(request: Request) {
   try {
-    const { email, password, fullName, website } = await request.json()
+    const body = await request.json()
     const clientIp = getClientIp(request)
     const userAgent = request.headers.get('user-agent') || 'unknown'
 
-    // Honeypot check - if filled, it's a bot
-    if (website) {
-      logBlockedAttempt(clientIp, email || 'unknown', 'honeypot', userAgent)
+    // Validate request body with Zod schema
+    const validationResult = registerSchema.safeParse(body)
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.issues
+      const firstError = errors[0]
+
+      // Log blocked attempt if honeypot was triggered
+      if (firstError.path.includes('website')) {
+        logBlockedAttempt(clientIp, body.email || 'unknown', 'honeypot', userAgent)
+      }
+
       return NextResponse.json(
-        { error: 'Registrazione non valida' },
+        { error: firstError.message },
         { status: 400 }
       )
     }
 
-    // Rate limiting check
+    // Extract validated data
+    const { email, password, fullName } = validationResult.data
+
+    // Rate limiting check (business logic, not validation)
     if (!checkRateLimit(clientIp)) {
-      logBlockedAttempt(clientIp, email || 'unknown', 'rate_limit', userAgent)
+      logBlockedAttempt(clientIp, email, 'rate_limit', userAgent)
       return NextResponse.json(
         { error: 'Troppe registrazioni. Riprova tra 10 minuti.' },
         { status: 429 }
-      )
-    }
-
-    // Validation
-    if (!email || !password || !fullName) {
-      return NextResponse.json(
-        { error: 'Tutti i campi sono obbligatori' },
-        { status: 400 }
-      )
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { error: 'La password deve contenere almeno 6 caratteri' },
-        { status: 400 }
-      )
-    }
-
-    if (fullName.trim().length < 2) {
-      return NextResponse.json(
-        { error: 'Inserisci nome e cognome validi' },
-        { status: 400 }
       )
     }
 

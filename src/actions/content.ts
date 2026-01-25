@@ -6,6 +6,7 @@ import type { ContentInsert, ContentUpdate } from '@/lib/supabase/types'
 import { insertContent, updateContent, selectProfileById, selectFullProfileById, getUserContentCount } from '@/lib/supabase/queries'
 import { sendContentNotification, sendApprovalNotification } from '@/lib/email'
 import { validateImageMetadata, validateVideoMetadata } from '@/lib/media-validation'
+import { textContentSchema } from '@/lib/validation/schemas'
 
 export async function uploadTextContent(textContent: string) {
   try {
@@ -17,7 +18,17 @@ export async function uploadTextContent(textContent: string) {
       return { success: false, error: 'Non autenticato' }
     }
 
-    // Check rate limit: max 1 upload per minute
+    // Validate text content with Zod schema
+    const validationResult = textContentSchema.safeParse(textContent)
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]
+      return { success: false, error: firstError.message }
+    }
+
+    // Use validated and trimmed text
+    const validatedText = validationResult.data
+
+    // Check rate limit: max 1 upload per minute (business logic, not validation)
     const { data: lastUpload } = await supabase
       .from('content')
       .select('created_at')
@@ -39,16 +50,11 @@ export async function uploadTextContent(textContent: string) {
       }
     }
 
-    // Validate input
-    if (textContent.length < 10 || textContent.length > 1000) {
-      return { success: false, error: 'Il messaggio deve essere tra 10 e 1000 caratteri' }
-    }
-
-    // Insert content
+    // Insert content (using validated and trimmed text)
     const contentData: ContentInsert = {
       user_id: user.id,
       type: 'text',
-      text_content: textContent,
+      text_content: validatedText,
       status: 'pending',
     }
     const { data: insertedContent, error } = await insertContent(supabase, contentData)
@@ -66,7 +72,7 @@ export async function uploadTextContent(textContent: string) {
         userName: profile.full_name,
         userEmail: profile.email,
         contentType: 'text',
-        contentPreview: textContent,
+        contentPreview: validatedText,
         contentId: insertedContent.id,
       })
     }

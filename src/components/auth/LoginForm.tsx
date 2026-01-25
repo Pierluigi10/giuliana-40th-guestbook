@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff } from 'lucide-react'
+import { loginSchema } from '@/lib/validation/schemas'
 
 export function LoginForm() {
   const router = useRouter()
@@ -70,6 +71,15 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    // Final Zod validation
+    const validationResult = loginSchema.safeParse({ email, password })
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0]
+      setError(firstError.message)
+      return
+    }
+
     setLoading(true)
 
     try {
