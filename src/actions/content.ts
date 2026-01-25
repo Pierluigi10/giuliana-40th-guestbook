@@ -564,12 +564,15 @@ export async function approveContent(contentId: string) {
     // Send email notification to content author (non-blocking)
     if (contentData.profiles?.email && contentData.profiles?.full_name) {
       console.log('[APPROVAL] Invio email conferma utente...')
-      await sendApprovalNotification({
+      sendApprovalNotification({
         userName: contentData.profiles.full_name,
         userEmail: contentData.profiles.email,
         contentType: contentData.type,
         contentPreview: contentData.text_content || undefined,
+      }).catch(error => {
+        console.warn('[APPROVAL] Email notification failed (non-blocking):', error)
       })
+      // NON usare await - approval success è indipendente da email delivery
     }
 
     revalidatePath('/admin/approve-content')
@@ -667,6 +670,9 @@ export async function deleteContent(contentId: string) {
       console.error('Error deleting content:', error)
       return { success: false, error: 'Errore durante l\'eliminazione' }
     }
+
+    // Wait for DB propagation (100ms)
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     revalidatePath('/gallery')
     revalidatePath('/admin/approve-content')
