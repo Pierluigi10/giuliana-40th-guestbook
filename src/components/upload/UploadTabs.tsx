@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { TextUpload } from './TextUpload'
 import { ImageUpload } from './ImageUpload'
 import { VideoUpload } from './VideoUpload'
-import { FirstTimeTutorial } from '@/components/onboarding/FirstTimeTutorial'
 import { MotivationalMessages } from './MotivationalMessages'
 
 type Tab = 'text' | 'image' | 'video'
@@ -15,23 +14,12 @@ interface UploadTabsProps {
 
 export function UploadTabs({ userId }: UploadTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>('text')
-  const [tutorialCompleted, setTutorialCompleted] = useState(false)
-  const tutorialCompletedRef = useRef(tutorialCompleted)
 
   const tabs = [
     { id: 'text' as Tab, label: '💬 Messaggio', icon: '📝' },
     { id: 'image' as Tab, label: '📷 Foto', icon: '🖼️' },
     { id: 'video' as Tab, label: '🎥 Video', icon: '🎬' },
   ]
-
-  // Restore tutorial completion state from localStorage on mount
-  useEffect(() => {
-    const completed = localStorage.getItem('tutorial-completed') === 'true'
-    if (completed) {
-      setTutorialCompleted(true)
-      tutorialCompletedRef.current = true
-    }
-  }, [])
 
   return (
     <>
@@ -78,18 +66,6 @@ export function UploadTabs({ userId }: UploadTabsProps) {
           )}
         </div>
       </div>
-
-      {!tutorialCompleted && (
-        <FirstTimeTutorial
-          userId={userId}
-          onComplete={() => {
-            tutorialCompletedRef.current = true
-            setTutorialCompleted(true)
-            localStorage.setItem('tutorial-completed', 'true')
-          }}
-          onTabChange={(tab) => setActiveTab(tab)}
-        />
-      )}
     </>
   )
 }
