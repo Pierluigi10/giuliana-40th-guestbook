@@ -57,6 +57,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
   const [currentPage, setCurrentPage] = useState(0)
   const observerTarget = useRef<HTMLDivElement>(null)
   const previousContentIds = useRef<Set<string>>(new Set(initialContent.map(c => c.id)))
+  const deletedContentIds = useRef<Set<string>>(new Set())
   const { triggerConfetti } = useConfetti()
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -67,10 +68,19 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
   const [newContentNotification, setNewContentNotification] = useState<string | null>(null)
 
   const handleContentDeleted = (contentId: string) => {
+    // Track deleted IDs to prevent polling re-adding them
+    deletedContentIds.current.add(contentId)
+
     setContent(prev => prev.filter(item => item.id !== contentId))
+
     if (lightboxContent?.id === contentId) {
       setLightboxContent(null)
     }
+
+    // Cleanup deleted IDs after 5 minutes (prevent memory leak)
+    setTimeout(() => {
+      deletedContentIds.current.delete(contentId)
+    }, 5 * 60 * 1000)
   }
 
   // Load more content when scrolling to bottom
@@ -220,14 +230,25 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
         if (result.error || !result.data) return
 
         const currentIds = new Set(result.data.map(c => c.id))
-        const newContent = result.data.filter(c => !previousContentIds.current.has(c.id))
+        // Filter out deleted items before processing
+        const newContent = result.data.filter(c =>
+          !previousContentIds.current.has(c.id) &&
+          !deletedContentIds.current.has(c.id)
+        )
 
         if (newContent.length > 0) {
           // Update content list (prepend new items)
           setContent(prev => {
             const existingIds = new Set(prev.map(c => c.id))
-            const toAdd = newContent.filter(c => !existingIds.has(c.id))
-            return [...toAdd, ...prev]
+            const toAdd = newContent.filter(c =>
+              !existingIds.has(c.id) &&
+              !deletedContentIds.current.has(c.id)
+            )
+
+            if (toAdd.length > 0) {
+              return [...toAdd, ...prev]
+            }
+            return prev
           })
 
           // Trigger confetti and notification
