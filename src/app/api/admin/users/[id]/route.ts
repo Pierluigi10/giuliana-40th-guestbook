@@ -103,10 +103,10 @@ export async function DELETE(
       for (const mediaUrl of mediaUrls) {
         try {
           // Extract file path from URL
-          const urlParts = mediaUrl.split('/uploads/')
+          const urlParts = mediaUrl.split('/content-media/')
           if (urlParts.length === 2) {
             const filePath = urlParts[1]
-            await supabase.storage.from('uploads').remove([filePath])
+            await supabase.storage.from('content-media').remove([filePath])
           }
         } catch (error) {
           console.error('Error deleting media file:', error)
