@@ -93,35 +93,39 @@ export async function validateImageMetadata(mediaUrl: string, userId: string): P
     // Create service role client to check file metadata (bypasses RLS)
     const supabase = createSupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    // Get file metadata from Storage
-    const { data: fileData, error: fileError } = await supabase
+    // Use download to verify file exists and get metadata (more reliable than list)
+    // We only read the first byte to avoid downloading the entire file
+    const { data: fileBlob, error: downloadError } = await supabase
       .storage
       .from(BUCKET_NAME)
-      .list(userId, {
-        search: filePath.split('/')[1] // Get filename only
-      })
+      .download(filePath)
 
-    if (fileError) {
-      console.error('[Media Validation] Storage error:', fileError)
+    if (downloadError) {
+      console.error('[Media Validation] Download error:', downloadError)
+      // If file doesn't exist or access denied
+      if (downloadError.message?.includes('not found') || downloadError.message?.includes('Not found')) {
+        return { valid: false, error: 'File non trovato nello storage' }
+      }
       return { valid: false, error: 'Errore durante la verifica del file' }
     }
 
-    if (!fileData || fileData.length === 0) {
+    if (!fileBlob) {
       return { valid: false, error: 'File non trovato nello storage' }
     }
 
-    const file = fileData[0]
+    // Get file metadata from blob
+    const fileSize = fileBlob.size
+    const mimeType = fileBlob.type
 
     // Validate file size
-    if (file.metadata.size > MAX_IMAGE_SIZE) {
+    if (fileSize > MAX_IMAGE_SIZE) {
       return {
         valid: false,
-        error: `File troppo grande: ${(file.metadata.size / 1024 / 1024).toFixed(2)}MB (max ${MAX_IMAGE_SIZE / 1024 / 1024}MB)`
+        error: `File troppo grande: ${(fileSize / 1024 / 1024).toFixed(2)}MB (max ${MAX_IMAGE_SIZE / 1024 / 1024}MB)`
       }
     }
 
     // Validate MIME type
-    const mimeType = file.metadata.mimetype
     if (!ALLOWED_IMAGE_TYPES.includes(mimeType)) {
       return {
         valid: false,
@@ -132,9 +136,9 @@ export async function validateImageMetadata(mediaUrl: string, userId: string): P
     return {
       valid: true,
       metadata: {
-        size: file.metadata.size,
-        mimeType: file.metadata.mimetype,
-        fileName: file.name
+        size: fileSize,
+        mimeType: mimeType,
+        fileName: filePath.split('/')[1]
       }
     }
   } catch (error) {
@@ -164,35 +168,39 @@ export async function validateVideoMetadata(mediaUrl: string, userId: string): P
     // Create service role client to check file metadata (bypasses RLS)
     const supabase = createSupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    // Get file metadata from Storage
-    const { data: fileData, error: fileError } = await supabase
+    // Use download to verify file exists and get metadata (more reliable than list)
+    // We only read the first byte to avoid downloading the entire file
+    const { data: fileBlob, error: downloadError } = await supabase
       .storage
       .from(BUCKET_NAME)
-      .list(userId, {
-        search: filePath.split('/')[1] // Get filename only
-      })
+      .download(filePath)
 
-    if (fileError) {
-      console.error('[Media Validation] Storage error:', fileError)
+    if (downloadError) {
+      console.error('[Media Validation] Download error:', downloadError)
+      // If file doesn't exist or access denied
+      if (downloadError.message?.includes('not found') || downloadError.message?.includes('Not found')) {
+        return { valid: false, error: 'File non trovato nello storage' }
+      }
       return { valid: false, error: 'Errore durante la verifica del file' }
     }
 
-    if (!fileData || fileData.length === 0) {
+    if (!fileBlob) {
       return { valid: false, error: 'File non trovato nello storage' }
     }
 
-    const file = fileData[0]
+    // Get file metadata from blob
+    const fileSize = fileBlob.size
+    const mimeType = fileBlob.type
 
     // Validate file size
-    if (file.metadata.size > MAX_VIDEO_SIZE) {
+    if (fileSize > MAX_VIDEO_SIZE) {
       return {
         valid: false,
-        error: `File troppo grande: ${(file.metadata.size / 1024 / 1024).toFixed(2)}MB (max ${MAX_VIDEO_SIZE / 1024 / 1024}MB)`
+        error: `File troppo grande: ${(fileSize / 1024 / 1024).toFixed(2)}MB (max ${MAX_VIDEO_SIZE / 1024 / 1024}MB)`
       }
     }
 
     // Validate MIME type
-    const mimeType = file.metadata.mimetype
     if (!ALLOWED_VIDEO_TYPES.includes(mimeType)) {
       return {
         valid: false,
@@ -203,9 +211,9 @@ export async function validateVideoMetadata(mediaUrl: string, userId: string): P
     return {
       valid: true,
       metadata: {
-        size: file.metadata.size,
-        mimeType: file.metadata.mimetype,
-        fileName: file.name
+        size: fileSize,
+        mimeType: mimeType,
+        fileName: filePath.split('/')[1]
       }
     }
   } catch (error) {
