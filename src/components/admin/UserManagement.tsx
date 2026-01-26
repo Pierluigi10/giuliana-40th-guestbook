@@ -111,7 +111,9 @@ export function UserManagement() {
       case 'admin':
         return <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded">Admin</span>
       case 'vip':
-        return <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">VIP</span>
+        return <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-pink-200 to-purple-200 text-purple-900 rounded flex items-center gap-1">
+          🎂 VIP 🎉
+        </span>
       case 'guest':
         return <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">Guest</span>
       default:
@@ -151,9 +153,11 @@ export function UserManagement() {
             <p className="text-2xl font-bold text-purple-600">{adminUsers.length}</p>
             <p className="text-sm text-gray-600 mt-1">Admin</p>
           </div>
-          <div className="text-center p-4 bg-yellow-50 rounded-lg">
-            <p className="text-2xl font-bold text-yellow-600">{vipUsers.length}</p>
-            <p className="text-sm text-gray-600 mt-1">VIP</p>
+          <div className="text-center p-4 bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg border-2 border-pink-300">
+            <p className="text-2xl font-bold text-purple-700 flex items-center justify-center gap-1">
+              🎂 {vipUsers.length} 🎉
+            </p>
+            <p className="text-sm text-gray-700 mt-1 font-semibold">VIP 🐴✨</p>
           </div>
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <p className="text-2xl font-bold text-blue-600">{guestUsers.length}</p>
@@ -210,10 +214,16 @@ export function UserManagement() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                  <tr key={user.id} className={user.role === 'vip' ? 'bg-gradient-to-r from-pink-50 to-purple-50 hover:from-pink-100 hover:to-purple-100' : 'hover:bg-gray-50'}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                        {user.role === 'vip' && (
+                          <span className="text-lg">🐴🎂🎈</span>
+                        )}
                         {user.full_name}
+                        {user.role === 'vip' && (
+                          <span className="text-lg">🎉✨</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
