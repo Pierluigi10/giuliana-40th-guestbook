@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { loginSchema } from '@/lib/validation/schemas'
 
 export function LoginForm() {
@@ -69,6 +69,12 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent double submission
+    if (loading) {
+      return
+    }
+
     setError(null)
 
     // Final Zod validation
@@ -91,6 +97,7 @@ export function LoginForm() {
 
       if (signInError) {
         setError('Email o password non corretti')
+        setLoading(false)
         return
       }
 
@@ -104,19 +111,21 @@ export function LoginForm() {
 
         if (!profile) {
           setError('Profilo non trovato')
+          setLoading(false)
           return
         }
 
+        // Keep loading state true during redirect (button stays disabled)
         // Redirect based on role (no more approval check)
         // Use window.location.href to force a full page reload and ensure cookies are properly set
         const redirectPath = redirect ||
           (profile.role === 'admin' ? '/approve-content' : '/gallery')
         window.location.href = redirectPath
+        // Don't set loading to false here - let the page reload handle it
       }
     } catch (err) {
       setError('Si è verificato un errore durante l\'accesso')
       console.error(err)
-    } finally {
       setLoading(false)
     }
   }
@@ -183,8 +192,9 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading || !isFormValid()}
-        className="w-full min-h-[44px] rounded-md bg-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-birthday-purple/90 active:bg-birthday-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-opacity touch-manipulation"
+        className="w-full min-h-[44px] rounded-md bg-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-birthday-purple/90 active:bg-birthday-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-opacity touch-manipulation flex items-center justify-center gap-2"
       >
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         {loading ? 'Accesso in corso...' : 'Accedi'}
       </button>
     </form>

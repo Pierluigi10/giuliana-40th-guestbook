@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { registerSchema } from '@/lib/validation/schemas'
 
 export function RegisterForm() {
@@ -160,6 +160,12 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent double submission
+    if (loading) {
+      return
+    }
+
     setError(null)
 
     // Final Zod validation (in addition to real-time validation)
@@ -203,6 +209,7 @@ export function RegisterForm() {
 
       if (!response.ok) {
         setError(result.error || 'Si è verificato un errore durante la registrazione')
+        setLoading(false)
         return
       }
 
@@ -215,19 +222,21 @@ export function RegisterForm() {
 
       if (signInError) {
         setError('Registrazione completata, ma errore durante l\'accesso automatico. Prova ad accedere manualmente.')
+        setLoading(false)
         return
       }
 
       // Set flag to show tutorial on first gallery visit
       sessionStorage.setItem('show_gallery_tutorial', 'true')
 
+      // Keep loading state true during redirect (button stays disabled)
       // Redirect to gallery after successful registration and auto-login
       router.push('/gallery')
       router.refresh()
+      // Don't set loading to false here - let the page reload handle it
     } catch (err) {
       setError('Si è verificato un errore durante la registrazione')
       console.error(err)
-    } finally {
       setLoading(false)
     }
   }
@@ -357,8 +366,9 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={loading || !isFormValid()}
-        className="w-full min-h-[44px] rounded-md bg-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-birthday-purple/90 active:bg-birthday-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+        className="w-full min-h-[44px] rounded-md bg-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-birthday-purple/90 active:bg-birthday-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation flex items-center justify-center gap-2"
       >
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         {loading ? 'Registrazione in corso...' : 'Registrati'}
       </button>
     </form>
