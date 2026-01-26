@@ -89,6 +89,27 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     }
   }, [])
 
+  // Ensure video preview shows the stream during recording (fix black screen)
+  useEffect(() => {
+    if ((showPreview || isRecording) && mediaStreamRef.current && videoPreviewRef.current) {
+      debugLog('[VideoUpload] Ensuring video element has stream:', {
+        showPreview,
+        isRecording,
+        hasStream: !!mediaStreamRef.current,
+        hasVideoElement: !!videoPreviewRef.current
+      })
+
+      // Make sure the video element has the stream
+      if (videoPreviewRef.current.srcObject !== mediaStreamRef.current) {
+        debugLog('[VideoUpload] Re-attaching stream to video element')
+        videoPreviewRef.current.srcObject = mediaStreamRef.current
+        videoPreviewRef.current.play().catch(err => {
+          console.error('[VideoUpload] Error playing video:', err)
+        })
+      }
+    }
+  }, [showPreview, isRecording])
+
   // Auto-stop recording after 1 minute (60 seconds)
   useEffect(() => {
     if (isRecording && recordingTime === 50) {
@@ -107,9 +128,9 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   // Calculate estimated file size based on recording time and bitrate
   useEffect(() => {
     if (isRecording && recordingTime > 0) {
-      // Bitrate: 250 kbps video + ~32 kbps audio = ~282 kbps total
-      // Convert to bytes per second: 282000 bits/s = 35250 bytes/s
-      const bytesPerSecond = 35250
+      // Bitrate: 750 kbps video + ~64 kbps audio = ~814 kbps total
+      // Convert to bytes per second: 814000 bits/s = 101750 bytes/s
+      const bytesPerSecond = 101750
       const estimated = recordingTime * bytesPerSecond
       setEstimatedSize(estimated)
     } else {
@@ -321,7 +342,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
       const mediaRecorder = new MediaRecorder(mediaStreamRef.current, {
         mimeType,
-        videoBitsPerSecond: 250000, // Low bitrate: 250 kbps (default is usually 2.5 Mbps)
+        videoBitsPerSecond: 750000, // Moderate bitrate: 750 kbps (was 250 kbps) - better quality while keeping file size reasonable
       })
 
       mediaRecorderRef.current = mediaRecorder

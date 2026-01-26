@@ -65,20 +65,20 @@ export function getLowQualityVideoConstraints(facingMode: 'user' | 'environment'
   return {
     video: {
       facingMode: { ideal: facingMode }, // Use 'ideal' for better browser compatibility - 'user' = front camera, 'environment' = back camera
-      width: { ideal: 480 }, // Low resolution width
-      height: { ideal: 360 }, // Low resolution height
-      frameRate: { ideal: 15 }, // Lower frame rate (15fps instead of 30fps)
-      // Use advanced constraints to force lowest quality
+      width: { ideal: 640 }, // Slightly better resolution (was 480)
+      height: { ideal: 480 }, // Slightly better resolution (was 360)
+      frameRate: { ideal: 20 }, // Slightly better frame rate (was 15fps)
+      // Use advanced constraints to allow moderate quality
       advanced: [
-        { width: { max: 640 } }, // Max width 640px
+        { width: { max: 854 } }, // Max width 854px (480p)
         { height: { max: 480 } }, // Max height 480px
-        { frameRate: { max: 15 } }, // Max 15fps
+        { frameRate: { max: 24 } }, // Max 24fps (cinematic)
       ],
     },
     audio: {
       echoCancellation: true,
       noiseSuppression: true,
-      sampleRate: 16000, // Lower audio sample rate (16kHz instead of 48kHz)
+      sampleRate: 22050, // Better audio quality (was 16kHz, now 22kHz)
     },
   }
 }
