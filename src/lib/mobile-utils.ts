@@ -59,11 +59,12 @@ export function getImageCompressionOptions(isMobile: boolean) {
 /**
  * Get video recording constraints with lowest quality settings
  * This ensures videos are recorded at the lowest quality to reduce file size
+ * @param facingMode - 'user' for front camera (default), 'environment' for back camera
  */
-export function getLowQualityVideoConstraints(): MediaStreamConstraints {
+export function getLowQualityVideoConstraints(facingMode: 'user' | 'environment' = 'user'): MediaStreamConstraints {
   return {
     video: {
-      facingMode: 'environment', // Use back camera
+      facingMode: { ideal: facingMode }, // Use 'ideal' for better browser compatibility - 'user' = front camera, 'environment' = back camera
       width: { ideal: 480 }, // Low resolution width
       height: { ideal: 360 }, // Low resolution height
       frameRate: { ideal: 15 }, // Lower frame rate (15fps instead of 30fps)

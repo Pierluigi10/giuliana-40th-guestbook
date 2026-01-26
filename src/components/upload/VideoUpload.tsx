@@ -8,13 +8,26 @@ import { saveVideoContentRecord } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import { checkUploadRateLimit } from '@/lib/utils'
 import { isMobileDevice, isCameraAvailable, getLowQualityVideoConstraints } from '@/lib/mobile-utils'
-import { Camera, Video } from 'lucide-react'
+import { Camera, Video, RotateCcw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { analyzeNetworkError, uploadWithRetry } from '@/lib/network-errors'
 import { compressVideo } from '@/lib/video-compression'
 
 interface VideoUploadProps {
   userId: string
+}
+
+// Debug logging helpers - only log in development
+const debugLog = (...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...args)
+  }
+}
+
+const debugWarn = (...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(...args)
+  }
 }
 
 export function VideoUpload({ userId }: VideoUploadProps) {
@@ -26,9 +39,12 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const [compressionProgress, setCompressionProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [cameraAvailable, setCameraAvailable] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const [estimatedSize, setEstimatedSize] = useState(0)
+  const [isInitializing, setIsInitializing] = useState(false)
   const mobileFileInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
@@ -173,19 +189,126 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     }
   }
 
-  const startRecording = async () => {
+  const startPreview = async () => {
+    debugLog('[VideoUpload] startPreview called', {
+      showPreview,
+      isRecording,
+      facingMode,
+      isInitializing
+    })
+
+    setIsInitializing(true)
+
     try {
-      const constraints = getLowQualityVideoConstraints()
+      const constraints = getLowQualityVideoConstraints(facingMode)
+      debugLog('[VideoUpload] Requesting camera with constraints:', constraints)
+
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      
+      debugLog('[VideoUpload] Camera stream obtained:', {
+        tracks: stream.getTracks().map(t => ({
+          kind: t.kind,
+          label: t.label,
+          settings: t.getSettings()
+        }))
+      })
+
       mediaStreamRef.current = stream
-      recordedChunksRef.current = []
 
       // Show video preview
       if (videoPreviewRef.current) {
         videoPreviewRef.current.srcObject = stream
-        videoPreviewRef.current.play()
+        await videoPreviewRef.current.play()
       }
+
+      setShowPreview(true)
+      debugLog('[VideoUpload] Preview started successfully')
+    } catch (error) {
+      console.error('[VideoUpload] Error starting camera preview:', error)
+      toast.error('Errore accesso camera 📷', {
+        description: 'Assicurati di aver concesso i permessi per la camera'
+      })
+    } finally {
+      setIsInitializing(false)
+    }
+  }
+
+  const switchCamera = async () => {
+    debugLog('[VideoUpload] switchCamera called', {
+      currentFacingMode: facingMode,
+      isRecording,
+      showPreview
+    })
+
+    // Prevent switching camera during recording
+    if (isRecording) {
+      debugWarn('[VideoUpload] Cannot switch camera while recording')
+      toast.warning('Impossibile cambiare camera durante la registrazione', {
+        description: 'Ferma prima la registrazione'
+      })
+      return
+    }
+
+    setIsInitializing(true)
+
+    try {
+      // Stop current stream
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop())
+        mediaStreamRef.current = null
+      }
+
+      // Switch facing mode
+      const newFacingMode = facingMode === 'user' ? 'environment' : 'user'
+      setFacingMode(newFacingMode)
+      debugLog('[VideoUpload] Switching to camera:', newFacingMode)
+
+      // Restart preview with new camera
+      if (showPreview) {
+        const constraints = getLowQualityVideoConstraints(newFacingMode)
+        debugLog('[VideoUpload] Requesting new camera with constraints:', constraints)
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints)
+        debugLog('[VideoUpload] New camera stream obtained')
+
+        mediaStreamRef.current = stream
+
+        if (videoPreviewRef.current) {
+          videoPreviewRef.current.srcObject = stream
+          await videoPreviewRef.current.play()
+        }
+
+        debugLog('[VideoUpload] Camera switched successfully to:', newFacingMode)
+      }
+    } catch (error) {
+      console.error('[VideoUpload] Error switching camera:', error)
+      toast.error('Errore cambio camera 📷', {
+        description: 'Impossibile cambiare camera'
+      })
+    } finally {
+      setIsInitializing(false)
+    }
+  }
+
+  const startRecording = async () => {
+    debugLog('[VideoUpload] startRecording called', {
+      hasStream: !!mediaStreamRef.current,
+      showPreview,
+      isRecording,
+      facingMode
+    })
+
+    if (!mediaStreamRef.current) {
+      console.error('[VideoUpload] No media stream available')
+      toast.error('Preview non disponibile', {
+        description: 'Avvia prima la preview della camera'
+      })
+      return
+    }
+
+    setIsInitializing(true)
+
+    try {
+      recordedChunksRef.current = []
 
       // Create MediaRecorder with low bitrate
       const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
@@ -194,7 +317,9 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         ? 'video/webm'
         : 'video/mp4'
 
-      const mediaRecorder = new MediaRecorder(stream, {
+      debugLog('[VideoUpload] Creating MediaRecorder with mimeType:', mimeType)
+
+      const mediaRecorder = new MediaRecorder(mediaStreamRef.current, {
         mimeType,
         videoBitsPerSecond: 250000, // Low bitrate: 250 kbps (default is usually 2.5 Mbps)
       })
@@ -208,19 +333,23 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       }
 
       mediaRecorder.onstop = () => {
+        debugLog('[VideoUpload] MediaRecorder stopped, processing recording...')
         const blob = new Blob(recordedChunksRef.current, { type: mimeType })
+        debugLog('[VideoUpload] Recording blob size:', blob.size, 'bytes')
+
         const fileName = `video-${Date.now()}.${mimeType.includes('webm') ? 'webm' : 'mp4'}`
         const file = new File([blob], fileName, { type: mimeType })
-        
+
         handleFileSelect(file)
-        
+
         // Stop all tracks
         if (mediaStreamRef.current) {
           mediaStreamRef.current.getTracks().forEach(track => track.stop())
           mediaStreamRef.current = null
         }
-        
+
         setIsRecording(false)
+        setShowPreview(false)
         setRecordingTime(0)
         if (recordingTimerRef.current) {
           clearInterval(recordingTimerRef.current)
@@ -231,19 +360,26 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       setIsRecording(true)
       setRecordingTime(0)
 
+      debugLog('[VideoUpload] MediaRecorder started', {
+        state: mediaRecorder.state,
+        mimeType: mediaRecorder.mimeType
+      })
+
       // Start recording timer
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1)
       }, 1000)
 
       toast.success('Registrazione iniziata! 🎬', {
-        description: 'Limite 1 minuto • Qualità ottimizzata per caricamento veloce'
+        description: 'Qualità ottimizzata per caricamento veloce'
       })
     } catch (error) {
-      console.error('Error starting video recording:', error)
-      toast.error('Errore accesso camera 📷', {
-        description: 'Assicurati di aver concesso i permessi per la camera'
+      console.error('[VideoUpload] Error starting video recording:', error)
+      toast.error('Errore avvio registrazione 📷', {
+        description: 'Riprova tra un momento'
       })
+    } finally {
+      setIsInitializing(false)
     }
   }
 
@@ -269,10 +405,32 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     }
     
     setIsRecording(false)
+    setShowPreview(false)
     setRecordingTime(0)
     setEstimatedSize(0)
     recordedChunksRef.current = []
 
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current)
+    }
+  }
+
+  const closePreview = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop())
+      mediaStreamRef.current = null
+    }
+    
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null
+    }
+    
+    setShowPreview(false)
+    setIsRecording(false)
+    setRecordingTime(0)
+    setEstimatedSize(0)
+    recordedChunksRef.current = []
+    
     if (recordingTimerRef.current) {
       clearInterval(recordingTimerRef.current)
     }
@@ -337,7 +495,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       })
 
       try {
-        console.log('[Video Upload] Starting compression...')
+        debugLog('[Video Upload] Starting compression...')
 
         fileToUpload = await compressVideo(file, {
           quality: 'medium',
@@ -395,7 +553,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       const fileExt = fileToUpload.name.split('.').pop()
       fileName = `${userId}/${crypto.randomUUID()}.${fileExt}`
 
-      console.log('[Video Upload] Starting direct upload to Supabase Storage...')
+      debugLog('[Video Upload] Starting direct upload to Supabase Storage...')
 
       // Upload file directly to Supabase Storage with retry logic
       const uploadResult = await uploadWithRetry(
@@ -408,7 +566,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         {
           maxRetries: 2,
           onRetry: (attempt) => {
-            console.log(`[Video Upload] Retry attempt ${attempt}/3...`)
+            debugLog(`[Video Upload] Retry attempt ${attempt}/3...`)
             toast.info('Riprovo il caricamento... 🔄', {
               description: `Tentativo ${attempt} di 3`
             })
@@ -428,11 +586,11 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       }
 
       setProgress(70)
-      console.log('[Video Upload] File uploaded successfully to Storage')
+      debugLog('[Video Upload] File uploaded successfully to Storage')
 
       // Check if operation was aborted before proceeding
       if (abortControllerRef.current?.signal.aborted) {
-        console.log('[Video Upload] Operation aborted, cleaning up...')
+        debugLog('[Video Upload] Operation aborted, cleaning up...')
         await supabase.storage.from('content-media').remove([fileName])
         return
       }
@@ -442,7 +600,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         .from('content-media')
         .getPublicUrl(fileName)
 
-      console.log('[Video Upload] Public URL:', publicUrl)
+      debugLog('[Video Upload] Public URL:', publicUrl)
       setProgress(80)
 
       // Save content record to database via server action
@@ -561,22 +719,29 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           {/* Mobile Camera Access - Video Recording */}
           {isMobile && cameraAvailable && (
             <div className="space-y-4">
-              {!isRecording ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+              {!showPreview && !isRecording ? (
+                <div className="border-2 border-dashed border-birthday-purple/50 rounded-lg p-8 text-center bg-gradient-to-br from-birthday-pink/5 to-birthday-purple/5">
                   <button
                     type="button"
-                    onClick={startRecording}
-                    className="flex flex-col items-center gap-2 w-full"
+                    onClick={startPreview}
+                    disabled={isInitializing}
+                    className="flex flex-col items-center gap-3 w-full disabled:opacity-50"
                   >
-                    <Camera className="w-8 h-8 text-birthday-purple" />
-                    <span className="text-sm font-medium">Registra un video</span>
-                    <span className="text-xs text-muted-foreground">Max 1 minuto • Qualità ottimizzata</span>
+                    <div className="bg-birthday-purple/10 p-4 rounded-full">
+                      <Camera className="w-10 h-10 text-birthday-purple" />
+                    </div>
+                    <span className="text-base font-semibold text-foreground">
+                      {isInitializing ? 'Avvio camera...' : 'Anteprima Camera'}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      Vedi l'anteprima prima di registrare
+                    </span>
                   </button>
                 </div>
-              ) : (
+              ) : showPreview && !isRecording ? (
                 <div className="space-y-4">
-                  {/* Video Preview During Recording */}
-                  <div className="relative rounded-lg overflow-hidden border-2 border-red-500 bg-black">
+                  {/* Video Preview Before Recording */}
+                  <div className="relative rounded-lg overflow-hidden border-2 border-birthday-purple shadow-lg bg-black">
                     <video
                       ref={videoPreviewRef}
                       autoPlay
@@ -584,53 +749,113 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                       playsInline
                       className="w-full h-auto max-h-[400px]"
                     />
-                    {/* Recording Indicator */}
-                    <div className="absolute top-2 left-2 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full">
-                      <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                      <span className="text-xs font-medium">
-                        {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                    {/* Camera Switch Button - Enlarged and more prominent */}
+                    <button
+                      type="button"
+                      onClick={switchCamera}
+                      disabled={isInitializing}
+                      className="absolute top-3 right-3 bg-white/95 text-birthday-purple p-3 rounded-full hover:bg-white hover:scale-110 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Cambia camera"
+                    >
+                      <RotateCcw className="w-6 h-6" />
+                    </button>
+                    {/* Camera Indicator - More prominent */}
+                    <div className="absolute top-3 left-3 bg-birthday-purple/95 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg">
+                      <Camera className="w-4 h-4" />
+                      {facingMode === 'user' ? 'Frontale' : 'Posteriore'}
+                    </div>
+                    {/* Helper text at bottom */}
+                    <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-xs text-center">
+                      Scegli la camera, poi clicca REC
+                    </div>
+                  </div>
+
+                  {/* Preview Controls */}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      disabled={isInitializing}
+                      className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all flex items-center justify-center gap-3 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-4 h-4 bg-white rounded-full animate-pulse" />
+                      <span className="text-base">
+                        {isInitializing ? 'Preparazione...' : 'REC - Inizia Registrazione'}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closePreview}
+                      disabled={isInitializing}
+                      className="px-5 py-4 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50"
+                    >
+                      Annulla
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Video Preview During Recording */}
+                  <div className="relative rounded-lg overflow-hidden border-4 border-red-500 shadow-xl bg-black">
+                    <video
+                      ref={videoPreviewRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      className="w-full h-auto max-h-[400px]"
+                    />
+                    {/* Recording Indicator - More prominent */}
+                    <div className="absolute top-3 left-3 flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full shadow-lg">
+                      <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+                      <span className="text-sm font-bold">
+                        REC {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
                       </span>
                     </div>
+                    {/* Camera Indicator During Recording - DISABLED switch camera button */}
+                    <div className="absolute top-3 right-3 bg-gray-600/90 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg cursor-not-allowed">
+                      <Camera className="w-4 h-4" />
+                      {facingMode === 'user' ? 'Frontale' : 'Posteriore'}
+                    </div>
                     {/* Estimated Size Indicator */}
-                    <div className="absolute top-2 right-2 bg-black/70 text-white px-3 py-1 rounded-full">
-                      <span className="text-xs font-medium">
+                    <div className="absolute bottom-3 right-3 bg-black/80 text-white px-4 py-2 rounded-full shadow-lg">
+                      <span className="text-sm font-medium">
                         ~{(estimatedSize / 1024 / 1024).toFixed(1)} MB
                       </span>
                     </div>
                   </div>
-                  
+
                   {/* Recording Controls */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <button
                       type="button"
                       onClick={stopRecording}
-                      className="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all flex items-center justify-center gap-3 shadow-lg"
                     >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                         <rect x="6" y="6" width="12" height="12" rx="2" />
                       </svg>
-                      Ferma registrazione
+                      <span className="text-base">Ferma Registrazione</span>
                     </button>
                     <button
                       type="button"
                       onClick={cancelRecording}
-                      className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                      className="px-5 py-4 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                     >
                       Annulla
                     </button>
                   </div>
 
                   {/* Recording Info */}
-                  <div className="bg-gray-100 rounded-lg p-3 text-center space-y-1">
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 text-center space-y-2 border border-gray-200">
+                    <p className="text-base font-semibold text-gray-800">
                       {recordingTime < 50 ? (
-                        <>Tempo rimasto: <span className="text-birthday-purple">{60 - recordingTime}s</span></>
+                        <>Tempo rimasto: <span className="text-birthday-purple text-lg">{60 - recordingTime}s</span></>
                       ) : (
-                        <span className="text-orange-600">⚠️ {60 - recordingTime}s al limite!</span>
+                        <span className="text-orange-600 text-lg">⚠️ {60 - recordingTime}s al limite!</span>
                       )}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Dimensione stimata: ~{(estimatedSize / 1024 / 1024).toFixed(1)} MB
+                    <p className="text-sm text-muted-foreground">
+                      Dimensione stimata: ~{(estimatedSize / 1024 / 1024).toFixed(1)} MB / 20 MB
                     </p>
                   </div>
                 </div>
