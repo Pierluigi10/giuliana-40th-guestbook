@@ -568,17 +568,22 @@ export async function approveContent(contentId: string) {
     }
 
     // Send email notification to content author (non-blocking)
-    if (contentData.profiles?.email && contentData.profiles?.full_name) {
-      console.log('[APPROVAL] Invio email conferma utente...')
-      sendApprovalNotification({
-        userName: contentData.profiles.full_name,
-        userEmail: contentData.profiles.email,
-        contentType: contentData.type,
-        contentPreview: contentData.text_content || undefined,
-      }).catch(error => {
-        console.warn('[APPROVAL] Email notification failed (non-blocking):', error)
-      })
-      // NON usare await - approval success è indipendente da email delivery
+    try {
+      if (contentData.profiles?.email && contentData.profiles?.full_name) {
+        console.log('[APPROVAL] Invio email conferma utente...')
+        sendApprovalNotification({
+          userName: contentData.profiles.full_name,
+          userEmail: contentData.profiles.email,
+          contentType: contentData.type,
+          contentPreview: contentData.text_content || undefined,
+        }).catch(error => {
+          console.warn('[APPROVAL] Email notification failed (non-blocking):', error)
+        })
+        // NON usare await - approval success è indipendente da email delivery
+      }
+    } catch (emailError) {
+      // Catch synchronous errors from sendApprovalNotification
+      console.warn('[APPROVAL] Email notification sync error (non-blocking):', emailError)
     }
 
     // Revalidate paths (non-critical - errors don't affect operation success)
@@ -801,17 +806,21 @@ export async function bulkApproveContent(contentIds: string[]) {
     }
 
     // Send email notifications to content authors (non-blocking)
-    for (const contentData of contentDataArray) {
-      if (contentData.profiles?.email && contentData.profiles?.full_name) {
-        await sendApprovalNotification({
-          userName: contentData.profiles.full_name,
-          userEmail: contentData.profiles.email,
-          contentType: contentData.type,
-          contentPreview: contentData.text_content || undefined,
-        }).catch((err) => {
-          console.error('Error sending approval email:', err)
-        })
+    try {
+      for (const contentData of contentDataArray) {
+        if (contentData.profiles?.email && contentData.profiles?.full_name) {
+          await sendApprovalNotification({
+            userName: contentData.profiles.full_name,
+            userEmail: contentData.profiles.email,
+            contentType: contentData.type,
+            contentPreview: contentData.text_content || undefined,
+          }).catch((err) => {
+            console.warn('[BULK_APPROVAL] Email notification failed (non-blocking):', err)
+          })
+        }
       }
+    } catch (emailError) {
+      console.warn('[BULK_APPROVAL] Email notification sync error (non-blocking):', emailError)
     }
 
     // Revalidate paths (non-critical - errors don't affect operation success)
