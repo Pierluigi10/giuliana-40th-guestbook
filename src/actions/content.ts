@@ -624,12 +624,13 @@ export async function rejectContent(contentId: string) {
       return { success: false, error: 'Errore durante il rifiuto' }
     }
 
-    // Revalidate path (non-critical - errors don't affect operation success)
+    // Revalidate paths (non-critical - errors don't affect operation success)
     try {
       revalidatePath('/admin/approve-content')
+      revalidatePath('/gallery')
     } catch (revalidateError) {
       // Log error but don't fail the operation
-      console.warn('[CACHE] Error revalidating path (non-critical):', revalidateError)
+      console.warn('[CACHE] Error revalidating paths (non-critical):', revalidateError)
     }
     return { success: true }
   } catch (error) {
@@ -866,7 +867,14 @@ export async function bulkRejectContent(contentIds: string[]) {
       return { success: false, error: 'Errore durante il rifiuto' }
     }
 
-    revalidatePath('/admin/approve-content')
+    // Revalidate paths (non-critical - errors don't affect operation success)
+    try {
+      revalidatePath('/admin/approve-content')
+      revalidatePath('/gallery')
+    } catch (revalidateError) {
+      // Log error but don't fail the operation
+      console.warn('[CACHE] Error revalidating paths (non-critical):', revalidateError)
+    }
     return { success: true, count: contentIds.length }
   } catch (error) {
     console.error('Bulk reject content error:', error)
