@@ -26,47 +26,71 @@ async function runMigration() {
     const migrationPath = resolve(process.cwd(), 'supabase/migrations/006_update_delete_policies.sql')
     const sql = readFileSync(migrationPath, 'utf-8')
 
-    console.log('📝 Executing migration SQL...')
+    console.log('📝 Attempting to execute migration SQL...\n')
 
-    // Execute the SQL
-    const { error } = await supabase.rpc('exec_sql', { sql_query: sql }).single()
+    // Try using REST API directly with fetch
+    const statements = sql
+      .split(';')
+      .map(s => s.trim())
+      .filter(s => s && !s.startsWith('--') && s.length > 0)
 
-    if (error) {
-      // Try direct execution via REST API
-      console.log('⚠️  RPC method failed, trying direct execution...')
+    let successCount = 0
 
-      // Split SQL into individual statements
-      const statements = sql
-        .split(';')
-        .map(s => s.trim())
-        .filter(s => s && !s.startsWith('--'))
+    for (const statement of statements) {
+      if (!statement) continue
 
-      for (const statement of statements) {
-        if (!statement) continue
+      console.log(`Executing: ${statement.substring(0, 60)}...`)
 
-        const { error: execError } = await supabase.rpc('exec', {
-          query: statement + ';'
+      try {
+        // Try using PostgREST query endpoint (won't work for DDL, but worth trying)
+        const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseServiceKey,
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ query: statement })
         })
 
-        if (execError) {
-          console.error('❌ Error executing statement:', execError.message)
-          console.log('\n📋 Please run this migration manually in Supabase SQL Editor:')
-          console.log(sql)
-          return
+        if (response.ok) {
+          successCount++
+          console.log('   ✅ Success')
+        } else {
+          const errorText = await response.text()
+          console.log(`   ⚠️  Failed: ${response.status} - ${errorText.substring(0, 100)}`)
         }
+      } catch (fetchError) {
+        console.log(`   ⚠️  Error: ${fetchError.message}`)
       }
     }
 
-    console.log('✅ Migration completed successfully!')
-    console.log('\n🎉 VIP and Admin can now delete content from the gallery.')
-    console.log('   Test it by logging in as VIP or Admin and trying to delete a content item.')
+    if (successCount === statements.length) {
+      console.log('\n✅ Migration completed successfully!')
+      console.log('\n🎉 Users can now delete their own content, and VIP/Admin can delete any content.')
+      return
+    }
+
+    // If automatic execution failed, show manual instructions
+    console.log('\n⚠️  Automatic execution failed or partially failed.')
+    console.log('   Supabase does not expose a public API for executing arbitrary SQL.')
+    console.log('   Please run this migration manually:\n')
+    console.log('═'.repeat(70))
+    console.log('📋 MANUAL INSTRUCTIONS')
+    console.log('═'.repeat(70))
+    console.log('\n1. Open Supabase Dashboard:')
+    console.log('   https://supabase.com/dashboard/project/[YOUR_PROJECT]/sql/new\n')
+    console.log('2. Copy and paste this SQL:\n')
+    console.log('─'.repeat(70))
+    console.log(sql)
+    console.log('─'.repeat(70))
+    console.log('\n3. Click "Run" to execute\n')
+    console.log('═'.repeat(70))
 
   } catch (error) {
     console.error('❌ Migration failed:', error.message)
-    console.log('\n📋 Please run the migration manually:')
-    console.log('   1. Open Supabase Dashboard → SQL Editor')
-    console.log('   2. Copy content from: supabase/migrations/006_update_delete_policies.sql')
-    console.log('   3. Paste and execute')
+    console.log('\n📋 Please run the migration manually in Supabase SQL Editor')
   }
 }
 

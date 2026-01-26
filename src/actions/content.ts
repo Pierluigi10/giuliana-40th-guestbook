@@ -666,19 +666,40 @@ export async function deleteContent(contentId: string) {
       }
     }
 
-    // Delete content record (RLS policy will enforce permissions at DB level)
-    const { error } = await supabase
+    // Delete content record
+    // RLS policy will enforce permissions at DB level:
+    // - Users can delete their own content (user_id = auth.uid())
+    // - Admin and VIP can delete any content
+    // We don't add user_id filter here - let RLS handle it
+    
+    // Use select() to get the deleted row and verify deletion
+    // This will return the row BEFORE deletion, so RLS SELECT policies apply
+    // Since we already verified the user can read this content (line 640-644),
+    // we should be able to see it in the deleted rows
+    const { data: deletedRows, error } = await supabase
       .from('content')
       .delete()
       .eq('id', contentId)
-      .eq('user_id', user.id)  // Explicitly enforce ownership at query level
+      .select()
 
     if (error) {
       console.error('Error deleting content:', error)
+      // Check if it's an RLS policy error
+      if (error.code === '42501' || error.message?.includes('policy')) {
+        return { success: false, error: 'Non hai il permesso di eliminare questo contenuto' }
+      }
       return { success: false, error: 'Errore durante l\'eliminazione' }
     }
 
-    // Wait for DB propagation (300ms for better network reliability)
+    // Verify that a row was actually deleted
+    // If deletedRows is empty or null, the DELETE was blocked by RLS
+    if (!deletedRows || deletedRows.length === 0) {
+      console.error('No rows deleted - RLS policy blocked the deletion')
+      console.error('Content ID:', contentId, 'User ID:', user.id, 'Is Admin:', isAdmin, 'Is Owner:', isOwner)
+      return { success: false, error: 'Impossibile eliminare il contenuto. Verifica i permessi.' }
+    }
+
+    // Wait for DB propagation to ensure the deletion is reflected in subsequent queries
     await new Promise(resolve => setTimeout(resolve, 300))
 
     revalidatePath('/gallery')
