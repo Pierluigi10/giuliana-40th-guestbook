@@ -671,14 +671,15 @@ export async function deleteContent(contentId: string) {
       .from('content')
       .delete()
       .eq('id', contentId)
+      .eq('user_id', user.id)  // Explicitly enforce ownership at query level
 
     if (error) {
       console.error('Error deleting content:', error)
       return { success: false, error: 'Errore durante l\'eliminazione' }
     }
 
-    // Wait for DB propagation (100ms)
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // Wait for DB propagation (300ms for better network reliability)
+    await new Promise(resolve => setTimeout(resolve, 300))
 
     revalidatePath('/gallery')
     revalidatePath('/admin/approve-content')

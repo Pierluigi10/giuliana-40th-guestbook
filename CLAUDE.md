@@ -24,7 +24,7 @@ specs/
 ## Core Features (MVP)
 
 1. **3-role Auth**: admin, vip, guest with approval workflow
-2. **Upload**: text + photo + video (max 10MB per file)
+2. **Upload**: text + photo (max 10MB) + video (max 20MB)
 3. **Moderation**: admin approves content before VIP can see (users auto-approved via email confirmation)
 4. **VIP Gallery**: Giuliana sees only approved content
 5. **Reactions**: emoji reactions on content
@@ -126,7 +126,7 @@ See all functional requirements (42 items) → [specs/PRD.json](specs/PRD.json)
 
 | Risk | Mitigation |
 |------|------------|
-| Storage limit (500MB free) | Image compression, 10MB limit, monitor usage |
+| Storage limit (500MB free) | Image compression, 20MB video limit, monitor usage |
 | Bulk uploads near event | Rate limiting (1/min), video compression guide |
 | Critical bug pre-event | Deploy 3 days early, feature freeze 2 days early |
 | Admin approval delays | Email notifications, mobile-friendly dashboard |

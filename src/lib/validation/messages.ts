@@ -22,7 +22,7 @@ export const ERROR_MESSAGES = {
       invalidType: 'Tipo di file non supportato. Usa: JPEG, PNG, GIF, WEBP',
     },
     video: {
-      tooLarge: 'File troppo grande (max 15MB)',
+      tooLarge: 'File troppo grande (max 20MB)',
       invalidType: 'Tipo di file non supportato. Usa: MP4, MOV, WEBM',
     },
   },

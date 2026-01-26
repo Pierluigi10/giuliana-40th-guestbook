@@ -36,6 +36,20 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Refresh session if it's about to expire (within 5 minutes)
+  if (user) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session && session.expires_at) {
+      const expiryTime = session.expires_at * 1000 // Convert to milliseconds
+      const now = Date.now()
+      const fiveMinutes = 5 * 60 * 1000
+
+      if (expiryTime - now < fiveMinutes) {
+        await supabase.auth.refreshSession()
+      }
+    }
+  }
+
   // Get user profile with role
   // Note: is_approved is kept for backward compatibility but is always true
   // after migration 004 (email confirmation replaces manual approval)
@@ -51,13 +65,17 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
-  // Public routes - allow access
+  // Public routes - allow access but preserve authentication
   if (
     path === '/login' ||
     path === '/register' ||
     path === '/pending-approval' ||
     path === '/'
   ) {
+    // If user is authenticated, add their role to response headers for client-side access
+    if (user && profile?.role) {
+      supabaseResponse.headers.set('X-User-Role', profile.role)
+    }
     return supabaseResponse
   }
 

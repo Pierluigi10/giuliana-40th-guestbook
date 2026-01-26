@@ -5,7 +5,7 @@ import Link from 'next/link'
 import confetti from 'canvas-confetti'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { ChevronDown, Heart } from 'lucide-react'
+import { ChevronDown, Heart, Eye } from 'lucide-react'
 import { BirthdayDecorations } from '@/components/ui/BirthdayDecorations'
 
 export function HeroSection() {
@@ -166,8 +166,8 @@ export function HeroSection() {
           {/* Primary CTA con sottotitolo */}
           <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
             <Link
-              href="/login"
-              aria-label="Accedi al guestbook"
+              href="/register"
+              aria-label="Regala un ricordo speciale"
               className="group relative inline-flex items-center justify-center w-full sm:w-auto min-w-[200px] min-h-[44px] px-8 py-4 font-bold text-white transition-all duration-200 bg-birthday-pink rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-birthday-pink hover:bg-birthday-pink/90 touch-manipulation"
             >
               <span className="absolute inset-0 w-full h-full mt-1 ml-1 transition-all duration-300 ease-in-out bg-birthday-purple rounded-xl group-hover:mt-0 group-hover:ml-0 -z-10"></span>
@@ -181,9 +181,15 @@ export function HeroSection() {
               Regala un ricordo
             </Link>
 
-            {/* Sottotitolo discreto */}
-            <p className="text-xs text-muted-foreground text-center">
-              Hai già un account? <span className="font-medium text-birthday-purple">Accedi qui sopra</span>
+            {/* Sottotitolo discreto con link */}
+            <p className="text-xs sm:text-sm text-muted-foreground text-center">
+              Hai già un account?{' '}
+              <Link
+                href="/login"
+                className="font-medium text-birthday-purple hover:text-birthday-purple/80 underline underline-offset-2 transition-colors"
+              >
+                Clicca qui per accedere
+              </Link>
             </p>
           </div>
 
@@ -196,6 +202,19 @@ export function HeroSection() {
           >
             <Link href="/register" aria-label="Registrati al guestbook">
               Registrati
+            </Link>
+          </Button>
+
+          {/* Gallery Link */}
+          <Button
+            asChild
+            size="lg"
+            variant="ghost"
+            className="w-full sm:w-auto min-w-[200px] min-h-[44px] text-birthday-gold hover:text-birthday-gold hover:bg-birthday-gold/10 font-medium touch-manipulation"
+          >
+            <Link href="/gallery" aria-label="Visualizza la galleria">
+              <Eye className="w-5 h-5 mr-2" />
+              Vai alla Galleria
             </Link>
           </Button>
         </motion.div>

@@ -57,7 +57,15 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
   const [currentPage, setCurrentPage] = useState(0)
   const observerTarget = useRef<HTMLDivElement>(null)
   const previousContentIds = useRef<Set<string>>(new Set(initialContent.map(c => c.id)))
-  const deletedContentIds = useRef<Set<string>>(new Set())
+  // Initialize deleted IDs from localStorage to persist across page refreshes
+  const getInitialDeletedIds = (): Set<string> => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('deleted_content_ids')
+      return stored ? new Set(JSON.parse(stored)) : new Set()
+    }
+    return new Set()
+  }
+  const deletedContentIds = useRef<Set<string>>(getInitialDeletedIds())
   const { triggerConfetti } = useConfetti()
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -71,16 +79,30 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
     // Track deleted IDs to prevent polling re-adding them
     deletedContentIds.current.add(contentId)
 
+    // Persist to localStorage for cross-refresh persistence
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(
+        'deleted_content_ids',
+        JSON.stringify(Array.from(deletedContentIds.current))
+      )
+    }
+
     setContent(prev => prev.filter(item => item.id !== contentId))
 
     if (lightboxContent?.id === contentId) {
       setLightboxContent(null)
     }
 
-    // Cleanup deleted IDs after 5 minutes (prevent memory leak)
+    // Cleanup deleted IDs after 24 hours instead of 5 minutes
     setTimeout(() => {
       deletedContentIds.current.delete(contentId)
-    }, 5 * 60 * 1000)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          'deleted_content_ids',
+          JSON.stringify(Array.from(deletedContentIds.current))
+        )
+      }
+    }, 24 * 60 * 60 * 1000)
   }
 
   // Load more content when scrolling to bottom

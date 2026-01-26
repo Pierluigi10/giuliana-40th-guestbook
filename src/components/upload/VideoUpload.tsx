@@ -30,7 +30,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  const maxSize = 15 * 1024 * 1024 // 15MB
+  const maxSize = 20 * 1024 * 1024 // 20MB (increased from 15MB)
 
   useEffect(() => {
     setIsMobile(isMobileDevice())
@@ -59,7 +59,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
     if (file.size > maxSize) {
       toast.error('Video troppo grande! 📏', {
-        description: 'Il file supera i 15MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
+        description: 'Il file supera i 20MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
       })
       return
     }
@@ -95,7 +95,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.size > maxSize) {
       toast.error('Video troppo grande! 📏', {
-        description: 'Il file supera i 15MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
+        description: 'Il file supera i 20MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
       })
       return
     }
@@ -212,12 +212,12 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       setProgress(10)
     }
 
-    // Validate file size after compression (must be < 15MB)
-    if (fileToUpload.size > 15 * 1024 * 1024) {
+    // Validate file size after compression (must be < 20MB)
+    if (fileToUpload.size > 20 * 1024 * 1024) {
       toast.error('Video ancora troppo grande! 📏', {
         description: compressionSkipped
-          ? 'Compressione fallita. Riduci dimensioni manualmente.'
-          : 'Video supera 15MB anche dopo compressione'
+          ? 'Compressione fallita. Riduci dimensioni manualmente o scegli un video più corto.'
+          : 'Video supera 20MB anche dopo compressione. Prova con un video più corto.'
       })
       setLoading(false)
       setIsCompressing(false)
@@ -389,7 +389,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                       Trascina qui un video oppure clicca per selezionare
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Formati supportati: MP4, MOV • Max 15MB • Compressione automatica se necessario
+                      Formati supportati: MP4, MOV • <strong className="text-foreground">Max 20MB</strong> • Compressione automatica per video grandi
                     </p>
                   </>
                 )}
@@ -498,7 +498,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
             🎬 Compressione video: {compressionProgress}%
           </p>
           <p className="text-xs text-center text-muted-foreground">
-            Attendere prego... Può richiedere fino a 30 secondi
+            La compressione può richiedere diversi minuti. Attendere prego...
           </p>
         </div>
       )}

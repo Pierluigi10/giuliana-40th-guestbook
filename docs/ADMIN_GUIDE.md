@@ -245,7 +245,7 @@ In the admin dashboard you can monitor:
 **Problem**: Upload failed or blocked
 
 **Solutions:**
-1. **File size**: Max 10MB per file
+1. **File size**: Max 10MB for photos, 20MB for videos
    - If file is too large, ask to compress it
    - Photos: use apps like "Compress Photos" (iOS) or "Photo Compress" (Android)
    - Videos: record at lower resolution (720p instead of 4K)
