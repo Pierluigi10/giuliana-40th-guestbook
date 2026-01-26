@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff } from 'lucide-react'
 import { loginSchema } from '@/lib/validation/schemas'
 
 export function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || null
 
@@ -109,14 +108,10 @@ export function LoginForm() {
         }
 
         // Redirect based on role (no more approval check)
-        if (profile.role === 'admin') {
-          router.push(redirect || '/approve-content')
-        } else if (profile.role === 'vip') {
-          router.push(redirect || '/gallery')
-        } else if (profile.role === 'guest') {
-          router.push(redirect || '/gallery')
-        }
-        router.refresh()
+        // Use window.location.href to force a full page reload and ensure cookies are properly set
+        const redirectPath = redirect ||
+          (profile.role === 'admin' ? '/approve-content' : '/gallery')
+        window.location.href = redirectPath
       }
     } catch (err) {
       setError('Si è verificato un errore durante l\'accesso')

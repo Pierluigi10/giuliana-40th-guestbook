@@ -25,14 +25,15 @@ export default async function UploadPage() {
     redirect('/login')
   }
 
-  // Check if user is guest
+  // Check if user is guest or admin (admin can access for testing)
   const { data: profile } = await supabase
     .from('profiles')
     .select('role, full_name')
     .eq('id', user.id)
     .single() as { data: { role: string; full_name: string } | null }
 
-  if (profile?.role !== 'guest') {
+  // Allow admin to access upload page for testing
+  if (profile?.role !== 'guest' && profile?.role !== 'admin') {
     redirect('/login')
   }
 

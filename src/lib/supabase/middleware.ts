@@ -97,7 +97,8 @@ export async function updateSession(request: NextRequest) {
   if (path.startsWith('/guest')) {
     // After migration 004, all guests are auto-approved via email confirmation
     // is_approved is always true for guests who have confirmed their email
-    if (profile?.role !== 'guest') {
+    // Allow admin to access guest routes for testing
+    if (profile?.role !== 'guest' && profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/pending-approval', request.url))
     }
   }
