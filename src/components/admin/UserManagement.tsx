@@ -272,23 +272,25 @@ export function UserManagement() {
               <AlertTriangle className="w-5 h-5 text-red-600" />
               Conferma eliminazione utente
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Stai per eliminare l&apos;utente{' '}
-                <span className="font-semibold">{userToDelete?.full_name}</span>.
-              </p>
-              <p className="text-red-600 font-medium">
-                Questa azione eliminerà:
-              </p>
-              <ul className="list-disc list-inside text-sm space-y-1 ml-2">
-                <li>Il profilo utente</li>
-                <li>Tutti i contenuti caricati</li>
-                <li>Tutte le reazioni</li>
-                <li>I file media associati</li>
-              </ul>
-              <p className="font-semibold mt-4">
-                Questa azione è irreversibile!
-              </p>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <div>
+                  Stai per eliminare l&apos;utente{' '}
+                  <span className="font-semibold">{userToDelete?.full_name}</span>.
+                </div>
+                <div className="text-red-600 font-medium">
+                  Questa azione eliminerà:
+                </div>
+                <ul className="list-disc list-inside text-sm space-y-1 ml-2">
+                  <li>Il profilo utente</li>
+                  <li>Tutti i contenuti caricati</li>
+                  <li>Tutte le reazioni</li>
+                  <li>I file media associati</li>
+                </ul>
+                <div className="font-semibold mt-4">
+                  Questa azione è irreversibile!
+                </div>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
