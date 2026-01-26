@@ -209,8 +209,7 @@ export function HeroSection() {
           <Button
             asChild
             size="lg"
-            variant="ghost"
-            className="w-full sm:w-auto min-w-[200px] min-h-[44px] text-birthday-gold hover:text-birthday-gold hover:bg-birthday-gold/10 font-medium touch-manipulation"
+            className="w-full sm:w-auto min-w-[200px] min-h-[44px] bg-gradient-to-r from-birthday-pink to-birthday-purple hover:from-birthday-pink/90 hover:to-birthday-purple/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all touch-manipulation"
           >
             <Link href="/gallery" aria-label="Visualizza la galleria">
               <Eye className="w-5 h-5 mr-2" />
