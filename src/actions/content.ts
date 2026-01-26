@@ -581,8 +581,14 @@ export async function approveContent(contentId: string) {
       // NON usare await - approval success è indipendente da email delivery
     }
 
-    revalidatePath('/admin/approve-content')
-    revalidatePath('/gallery')
+    // Revalidate paths (non-critical - errors don't affect operation success)
+    try {
+      revalidatePath('/admin/approve-content')
+      revalidatePath('/gallery')
+    } catch (revalidateError) {
+      // Log error but don't fail the operation
+      console.warn('[CACHE] Error revalidating paths (non-critical):', revalidateError)
+    }
     return { success: true }
   } catch (error) {
     console.error('Approve content error:', error)
@@ -618,7 +624,13 @@ export async function rejectContent(contentId: string) {
       return { success: false, error: 'Errore durante il rifiuto' }
     }
 
-    revalidatePath('/admin/approve-content')
+    // Revalidate path (non-critical - errors don't affect operation success)
+    try {
+      revalidatePath('/admin/approve-content')
+    } catch (revalidateError) {
+      // Log error but don't fail the operation
+      console.warn('[CACHE] Error revalidating path (non-critical):', revalidateError)
+    }
     return { success: true }
   } catch (error) {
     console.error('Reject content error:', error)
@@ -702,8 +714,14 @@ export async function deleteContent(contentId: string) {
     // Wait for DB propagation to ensure the deletion is reflected in subsequent queries
     await new Promise(resolve => setTimeout(resolve, 300))
 
-    revalidatePath('/gallery')
-    revalidatePath('/admin/approve-content')
+    // Revalidate paths (non-critical - errors don't affect operation success)
+    try {
+      revalidatePath('/gallery')
+      revalidatePath('/admin/approve-content')
+    } catch (revalidateError) {
+      // Log error but don't fail the operation
+      console.warn('[CACHE] Error revalidating paths (non-critical):', revalidateError)
+    }
     return { success: true }
   } catch (error) {
     console.error('Delete content error:', error)
@@ -795,8 +813,14 @@ export async function bulkApproveContent(contentIds: string[]) {
       }
     }
 
-    revalidatePath('/admin/approve-content')
-    revalidatePath('/gallery')
+    // Revalidate paths (non-critical - errors don't affect operation success)
+    try {
+      revalidatePath('/admin/approve-content')
+      revalidatePath('/gallery')
+    } catch (revalidateError) {
+      // Log error but don't fail the operation
+      console.warn('[CACHE] Error revalidating paths (non-critical):', revalidateError)
+    }
     return { success: true, count: contentDataArray.length }
   } catch (error) {
     console.error('Bulk approve content error:', error)

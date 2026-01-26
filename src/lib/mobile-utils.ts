@@ -55,3 +55,29 @@ export function getImageCompressionOptions(isMobile: boolean) {
     initialQuality: 0.9,
   }
 }
+
+/**
+ * Get video recording constraints with lowest quality settings
+ * This ensures videos are recorded at the lowest quality to reduce file size
+ */
+export function getLowQualityVideoConstraints(): MediaStreamConstraints {
+  return {
+    video: {
+      facingMode: 'environment', // Use back camera
+      width: { ideal: 480 }, // Low resolution width
+      height: { ideal: 360 }, // Low resolution height
+      frameRate: { ideal: 15 }, // Lower frame rate (15fps instead of 30fps)
+      // Use advanced constraints to force lowest quality
+      advanced: [
+        { width: { max: 640 } }, // Max width 640px
+        { height: { max: 480 } }, // Max height 480px
+        { frameRate: { max: 15 } }, // Max 15fps
+      ],
+    },
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      sampleRate: 16000, // Lower audio sample rate (16kHz instead of 48kHz)
+    },
+  }
+}

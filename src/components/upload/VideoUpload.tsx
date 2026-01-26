@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti'
 import { saveVideoContentRecord } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import { checkUploadRateLimit } from '@/lib/utils'
-import { isMobileDevice, isCameraAvailable } from '@/lib/mobile-utils'
+import { isMobileDevice, isCameraAvailable, getLowQualityVideoConstraints } from '@/lib/mobile-utils'
 import { Camera, Video } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { analyzeNetworkError, uploadWithRetry } from '@/lib/network-errors'
@@ -26,9 +26,16 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   const [compressionProgress, setCompressionProgress] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [cameraAvailable, setCameraAvailable] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [estimatedSize, setEstimatedSize] = useState(0)
   const mobileFileInputRef = useRef<HTMLInputElement>(null)
-  const cameraInputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const mediaStreamRef = useRef<MediaStream | null>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const recordedChunksRef = useRef<Blob[]>([])
+  const videoPreviewRef = useRef<HTMLVideoElement>(null)
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const maxSize = 20 * 1024 * 1024 // 20MB (increased from 15MB)
 
@@ -52,6 +59,47 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       }
     }
   }, [preview])
+
+  // Cleanup media stream on unmount
+  useEffect(() => {
+    return () => {
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach(track => track.stop())
+        mediaStreamRef.current = null
+      }
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Auto-stop recording after 1 minute (60 seconds)
+  useEffect(() => {
+    if (isRecording && recordingTime === 50) {
+      toast.warning('10 secondi al limite! ⏰', {
+        description: 'La registrazione si fermerà automaticamente tra 10 secondi'
+      })
+    }
+    if (isRecording && recordingTime >= 60) {
+      stopRecording()
+      toast.info('Limite di 1 minuto raggiunto! 🎬', {
+        description: 'Registrazione fermata automaticamente'
+      })
+    }
+  }, [isRecording, recordingTime])
+
+  // Calculate estimated file size based on recording time and bitrate
+  useEffect(() => {
+    if (isRecording && recordingTime > 0) {
+      // Bitrate: 250 kbps video + ~32 kbps audio = ~282 kbps total
+      // Convert to bytes per second: 282000 bits/s = 35250 bytes/s
+      const bytesPerSecond = 35250
+      const estimated = recordingTime * bytesPerSecond
+      setEstimatedSize(estimated)
+    } else {
+      setEstimatedSize(0)
+    }
+  }, [isRecording, recordingTime])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
@@ -125,10 +173,108 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     }
   }
 
-  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
-    if (selectedFile) {
-      handleFileSelect(selectedFile)
+  const startRecording = async () => {
+    try {
+      const constraints = getLowQualityVideoConstraints()
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      
+      mediaStreamRef.current = stream
+      recordedChunksRef.current = []
+
+      // Show video preview
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream
+        videoPreviewRef.current.play()
+      }
+
+      // Create MediaRecorder with low bitrate
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+        ? 'video/webm;codecs=vp8'
+        : MediaRecorder.isTypeSupported('video/webm')
+        ? 'video/webm'
+        : 'video/mp4'
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: 250000, // Low bitrate: 250 kbps (default is usually 2.5 Mbps)
+      })
+
+      mediaRecorderRef.current = mediaRecorder
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recordedChunksRef.current.push(event.data)
+        }
+      }
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: mimeType })
+        const fileName = `video-${Date.now()}.${mimeType.includes('webm') ? 'webm' : 'mp4'}`
+        const file = new File([blob], fileName, { type: mimeType })
+        
+        handleFileSelect(file)
+        
+        // Stop all tracks
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach(track => track.stop())
+          mediaStreamRef.current = null
+        }
+        
+        setIsRecording(false)
+        setRecordingTime(0)
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current)
+        }
+      }
+
+      mediaRecorder.start(1000) // Collect data every second
+      setIsRecording(true)
+      setRecordingTime(0)
+
+      // Start recording timer
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+
+      toast.success('Registrazione iniziata! 🎬', {
+        description: 'Limite 1 minuto • Qualità ottimizzata per caricamento veloce'
+      })
+    } catch (error) {
+      console.error('Error starting video recording:', error)
+      toast.error('Errore accesso camera 📷', {
+        description: 'Assicurati di aver concesso i permessi per la camera'
+      })
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+    }
+  }
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      mediaRecorderRef.current = null
+    }
+    
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop())
+      mediaStreamRef.current = null
+    }
+    
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null
+    }
+    
+    setIsRecording(false)
+    setRecordingTime(0)
+    setEstimatedSize(0)
+    recordedChunksRef.current = []
+
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current)
     }
   }
 
@@ -138,7 +284,22 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     setPreview(null)
     setProgress(0)
     if (mobileFileInputRef.current) mobileFileInputRef.current.value = ''
-    if (cameraInputRef.current) cameraInputRef.current.value = ''
+
+    // Cleanup recording state
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop())
+      mediaStreamRef.current = null
+    }
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null
+    }
+    setIsRecording(false)
+    setRecordingTime(0)
+    setEstimatedSize(0)
+    recordedChunksRef.current = []
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -246,7 +407,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           }),
         {
           maxRetries: 2,
-          onRetry: (attempt, error) => {
+          onRetry: (attempt) => {
             console.log(`[Video Upload] Retry attempt ${attempt}/3...`)
             toast.info('Riprovo il caricamento... 🔄', {
               description: `Tentativo ${attempt} di 3`
@@ -397,26 +558,83 @@ export function VideoUpload({ userId }: VideoUploadProps) {
             </div>
           )}
 
-          {/* Mobile Camera Access */}
+          {/* Mobile Camera Access - Video Recording */}
           {isMobile && cameraAvailable && (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="video/*"
-                capture="environment"
-                onChange={handleCameraCapture}
-                className="hidden"
-                id="camera-video-input"
-              />
-              <label
-                htmlFor="camera-video-input"
-                className="cursor-pointer flex flex-col items-center gap-2"
-              >
-                <Camera className="w-8 h-8 text-birthday-purple" />
-                <span className="text-sm font-medium">Registra un video</span>
-                <span className="text-xs text-muted-foreground">Usa la videocamera del dispositivo</span>
-              </label>
+            <div className="space-y-4">
+              {!isRecording ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <button
+                    type="button"
+                    onClick={startRecording}
+                    className="flex flex-col items-center gap-2 w-full"
+                  >
+                    <Camera className="w-8 h-8 text-birthday-purple" />
+                    <span className="text-sm font-medium">Registra un video</span>
+                    <span className="text-xs text-muted-foreground">Max 1 minuto • Qualità ottimizzata</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Video Preview During Recording */}
+                  <div className="relative rounded-lg overflow-hidden border-2 border-red-500 bg-black">
+                    <video
+                      ref={videoPreviewRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      className="w-full h-auto max-h-[400px]"
+                    />
+                    {/* Recording Indicator */}
+                    <div className="absolute top-2 left-2 flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                      <span className="text-xs font-medium">
+                        {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                    {/* Estimated Size Indicator */}
+                    <div className="absolute top-2 right-2 bg-black/70 text-white px-3 py-1 rounded-full">
+                      <span className="text-xs font-medium">
+                        ~{(estimatedSize / 1024 / 1024).toFixed(1)} MB
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Recording Controls */}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={stopRecording}
+                      className="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12" rx="2" />
+                      </svg>
+                      Ferma registrazione
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelRecording}
+                      className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                    >
+                      Annulla
+                    </button>
+                  </div>
+
+                  {/* Recording Info */}
+                  <div className="bg-gray-100 rounded-lg p-3 text-center space-y-1">
+                    <p className="text-sm font-medium text-gray-700">
+                      {recordingTime < 50 ? (
+                        <>Tempo rimasto: <span className="text-birthday-purple">{60 - recordingTime}s</span></>
+                      ) : (
+                        <span className="text-orange-600">⚠️ {60 - recordingTime}s al limite!</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Dimensione stimata: ~{(estimatedSize / 1024 / 1024).toFixed(1)} MB
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
