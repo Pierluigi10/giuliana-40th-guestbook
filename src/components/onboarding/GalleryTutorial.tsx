@@ -36,7 +36,7 @@ const TUTORIAL_STEPS: Record<TutorialStep, StepConfig> = {
   'upload-cta': {
     title: 'Lascia il tuo ricordo ✨',
     emoji: '✨',
-    description: 'Non hai ancora caricato nulla! Condividi un messaggio, una foto o un video speciale per rendere questo compleanno ancora più memorabile.',
+    description: 'Non hai ancora caricato nulla! Condividi un messaggio, una foto (max 10MB) o un video (max 20MB). I contenuti saranno visibili dopo l\'approvazione dell\'admin.',
   },
   complete: {
     title: 'Tutto pronto! 🎊',

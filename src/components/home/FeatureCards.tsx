@@ -7,9 +7,9 @@ import { Card } from '@/components/ui/card'
 const features = [
   {
     icon: LogIn,
-    title: 'Accedi',
+    title: 'Registrati',
     description:
-      'Registrati con email e conferma per accedere alla piattaforma.',
+      'Registrati, conferma la tua email cliccando sul link ricevuto e accedi alla piattaforma.',
     gradient: 'from-birthday-pink to-birthday-purple',
     iconColor: 'text-birthday-pink',
   },
@@ -17,7 +17,7 @@ const features = [
     icon: Upload,
     title: 'Carica',
     description:
-      'Condividi messaggi, foto e video (max 10MB) per augurare il meglio.',
+      'Condividi messaggi, foto (max 10MB) e video (max 20MB) per augurare il meglio.',
     gradient: 'from-birthday-purple to-birthday-gold',
     iconColor: 'text-birthday-purple',
   },
@@ -25,7 +25,7 @@ const features = [
     icon: Eye,
     title: 'Visualizza',
     description:
-      'Giuliana vedrà tutti i contenuti approvati nella galleria privata.',
+      "L'admin approva i contenuti, che saranno poi visibili nella galleria.",
     gradient: 'from-birthday-gold to-birthday-pink',
     iconColor: 'text-birthday-gold',
   },
