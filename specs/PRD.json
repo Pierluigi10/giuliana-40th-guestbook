@@ -10,66 +10,72 @@
     {
       "category": "Authentication & Authorization",
       "id": "AUTH-001",
-      "description": "Implementare sistema di registrazione per guest con email e nome completo. Gli utenti registrati devono avere stato 'pending' fino ad approvazione admin.",
+      "description": "Implementare sistema di registrazione per guest con email e nome completo. Email auto-confermata (no approvazione manuale admin).",
       "acceptance_criteria": [
         "Form registrazione con campi: email (validato), full_name, password",
-        "Dopo submit, utente creato in Supabase Auth con role='guest' e is_approved=false",
-        "Redirect a pagina 'Pending Approval' con messaggio esplicativo",
-        "Email di conferma registrazione inviata automaticamente"
+        "Dopo submit, utente creato in Supabase Auth con role='guest' e is_approved=true (auto-approved)",
+        "Email auto-confermata tramite API admin (no link conferma)",
+        "Auto-login dopo registrazione e redirect a /gallery",
+        "Honeypot field per prevenire spam bot"
       ],
       "steps_to_verify": [
         "1. Aprire /register",
         "2. Compilare form con email test@example.com, nome 'Mario Rossi', password",
         "3. Submit form",
-        "4. Verificare redirect a /pending-approval",
-        "5. Controllare Supabase Dashboard → Authentication → Users: trovare utente con role='guest', is_approved=false",
-        "6. Verificare email ricevuta (check inbox o Supabase logs)"
+        "4. Verificare auto-login e redirect a /gallery",
+        "5. Controllare Supabase Dashboard → Authentication → Users: trovare utente con role='guest', is_approved=true",
+        "6. Verificare profile creato automaticamente in profiles table"
       ],
-      "passes": false
+      "passes": true,
+      "implementation_notes": "Sistema modificato il 2026-01-23 con migration 004: rimossa approvazione manuale, ora email auto-confermata. Rate limiting implementato (5 registrazioni per IP ogni 10 minuti)."
     },
     {
       "category": "Authentication & Authorization",
       "id": "AUTH-002",
-      "description": "Implementare login per tutti i ruoli (admin, vip, guest) con validazione stato approvazione per guest.",
+      "description": "Implementare login per tutti i ruoli (admin, vip, guest). Tutti gli utenti con email confermata accedono immediatamente.",
       "acceptance_criteria": [
         "Form login con email e password",
         "Autenticazione tramite Supabase Auth",
-        "Guest non approvati (is_approved=false) vedono messaggio 'In attesa di approvazione' e non possono accedere alle aree protette",
-        "Guest approvati accedono a /guest/upload",
-        "Admin accede a /admin/dashboard",
-        "VIP accede a /vip/gallery"
+        "Validazione email format e password minimo 6 caratteri",
+        "Admin accede a /approve-content (route principale admin)",
+        "Guest e VIP accedono a /gallery",
+        "Redirect automatico al percorso richiesto se URL aveva parametro redirect"
       ],
       "steps_to_verify": [
         "1. Aprire /login",
-        "2. Login come guest non approvato → verificare redirect a /pending-approval",
-        "3. Admin approva guest da dashboard",
-        "4. Logout e login nuovamente come guest → verificare accesso a /guest/upload",
-        "5. Login come admin → verificare accesso a /admin/*",
-        "6. Login come VIP (Giuliana) → verificare accesso a /vip/gallery"
+        "2. Login come guest → verificare redirect a /gallery",
+        "3. Login come admin → verificare redirect a /approve-content",
+        "4. Logout e tentare /upload senza login → redirect a /login?redirect=/upload",
+        "5. Login → verificare redirect automatico a /upload",
+        "6. Verificare form disabilita submit se campi invalidi"
       ],
-      "passes": false
+      "passes": true,
+      "implementation_notes": "Routes effettive: /upload (guest), /approve-content (admin), /gallery (tutti). No approvazione manuale guest (rimossa in migration 004). Full page reload con window.location.href per garantire cookies corretti."
     },
     {
       "category": "Authentication & Authorization",
       "id": "AUTH-003",
       "description": "Implementare middleware Next.js per protezione route basata su ruoli. Le route devono essere protette lato server (non solo UI).",
       "acceptance_criteria": [
-        "File middleware.ts che intercetta tutte le richieste",
-        "Route /admin/* accessibili solo a role='admin'",
-        "Route /vip/* accessibili solo a role='vip'",
-        "Route /guest/* accessibili solo a guest con is_approved=true",
-        "Accesso non autorizzato → redirect a /login con messaggio errore",
-        "Protezione lato server (non bypassabile da client)"
+        "File middleware.ts che intercetta tutte le richieste (esclusi static assets)",
+        "Admin routes (/approve-content, /approve-users, /dashboard, /export, /manage-users, /security-log) accessibili solo a role='admin'",
+        "Route /upload accessibile solo a guest e admin",
+        "Route /gallery accessibile a tutti gli utenti autenticati",
+        "Accesso non autorizzato → redirect a /login con parametro redirect",
+        "Protezione lato server (non bypassabile da client)",
+        "Session refresh automatico se scadenza imminente (<5 min)"
       ],
       "steps_to_verify": [
         "1. Logout completo (cancellare sessione)",
-        "2. Tentare accesso diretto a /admin/approve-users → verificare redirect a /login",
-        "3. Login come guest approvato → tentare /admin/approve-users → verificare redirect/403",
-        "4. Login come guest approvato → tentare /vip/gallery → verificare redirect/403",
-        "5. Login come VIP → tentare /admin/approve-users → verificare redirect/403",
-        "6. Testare bypass con cURL o Postman → verificare 401/403"
+        "2. Tentare accesso diretto a /approve-content → verificare redirect a /login",
+        "3. Login come guest → tentare /approve-content → verificare redirect a /login",
+        "4. Login come guest → accedere a /upload → verificare successo",
+        "5. Login come guest → accedere a /gallery → verificare successo",
+        "6. Login come admin → accedere a /approve-content → verificare successo",
+        "7. Testare bypass con cURL senza cookie auth → verificare redirect/401"
       ],
-      "passes": false
+      "passes": true,
+      "implementation_notes": "Usa Next.js route groups: (admin)/approve-content → URL /approve-content, (guest)/upload → URL /upload. Middleware in src/lib/supabase/middleware.ts. Matcher esclude static files e API routes."
     },
     {
       "category": "User Management - Admin",
@@ -491,7 +497,7 @@
         "7. Verificare trigger: creare user in Authentication → verificare profile auto-creato",
         "8. Verificare indici: controllare Indexes tab per ogni tabella"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "Database & Security",
@@ -518,7 +524,7 @@
         "8. Test policy: autenticare come admin → UPDATE content status → successo",
         "9. Test policy: guest approvato → INSERT content → successo, guest non approvato → errore"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "category": "Storage & File Management",

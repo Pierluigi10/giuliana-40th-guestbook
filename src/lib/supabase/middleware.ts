@@ -88,20 +88,28 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Check role-based access
-  if (path.startsWith('/admin')) {
+  // Note: Routes use Next.js route groups, so (admin)/approve-content becomes /approve-content
+
+  // Admin-only routes (from (admin) route group)
+  const adminRoutes = ['/approve-content', '/approve-users', '/dashboard', '/export', '/manage-users', '/security-log']
+  if (adminRoutes.some(route => path.startsWith(route))) {
     if (profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
 
-  if (path.startsWith('/guest')) {
+  // Guest routes (from (guest) route group) - accessible by guests and admins
+  if (path.startsWith('/upload')) {
     // After migration 004, all guests are auto-approved via email confirmation
     // is_approved is always true for guests who have confirmed their email
     // Allow admin to access guest routes for testing
     if (profile?.role !== 'guest' && profile?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/pending-approval', request.url))
+      return NextResponse.redirect(new URL('/login', request.url))
     }
   }
+
+  // Gallery route - accessible by all authenticated users (VIP, admin, guest)
+  // No special protection needed - authentication check above is sufficient
 
   return supabaseResponse
 }
