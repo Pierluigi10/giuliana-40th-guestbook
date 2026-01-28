@@ -4,18 +4,26 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Home } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'Accedi',
-  description: 'Accedi al guestbook di Giuliana per condividere i tuoi auguri',
-  openGraph: {
-    title: 'Accedi - Guestbook Giuliana 40',
-    description: 'Accedi per partecipare alla celebrazione',
-    type: 'website',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('auth.login')
+
+  return {
+    title: t('title'),
+    description: t('subtitle'),
+    openGraph: {
+      title: `${t('title')} - Guestbook Giuliana 40`,
+      description: t('subtitle'),
+      type: 'website',
+    },
+  }
 }
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations('auth.login')
+  const tc = await getTranslations('common')
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
@@ -23,28 +31,28 @@ export default function LoginPage() {
           <Button variant="ghost" asChild>
             <Link href="/" className="flex items-center gap-2">
               <Home className="h-4 w-4" />
-              Home
+              {tc('home')}
             </Link>
           </Button>
         </div>
 
         <div className="text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent">
-            Accedi
+            {t('title')}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Benvenuto al guestbook di Giuliana
+            {t('subtitle')}
           </p>
         </div>
 
-        <Suspense fallback={<div>Caricamento...</div>}>
+        <Suspense fallback={<div>{tc('loading')}</div>}>
           <LoginForm />
         </Suspense>
 
         <p className="text-center text-sm text-muted-foreground">
-          Non hai un account?{' '}
+          {t('noAccount')}{' '}
           <Link href="/register" className="font-medium text-birthday-purple hover:underline">
-            Registrati
+            {tc('register')}
           </Link>
         </p>
       </div>

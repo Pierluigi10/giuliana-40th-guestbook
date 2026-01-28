@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { X, Upload } from 'lucide-react'
@@ -22,36 +23,38 @@ interface StepConfig {
   emoji: string
 }
 
-const TUTORIAL_STEPS: Record<TutorialStep, StepConfig> = {
-  welcome: {
-    title: 'Benvenuto! 🎉',
-    emoji: '🎉',
-    description: 'Questa è la galleria di messaggi, foto e video per il compleanno di Giuliana. Qui puoi vedere tutti i contenuti condivisi dai suoi amici!',
-  },
-  'gallery-overview': {
-    title: 'Esplora i contenuti 📸',
-    emoji: '📸',
-    description: 'Usa i filtri per visualizzare solo messaggi, foto o video. Puoi anche reagire ai contenuti con emoji per mostrare il tuo apprezzamento!',
-  },
-  'upload-cta': {
-    title: 'Lascia il tuo ricordo ✨',
-    emoji: '✨',
-    description: 'Non hai ancora caricato nulla! Condividi un messaggio, una foto (max 10MB) o un video (max 20MB). I contenuti saranno visibili dopo l\'approvazione dell\'admin.',
-  },
-  complete: {
-    title: 'Tutto pronto! 🎊',
-    emoji: '🎊',
-    description: 'Ora puoi esplorare la galleria e interagire con i contenuti. Buon divertimento e grazie per aver partecipato!',
-  },
-}
-
 const STORAGE_KEY = 'g_gift_gallery_tutorial_completed'
 
 export function GalleryTutorial({ userId }: GalleryTutorialProps) {
+  const t = useTranslations('tutorial')
   const [currentStep, setCurrentStep] = useState<TutorialStep>('welcome')
   const [shouldShow, setShouldShow] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+  // Build tutorial steps dynamically based on translations
+  const TUTORIAL_STEPS: Record<TutorialStep, StepConfig> = {
+    welcome: {
+      title: t('welcome.title'),
+      emoji: '🎉',
+      description: t('welcome.description'),
+    },
+    'gallery-overview': {
+      title: t('explore.title'),
+      emoji: '📸',
+      description: t('explore.description'),
+    },
+    'upload-cta': {
+      title: t('upload.title'),
+      emoji: '✨',
+      description: t('upload.description'),
+    },
+    complete: {
+      title: t('complete.title'),
+      emoji: '🎊',
+      description: t('complete.description'),
+    },
+  }
 
   useEffect(() => {
     checkIfShouldShowTutorial()
@@ -171,7 +174,7 @@ export function GalleryTutorial({ userId }: GalleryTutorialProps) {
           <button
             onClick={handleSkip}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
-            aria-label="Salta tutorial"
+            aria-label={t('skipAriaLabel')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -197,21 +200,21 @@ export function GalleryTutorial({ userId }: GalleryTutorialProps) {
                 className="w-full px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md"
               >
                 <Upload className="w-5 h-5" />
-                Carica contenuto
+                {t('uploadButton')}
               </button>
             ) : currentStep === 'complete' ? (
               <button
                 onClick={handleComplete}
                 className="w-full px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold rounded-lg hover:opacity-90 transition-opacity shadow-md"
               >
-                Inizia!
+                {t('startButton')}
               </button>
             ) : (
               <button
                 onClick={handleNext}
                 className="w-full px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold rounded-lg hover:opacity-90 transition-opacity shadow-md"
               >
-                Avanti
+                {t('nextButton')}
               </button>
             )}
           </div>

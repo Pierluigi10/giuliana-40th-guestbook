@@ -1,0 +1,300 @@
+{
+  "common": {
+    "login": "Accedi",
+    "logout": "Esci",
+    "register": "Registrati",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "required": "Campo obbligatorio",
+    "serverError": "Errore del server",
+    "invalidId": "ID non valido"
+  },
+  "nav": {
+    "gallery": "Galleria",
+    "upload": "Lascia un ricordo",
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "mainMenu": "Menu principale",
+    "navigationMenu": "Menu di Navigazione",
+    "openNav": "Apri menu di navigazione",
+    "userConnected": "Utente connesso: {userName}"
+  },
+  "hero": {
+    "title": "Giuliana 40",
+    "subtitle": "Il Libro dei Ricordi per i tuoi 40 anni ✨",
+    "description": "Un regalo digitale fatto di parole, sorrisi e momenti indimenticabili",
+    "messages": "Messaggi",
+    "photos": "Foto",
+    "videos": "Video",
+    "cta": {
+      "primary": "Regala un ricordo",
+      "primaryAriaLabel": "Regala un ricordo speciale",
+      "secondary": "Registrati",
+      "secondaryAriaLabel": "Registrati al guestbook",
+      "gallery": "Vai alla Galleria",
+      "galleryAriaLabel": "Visualizza la galleria"
+    },
+    "loginHint": "Hai già un account?",
+    "loginLink": "Clicca qui per accedere",
+    "confettiAriaLabel": "Spara coriandoli festosi"
+  },
+  "features": {
+    "heading": "Come Funziona",
+    "subtitle": "Tre semplici passaggi per contribuire alla celebrazione",
+    "step": "Passo {step}",
+    "register": {
+      "title": "Registrati",
+      "description": "Registrati, conferma la tua email cliccando sul link ricevuto e accedi alla piattaforma."
+    },
+    "upload": {
+      "title": "Carica",
+      "description": "Condividi messaggi, foto (max 10MB) e video (max 20MB) per augurare il meglio."
+    },
+    "view": {
+      "title": "Visualizza",
+      "description": "L'admin approva i contenuti, che saranno poi visibili nella galleria."
+    }
+  },
+  "auth": {
+    "email": {
+      "label": "Email",
+      "placeholder": "mario@example.com"
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "••••••••",
+      "hint": "Almeno 6 caratteri",
+      "forgot": "Password dimenticata?"
+    },
+    "fullName": {
+      "label": "Nome completo",
+      "placeholder": "Mario Rossi"
+    },
+    "confirmPassword": {
+      "label": "Conferma Password"
+    },
+    "register": {
+      "title": "Registrazione",
+      "subtitle": "Unisciti alla celebrazione del 40° di Giuliana",
+      "submit": "Registrati",
+      "submitting": "Registrazione in corso...",
+      "success": "Registrazione completata con successo!",
+      "errorGeneric": "Si è verificato un errore durante la registrazione",
+      "errorAutoLogin": "Registrazione completata, ma errore durante l'accesso automatico. Prova ad accedere manualmente.",
+      "hasAccount": "Hai già un account?"
+    },
+    "login": {
+      "title": "Accedi",
+      "subtitle": "Benvenuto al guestbook di Giuliana",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso...",
+      "errorCredentials": "Email o password non corretti",
+      "errorProfile": "Profilo non trovato",
+      "errorGeneric": "Si è verificato un errore durante l'accesso",
+      "noAccount": "Non hai un account?"
+    },
+    "forgotPassword": {
+      "title": "Password Dimenticata",
+      "description": "Inserisci il tuo indirizzo email e ti invieremo un link per reimpostare la password.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "mario@example.com",
+      "emailInvalid": "Email non valida",
+      "submitButton": "Invia link di reset",
+      "submittingButton": "Invio in corso...",
+      "successTitle": "Email inviata!",
+      "successMessage": "Controlla la tua casella di posta. Ti abbiamo inviato un link per reimpostare la password.",
+      "noEmailReceived": "Non hai ricevuto l'email? Controlla anche nello spam.",
+      "backToLogin": "Torna al login",
+      "genericError": "Si è verificato un errore. Riprova più tardi."
+    },
+    "resetPassword": {
+      "title": "Reimposta Password",
+      "description": "Inserisci la tua nuova password (minimo 6 caratteri).",
+      "newPasswordLabel": "Nuova Password",
+      "newPasswordPlaceholder": "••••••••",
+      "newPasswordHint": "Almeno 6 caratteri",
+      "confirmPasswordLabel": "Conferma Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "minLength": "Minimo 6 caratteri",
+      "passwordMismatch": "Le password non coincidono",
+      "submitButton": "Reimposta Password",
+      "submittingButton": "Salvataggio...",
+      "successTitle": "Password reimpostata!",
+      "successMessage": "La tua password è stata reimpostata con successo. Verrai reindirizzato al login...",
+      "backToLogin": "Torna al login",
+      "errorAllFields": "Compila correttamente tutti i campi",
+      "genericError": "Si è verificato un errore. Riprova più tardi."
+    },
+    "pendingApproval": {
+      "metadata": {
+        "title": "In attesa di approvazione",
+        "description": "La tua registrazione è in attesa di approvazione da parte di un amministratore",
+        "ogTitle": "In attesa di approvazione - Guestbook Giuliana 40",
+        "ogDescription": "Account in attesa di approvazione"
+      },
+      "emailConfirmationTitle": "Controlla la tua email",
+      "waitingApprovalTitle": "In attesa di approvazione",
+      "greeting": "Ciao {name}!",
+      "guestFallback": "ospite",
+      "emailSentTo": "Ti abbiamo inviato un'email di conferma all'indirizzo {email}.",
+      "emailFallback": "la tua email",
+      "clickLinkInstructions": "Clicca sul link nella email per completare la registrazione e accedere al guestbook.",
+      "noEmailReceived": "Non hai ricevuto l'email? Controlla la cartella spam o attendi qualche minuto.",
+      "registrationSuccess": "La tua registrazione è stata ricevuta con successo. Dopo aver confermato la tua email, potrai accedere al guestbook.",
+      "checkEmailInstructions": "Controlla la tua casella email e clicca sul link di conferma.",
+      "backToLogin": "Torna al login"
+    }
+  },
+  "validation": {
+    "email": {
+      "invalid": "Email non valida"
+    },
+    "password": {
+      "tooShort": "Minimo 6 caratteri",
+      "mismatch": "Le password non coincidono",
+      "required": "Password obbligatoria",
+      "minLength": "La password deve contenere almeno 6 caratteri"
+    },
+    "fullName": {
+      "tooShort": "Inserisci nome e cognome",
+      "required": "Inserisci nome e cognome validi"
+    },
+    "text": {
+      "tooShort": "Il messaggio deve essere di almeno 10 caratteri",
+      "tooLong": "Il messaggio non può superare i 1000 caratteri",
+      "required": "Il messaggio è obbligatorio"
+    },
+    "media": {
+      "invalidUrl": "URL del file non valido",
+      "notSupabaseUrl": "URL non valido: deve provenire da Supabase Storage",
+      "image": {
+        "tooLarge": "File troppo grande (max 10MB)",
+        "invalidType": "Tipo di file non supportato. Usa: JPEG, PNG, GIF, WEBP"
+      },
+      "video": {
+        "tooLarge": "File troppo grande (max 20MB)",
+        "invalidType": "Tipo di file non supportato. Usa: MP4, MOV, WEBM"
+      }
+    },
+    "reactions": {
+      "invalidEmoji": "Emoji non valida",
+      "singleEmojiOnly": "Usa una sola emoji"
+    }
+  },
+  "admin": {
+    "panel": "Pannello Admin",
+    "areaAdmin": "Area Admin",
+    "approveContent": {
+      "title": "Modera Contenuti",
+      "menuItem": "Modera Contenuti"
+    },
+    "manageUsers": {
+      "title": "Gestione Utenti",
+      "menuItem": "Gestione Utenti"
+    },
+    "securityLog": {
+      "title": "Log di Sicurezza",
+      "menuItem": "Log di Sicurezza"
+    },
+    "export": {
+      "title": "Esporta Dati",
+      "menuItem": "Esporta Dati"
+    },
+    "dashboard": {
+      "title": "Dashboard"
+    },
+    "invalidContentId": "ID contenuto non valido",
+    "noContentSelected": "Nessun contenuto selezionato",
+    "tooManyContentSelected": "Troppi contenuti selezionati (max 50)"
+  },
+  "footer": {
+    "createdWith": "Creato con ❤️ per il 40° compleanno di Giuliana",
+    "poweredBy": "Powered by Next.js, Supabase, and Shadcn/ui"
+  },
+  "upload": {
+    "metadata": {
+      "title": "Carica il tuo messaggio",
+      "description": "Condividi un messaggio, foto o video per il compleanno di Giuliana",
+      "ogTitle": "Carica il tuo messaggio - Guestbook Giuliana 40",
+      "ogDescription": "Condividi i tuoi auguri con messaggi, foto e video"
+    },
+    "pageTitle": "Lascia un segno speciale ✨",
+    "pageSubtitle": "Ciao {name}! Regala un ricordo indimenticabile per i 40 anni di Giuliana 🎂💝",
+    "backToGallery": "Torna alla galleria",
+    "tabs": {
+      "message": "💬 Messaggio",
+      "photo": "📷 Foto",
+      "video": "🎥 Video"
+    },
+    "text": {
+      "label": "Scrivi qualcosa di speciale ✨",
+      "placeholder": "Scrivi un pensiero speciale per Giuliana...",
+      "charCount": "{count} / {max} caratteri",
+      "charCountMin": "{count} / {max} caratteri (minimo {min})",
+      "readyToSend": "✓ Pronto per l'invio",
+      "minCharError": "⚠️ Il messaggio deve avere almeno {min} caratteri",
+      "submitButton": "💝 Regala le tue parole",
+      "submittingButton": "✨ Magia in corso...",
+      "addMoreToast": "Continua così! 🌟",
+      "successToast": "🎉 Messaggio inviato con successo!",
+      "successDescription": "In attesa di approvazione dall'admin. Giuliana lo vedrà presto! {message}",
+      "firstMessageToast": "Questo è il tuo primo messaggio! 🎊",
+      "multipleContentToast": "Hai già caricato {count} contenuti! Continua così! 🌟",
+      "errorToast": "Ops! Qualcosa è andato storto 😔",
+      "errorDescription": "Riprova tra un momento, stiamo sistemando tutto per te!",
+      "rateLimitTitle": "Aspetta ancora un attimo! ⏱️",
+      "rateLimitDescription": "Attendi {remainingSeconds} secondi prima di caricare un altro contenuto. Stiamo preparando tutto per Giuliana! 🎁",
+      "unexpectedErrorToast": "Si è verificato un errore 😔",
+      "pendingApprovalNote": "📋 Il tuo contenuto sarà in attesa di approvazione dall'admin prima di essere visibile 💝✨"
+    },
+    "motivational": {
+      "messages": [
+        {
+          "text": "Il tuo messaggio renderà il compleanno di Giuliana ancora più speciale! ✨",
+          "emoji": "💝"
+        },
+        {
+          "text": "Ogni parola conta - condividi i tuoi ricordi più belli! 🌟",
+          "emoji": "📝"
+        },
+        {
+          "text": "Giuliana adorerà leggere il tuo messaggio! Continua così! 🎉",
+          "emoji": "🎁"
+        },
+        {
+          "text": "Stai creando un ricordo indelebile per questo giorno speciale! 💖",
+          "emoji": "✨"
+        },
+        {
+          "text": "I tuoi amici stanno già partecipando - unisciti a loro! 🎊",
+          "emoji": "👥"
+        },
+        {
+          "text": "Ogni messaggio è un regalo prezioso per Giuliana! 🎈",
+          "emoji": "🎂"
+        },
+        {
+          "text": "Stai facendo la differenza con le tue parole! Continua! 🌈",
+          "emoji": "💌"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "title": {
+      "template": "Guestbook Giuliana 40 | %s",
+      "default": "Guestbook Giuliana 40 - Auguri per i tuoi 40 Anni"
+    },
+    "description": "Guestbook privato per il 40esimo compleanno di Giuliana. Condividi messaggi, foto e video con i tuoi amici.",
+    "keywords": "guestbook, compleanno, 40 anni, Giuliana, messaggi, festa",
+    "og": {
+      "siteName": "Guestbook Giuliana 40",
+      "title": "Guestbook Giuliana 40 - Auguri per i tuoi 40 Anni",
+      "description": "Guestbook privato per il 40esimo compleanno di Giuliana. Condividi messaggi, foto e video."
+    },
+    "twitter": {
+      "title": "Guestbook Giuliana 40 - Auguri per i tuoi 40 Anni",
+      "description": "Condividi i tuoi auguri per il compleanno di Giuliana"
+    }
+  }
+}

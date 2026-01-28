@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { X, Type } from 'lucide-react'
 
 interface ImageTextOverlayProps {
@@ -10,6 +11,7 @@ interface ImageTextOverlayProps {
 }
 
 export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverlayProps) {
+  const t = useTranslations('upload.imageTextOverlay')
   const [text, setText] = useState('')
   const [position, setPosition] = useState({ x: 50, y: 50 })
   const [fontSize, setFontSize] = useState(24)
@@ -94,7 +96,7 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Type className="w-5 h-5 text-birthday-purple" />
-          <h3 className="font-medium">Aggiungi testo alla foto</h3>
+          <h3 className="font-medium">{t('title')}</h3>
         </div>
         <button
           type="button"
@@ -165,12 +167,12 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
       {/* Controls */}
       <div className="space-y-3 bg-gray-50 rounded-lg p-3 md:p-4">
         <div>
-          <label className="block text-sm md:text-base font-medium mb-2">Testo</label>
+          <label className="block text-sm md:text-base font-medium mb-2">{t('textLabel')}</label>
           <input
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Scrivi un messaggio..."
+            placeholder={t('textPlaceholder')}
             className="w-full min-h-[44px] rounded-md border border-input bg-background px-3 py-2.5 text-base md:text-sm touch-manipulation"
             maxLength={50}
           />
@@ -178,7 +180,7 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-3">
           <div>
-            <label className="block text-sm md:text-base font-medium mb-2">Dimensione</label>
+            <label className="block text-sm md:text-base font-medium mb-2">{t('sizeLabel')}</label>
             <input
               type="range"
               min="16"
@@ -191,7 +193,7 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
           </div>
 
           <div>
-            <label className="block text-sm md:text-base font-medium mb-2">Colore</label>
+            <label className="block text-sm md:text-base font-medium mb-2">{t('colorLabel')}</label>
             <div className="flex gap-2">
               <input
                 type="color"
@@ -204,7 +206,7 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
         </div>
 
         <p className="text-xs md:text-xs text-muted-foreground text-center">
-          💡 Tocca e trascina sulla foto per spostare il testo
+          {t('dragHint')}
         </p>
       </div>
 
@@ -215,7 +217,7 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
           onClick={onCancel}
           className="flex-1 min-h-[44px] rounded-md border border-gray-300 px-4 py-2.5 md:py-2 text-base md:text-sm font-medium hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
         >
-          Annulla
+          {t('cancelButton')}
         </button>
         <button
           type="button"
@@ -223,7 +225,7 @@ export function ImageTextOverlay({ imageUrl, onSave, onCancel }: ImageTextOverla
           disabled={!text}
           className="flex-1 min-h-[44px] rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
         >
-          Salva con testo
+          {t('saveButton')}
         </button>
       </div>
     </div>

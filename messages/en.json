@@ -1,0 +1,496 @@
+{
+  "common": {
+    "home": "Home",
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "register": "Register",
+    "loading": "Loading...",
+    "error": "Error",
+    "required": "Required field",
+    "serverError": "Server error",
+    "invalidId": "Invalid ID"
+  },
+  "nav": {
+    "gallery": "Gallery",
+    "upload": "Leave a memory",
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "mainMenu": "Main menu",
+    "navigationMenu": "Navigation Menu",
+    "openNav": "Open navigation menu",
+    "userConnected": "Logged in user: {userName}"
+  },
+  "hero": {
+    "title": "Giuliana 40",
+    "subtitle": "The Memory Book for your 40th birthday ✨",
+    "description": "A digital gift made of words, smiles and unforgettable moments",
+    "messages": "Messages",
+    "photos": "Photos",
+    "videos": "Videos",
+    "cta": {
+      "primary": "Give a memory",
+      "primaryAriaLabel": "Give a special memory",
+      "secondary": "Register",
+      "secondaryAriaLabel": "Register to the guestbook",
+      "gallery": "Go to Gallery",
+      "galleryAriaLabel": "View the gallery"
+    },
+    "loginHint": "Already have an account?",
+    "loginLink": "Click here to sign in",
+    "confettiAriaLabel": "Shoot festive confetti"
+  },
+  "features": {
+    "heading": "How It Works",
+    "subtitle": "Three simple steps to contribute to the celebration",
+    "step": "Step {step}",
+    "register": {
+      "title": "Register",
+      "description": "Register, confirm your email by clicking the link received and access the platform."
+    },
+    "upload": {
+      "title": "Upload",
+      "description": "Share messages, photos (max 10MB) and videos (max 20MB) to wish the best."
+    },
+    "view": {
+      "title": "View",
+      "description": "The admin approves the content, which will then be visible in the gallery."
+    }
+  },
+  "auth": {
+    "email": {
+      "label": "Email",
+      "placeholder": "john@example.com"
+    },
+    "password": {
+      "label": "Password",
+      "placeholder": "••••••••",
+      "hint": "At least 6 characters",
+      "forgot": "Forgot password?"
+    },
+    "fullName": {
+      "label": "Full name",
+      "placeholder": "John Doe"
+    },
+    "confirmPassword": {
+      "label": "Confirm Password"
+    },
+    "register": {
+      "title": "Registration",
+      "subtitle": "Join Giuliana's 40th celebration",
+      "submit": "Register",
+      "submitting": "Registering...",
+      "success": "Registration completed successfully!",
+      "errorGeneric": "An error occurred during registration",
+      "errorAutoLogin": "Registration completed, but error during automatic login. Please try to log in manually.",
+      "hasAccount": "Already have an account?"
+    },
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Welcome to Giuliana's guestbook",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "errorCredentials": "Incorrect email or password",
+      "errorProfile": "Profile not found",
+      "errorGeneric": "An error occurred during sign in",
+      "noAccount": "Don't have an account?"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we'll send you a link to reset your password.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "john@example.com",
+      "emailInvalid": "Invalid email",
+      "submitButton": "Send reset link",
+      "submittingButton": "Sending...",
+      "successTitle": "Email sent!",
+      "successMessage": "Check your mailbox. We've sent you a link to reset your password.",
+      "noEmailReceived": "Didn't receive the email? Check spam folder too.",
+      "backToLogin": "Back to login",
+      "genericError": "An error occurred. Please try again later."
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Enter your new password (minimum 6 characters).",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "••••••••",
+      "newPasswordHint": "At least 6 characters",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "minLength": "Minimum 6 characters",
+      "passwordMismatch": "Passwords don't match",
+      "submitButton": "Reset Password",
+      "submittingButton": "Saving...",
+      "successTitle": "Password reset!",
+      "successMessage": "Your password has been reset successfully. You'll be redirected to login...",
+      "backToLogin": "Back to login",
+      "errorAllFields": "Please fill in all fields correctly",
+      "genericError": "An error occurred. Please try again later."
+    },
+    "pendingApproval": {
+      "metadata": {
+        "title": "Pending approval",
+        "description": "Your registration is pending approval from an administrator",
+        "ogTitle": "Pending approval - Guestbook Giuliana 40",
+        "ogDescription": "Account pending approval"
+      },
+      "emailConfirmationTitle": "Check your email",
+      "waitingApprovalTitle": "Pending approval",
+      "greeting": "Hi {name}!",
+      "guestFallback": "guest",
+      "emailSentTo": "We've sent you a confirmation email to {email}.",
+      "emailFallback": "your email",
+      "clickLinkInstructions": "Click the link in the email to complete registration and access the guestbook.",
+      "noEmailReceived": "Didn't receive the email? Check spam folder or wait a few minutes.",
+      "registrationSuccess": "Your registration was received successfully. After confirming your email, you'll be able to access the guestbook.",
+      "checkEmailInstructions": "Check your email inbox and click the confirmation link.",
+      "backToLogin": "Back to login"
+    }
+  },
+  "validation": {
+    "email": {
+      "invalid": "Invalid email"
+    },
+    "password": {
+      "tooShort": "Minimum 6 characters",
+      "mismatch": "Passwords don't match",
+      "required": "Password required",
+      "minLength": "Password must contain at least 6 characters"
+    },
+    "fullName": {
+      "tooShort": "Enter first and last name",
+      "required": "Enter a valid first and last name"
+    },
+    "text": {
+      "tooShort": "The message must be at least 10 characters",
+      "tooLong": "The message cannot exceed 1000 characters",
+      "required": "The message is required"
+    },
+    "media": {
+      "invalidUrl": "Invalid file URL",
+      "notSupabaseUrl": "Invalid URL: must come from Supabase Storage",
+      "image": {
+        "tooLarge": "File too large (max 10MB)",
+        "invalidType": "Unsupported file type. Use: JPEG, PNG, GIF, WEBP"
+      },
+      "video": {
+        "tooLarge": "File too large (max 20MB)",
+        "invalidType": "Unsupported file type. Use: MP4, MOV, WEBM"
+      }
+    },
+    "reactions": {
+      "invalidEmoji": "Invalid emoji",
+      "singleEmojiOnly": "Use only one emoji"
+    }
+  },
+  "admin": {
+    "panel": "Admin Panel",
+    "areaAdmin": "Admin Area",
+    "approveContent": {
+      "title": "Moderate Content",
+      "menuItem": "Moderate Content"
+    },
+    "manageUsers": {
+      "title": "User Management",
+      "menuItem": "User Management"
+    },
+    "securityLog": {
+      "title": "Security Log",
+      "menuItem": "Security Log"
+    },
+    "export": {
+      "title": "Export Data",
+      "menuItem": "Export Data"
+    },
+    "dashboard": {
+      "title": "Dashboard"
+    },
+    "invalidContentId": "Invalid content ID",
+    "noContentSelected": "No content selected",
+    "tooManyContentSelected": "Too many contents selected (max 50)"
+  },
+  "footer": {
+    "createdWith": "Created with ❤️ for Giuliana's 40th birthday",
+    "poweredBy": "Powered by Next.js, Supabase, and Shadcn/ui"
+  },
+  "upload": {
+    "imageTextOverlay": {
+      "title": "Add text to photo",
+      "textLabel": "Text",
+      "textPlaceholder": "Write a message...",
+      "sizeLabel": "Size",
+      "colorLabel": "Color",
+      "dragHint": "💡 Tap and drag on the photo to move the text",
+      "cancelButton": "Cancel",
+      "saveButton": "Save with text"
+    },
+    "metadata": {
+      "title": "Upload your message",
+      "description": "Share a message, photo or video for Giuliana's birthday",
+      "ogTitle": "Upload your message - Guestbook Giuliana 40",
+      "ogDescription": "Share your wishes with messages, photos and videos"
+    },
+    "pageTitle": "Leave a special mark ✨",
+    "pageSubtitle": "Hi {name}! Give an unforgettable memory for Giuliana's 40th birthday 🎂💝",
+    "backToGallery": "Back to gallery",
+    "tabs": {
+      "message": "💬 Message",
+      "photo": "📷 Photo",
+      "video": "🎥 Video"
+    },
+    "text": {
+      "label": "Write something special ✨",
+      "placeholder": "Write a special thought for Giuliana...",
+      "charCount": "{count} / {max} characters",
+      "charCountMin": "{count} / {max} characters (minimum {min})",
+      "readyToSend": "✓ Ready to send",
+      "minCharError": "⚠️ The message must be at least {min} characters",
+      "submitButton": "💝 Gift your words",
+      "submittingButton": "✨ Magic in progress...",
+      "addMoreToast": "Keep it up! 🌟",
+      "successToast": "🎉 Message sent successfully!",
+      "successDescription": "Awaiting admin approval. Giuliana will see it soon! {message}",
+      "firstMessageToast": "This is your first message! 🎊",
+      "multipleContentToast": "You've already uploaded {count} items! Keep it up! 🌟",
+      "errorToast": "Oops! Something went wrong 😔",
+      "errorDescription": "Try again in a moment, we're fixing everything for you!",
+      "rateLimitTitle": "Wait a moment! ⏱️",
+      "rateLimitDescription": "Wait {remainingSeconds} seconds before uploading more content. We're getting everything ready for Giuliana! 🎁",
+      "unexpectedErrorToast": "An error occurred 😔",
+      "pendingApprovalNote": "📋 Your content will be awaiting admin approval before being visible 💝✨"
+    },
+    "image": {
+      "dragActive": "Drop your photo here!",
+      "dragDropLabel": "Capture an unforgettable memory for Giuliana",
+      "dragDropLabelMobile": "Capture a special moment ✨",
+      "dragDropHint": "Drag here or click to select",
+      "dragDropHintMobile": "Drag or choose a photo",
+      "fileTypeHint": "Automatic compression",
+      "cameraButton": "Capture the moment 📸",
+      "cameraHint": "Take a photo now",
+      "filePickerButton": "Browse your memories 🖼️",
+      "filePickerHint": "Choose from your gallery",
+      "fileTooLargeTitle": "File too large! 📏",
+      "fileTooLargeDescription": "The file exceeds 10MB. Try compressing the image or choose a smaller one. We'll help Giuliana see your photo faster! 🖼️",
+      "optimizingTitle": "Optimizing now! ⚡",
+      "optimizingDescription": "Large image detected, we're automatically compressing it for faster upload! 🎨",
+      "compressingImage": "Image optimization in progress... 🎨",
+      "compressingLargeImage": "We're optimizing your photo for mobile! 📱",
+      "compressingDesktopImage": "We're preparing your photo to make it perfect for Giuliana!",
+      "optimizedTitle": "Perfect! Image optimized ✨",
+      "optimizedDescription": "Reduced from {originalMB}MB to {compressedMB}MB. Ready for Giuliana! 📸",
+      "uploadingOriginalTitle": "Uploading original image",
+      "uploadingOriginalDescription": "Compression failed, but we'll upload your photo anyway! 🖼️",
+      "retryingUpload": "Retrying upload... 🔄",
+      "retryAttempt": "Attempt {attempt} of 3",
+      "uploadErrorTitle": "Error uploading file 📤",
+      "uploadErrorDescription": "An error occurred while saving",
+      "preparingProgress": "✨ Preparing...",
+      "uploadingProgress": "📤 Uploading...",
+      "finalizingProgress": "🎨 Finalizing...",
+      "removeImageAriaLabel": "Remove image",
+      "submitButton": "✨ Give a memory",
+      "submittingButton": "✨ Magic in progress...",
+      "firstPhotoToast": "This is your first photo! 🎊",
+      "multipleContentToast": "You've already uploaded {count} contents! Keep it up! 🌟",
+      "successToast": "🎉 Photo uploaded successfully!",
+      "successDescription": "Waiting for admin approval. Giuliana will see it soon!",
+      "errorToast": "Oops! Something went wrong 😔",
+      "errorDescription": "Please try again in a moment, we're fixing everything for you!",
+      "rateLimitTitle": "Hold on a moment! ⏱️",
+      "rateLimitDescription": "Wait {remainingSeconds} seconds before uploading another content. We're preparing everything for Giuliana! 🎁",
+      "unexpectedErrorToast": "An error occurred 😔",
+      "pendingApprovalNote": "📋 Your content will be waiting for admin approval before being visible 💝✨",
+      "fileNotSelected": "Select an image"
+    },
+    "motivational": {
+      "messages": [
+        {
+          "text": "Your message will make Giuliana's birthday even more special! ✨",
+          "emoji": "💝"
+        },
+        {
+          "text": "Every word counts - share your most beautiful memories! 🌟",
+          "emoji": "📝"
+        },
+        {
+          "text": "Giuliana will love reading your message! Keep it up! 🎉",
+          "emoji": "🎁"
+        },
+        {
+          "text": "You're creating an unforgettable memory for this special day! 💖",
+          "emoji": "✨"
+        },
+        {
+          "text": "Your friends are already participating - join them! 🎊",
+          "emoji": "👥"
+        },
+        {
+          "text": "Every message is a precious gift for Giuliana! 🎈",
+          "emoji": "🎂"
+        },
+        {
+          "text": "You're making a difference with your words! Keep going! 🌈",
+          "emoji": "💌"
+        }
+      ]
+    },
+    "video": {
+      "dragActive": "Drop the video here!",
+      "dragDropLabel": "Drag a video here or click to select",
+      "fileTypeHint": "Supported formats: MP4, MOV • Max 20MB • Auto compression for large videos",
+      "previewTitle": "Camera Preview",
+      "previewLoading": "Starting camera...",
+      "previewHint": "See the preview before recording",
+      "chooseCamera": "Choose camera, then click REC",
+      "startRecordingButton": "REC - Start Recording",
+      "preparingButton": "Preparing...",
+      "cancelButton": "Cancel",
+      "stopRecordingButton": "Stop Recording",
+      "recordingTimeRemaining": "Time remaining: {remainingSeconds}s",
+      "recordingTimeWarning": "⚠️ {remainingSeconds}s to limit!",
+      "estimatedSize": "Estimated size: ~{size} MB / 20 MB",
+      "galleryButton": "Choose from gallery",
+      "galleryHint": "Select an existing video",
+      "videoNotSupported": "Your browser does not support video playback.",
+      "removeVideoAriaLabel": "Remove video",
+      "compressingTitle": "Compressing video: {progress}%",
+      "compressingDescription": "Compression may take several minutes. Please wait...",
+      "preparingProgress": "✨ Preparing...",
+      "uploadingProgress": "📤 Uploading...",
+      "finalizingProgress": "🎬 Finalizing...",
+      "uploadingButton": "✨ Uploading...",
+      "submitButton": "🎬 Upload Video",
+      "fileTooLargeTitle": "Video too large! 📏",
+      "fileTooLargeDescription": "The file exceeds 20MB. Try compressing the video or choose a smaller one. We'll help Giuliana see your video faster! 🎬",
+      "formatNotSupportedTitle": "Format not supported 🎥",
+      "formatNotSupportedDescription": "Use MP4 or MOV for your video. We're preparing everything for Giuliana! ✨",
+      "largeVideoTitle": "Large video detected! ⏳",
+      "largeVideoDescription": "Upload may take a bit longer. It's worth the wait for such a special video! 🎬💝",
+      "cameraPermissionErrorTitle": "Camera access error 📷",
+      "cameraPermissionErrorDescription": "Make sure you've granted camera permissions",
+      "cannotSwitchTitle": "Cannot switch camera while recording",
+      "cannotSwitchDescription": "Stop the recording first",
+      "switchCameraErrorTitle": "Camera switch error 📷",
+      "switchCameraErrorDescription": "Unable to switch camera",
+      "previewNotAvailableTitle": "Preview not available",
+      "previewNotAvailableDescription": "Start the camera preview first",
+      "recordingStartedTitle": "Recording started! 🎬",
+      "recordingStartedDescription": "Quality optimized for fast upload",
+      "recordingErrorTitle": "Recording start error 📷",
+      "recordingErrorDescription": "Please try again in a moment",
+      "selectVideoTitle": "Select a video 🎥",
+      "selectVideoDescription": "Choose a special video for Giuliana! It will be beautiful to see! ✨",
+      "rateLimitTitle": "Wait a moment! ⏱️",
+      "rateLimitDescription": "Wait {remainingSeconds} seconds before uploading another content. We're preparing everything for Giuliana! 🎁",
+      "compressingVideoTitle": "Compressing video... 🎬",
+      "compressingVideoDescription": "Optimization in progress for Giuliana!",
+      "compressedTitle": "Video compressed! 📦",
+      "compressedDescription": "{originalMB}MB → {compressedMB}MB",
+      "compressionFailedTitle": "Compression failed ⚠️",
+      "compressionFailedDescription": "Continuing with original video",
+      "stillTooLargeTitle": "Video still too large! 📏",
+      "stillTooLargeDescription": "Compression failed. Reduce dimensions manually or choose a shorter video.",
+      "stillTooLargeDescriptionAfterCompress": "Video exceeds 20MB even after compression. Try a shorter video.",
+      "uploadErrorTitle": "Error uploading file 📤",
+      "uploadErrorDescription": "An error occurred while saving",
+      "uploadErrorAttempt": "Attempt {attempt} of 3",
+      "saveErrorTitle": "Save error 💾",
+      "saveErrorDescription": "An error occurred",
+      "firstVideoToast": "This is your first video! 🎊",
+      "multipleContentToast": "You've already uploaded {count} contents! Keep it up! 🌟",
+      "successToast": "🎉 Video uploaded successfully!",
+      "successDescription": "Awaiting admin approval. Giuliana will see it soon! {countMessage}",
+      "errorToast": "Oops! Something went wrong 😔",
+      "errorDescription": "Try again in a moment, we're fixing everything for you!",
+      "unexpectedErrorToast": "An error occurred 😔",
+      "tenSecondWarningTitle": "10 seconds to limit! ⏰",
+      "tenSecondWarningDescription": "Recording will stop automatically in 10 seconds",
+      "limitReachedTitle": "1 minute limit reached! 🎬",
+      "limitReachedDescription": "Recording stopped automatically",
+      "pendingApprovalNote": "📋 Your content will be pending admin approval before being visible 💝✨",
+      "frontCamera": "Front",
+      "backCamera": "Back"
+    }
+  },
+  "metadata": {
+    "title": {
+      "template": "Guestbook Giuliana 40 | %s",
+      "default": "Guestbook Giuliana 40 - Happy 40th Birthday"
+    },
+    "description": "Private guestbook for Giuliana's 40th birthday. Share messages, photos and videos with your friends.",
+    "keywords": "guestbook, birthday, 40 years, Giuliana, messages, party",
+    "og": {
+      "siteName": "Guestbook Giuliana 40",
+      "title": "Guestbook Giuliana 40 - Happy 40th Birthday",
+      "description": "Private guestbook for Giuliana's 40th birthday. Share messages, photos and videos."
+    },
+    "twitter": {
+      "title": "Guestbook Giuliana 40 - Happy 40th Birthday",
+      "description": "Share your wishes for Giuliana's birthday"
+    }
+  },
+  "gallery": {
+    "contentRegionAriaLabel": "Content gallery",
+    "metadata": {
+      "title": "Gallery",
+      "description": "View all messages, photos and videos for Giuliana's birthday",
+      "ogTitle": "Gallery - Guestbook Giuliana 40",
+      "ogDescription": "All messages and wishes for Giuliana's birthday"
+    },
+    "pageTitle": "🎉 Happy Birthday Giuliana! 🎉",
+    "pageSubtitle": "Messages, photos and videos from your friends ✨",
+    "guestCtaTitle": "Add your message",
+    "guestCtaDescription": "Share a message, photo or video to make this birthday even more special",
+    "filters": {
+      "all": "All",
+      "text": "Text",
+      "image": "Photos",
+      "video": "Videos"
+    },
+    "empty": {
+      "noContentYet": "Coming soon...",
+      "friendsPreparing": "Your friends are preparing their messages!",
+      "noText": "No messages yet",
+      "noImages": "No photos yet",
+      "noVideos": "No videos yet",
+      "beFirstToUpload": "Be the first to leave a message! ✨",
+      "shareMemories": "Share your memories in photos! 📷",
+      "startDances": "Start the party with a video! 🎬"
+    },
+    "soundToggle": "🔊 Sound effects",
+    "totalCount": "{count} total messages",
+    "filteredCount": "Showing {filtered} of {total}",
+    "loadingMore": "Loading more content...",
+    "allContentViewed": "🎉 You've seen all {count} contents!",
+    "loadingErrorTitle": "Loading error 😔",
+    "loadingErrorDescription": "Could not load more content. Please try again!",
+    "updateErrorTitle": "Update error",
+    "updateErrorDescription": "Unable to check for new content.",
+    "newContentNotification": "New {type} added! 🎉",
+    "newContentMultiple": "{count} new contents added! 🎉",
+    "videoNotSupported": "Your browser does not support video playback.",
+    "closeButton": "Close"
+  },
+  "tutorial": {
+    "welcome": {
+      "title": "Welcome! 🎉",
+      "description": "This is the gallery of messages, photos and videos for Giuliana's birthday. Here you can see all the content shared by her friends!"
+    },
+    "explore": {
+      "title": "Explore content 📸",
+      "description": "Use the filters to view only messages, photos or videos. You can also react to content with emojis to show your appreciation!"
+    },
+    "upload": {
+      "title": "Leave your memory ✨",
+      "description": "You haven't uploaded anything yet! Share a message, photo (max 10MB) or video (max 20MB). Content will be visible after admin approval."
+    },
+    "complete": {
+      "title": "All set! 🎊",
+      "description": "Now you can explore the gallery and interact with content. Have fun and thanks for participating!"
+    },
+    "skipAriaLabel": "Skip tutorial",
+    "uploadButton": "Upload content",
+    "startButton": "Start!",
+    "nextButton": "Next"
+  }
+}

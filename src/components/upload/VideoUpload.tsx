@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 import { saveVideoContentRecord } from '@/actions/content'
@@ -31,6 +32,7 @@ const debugWarn = (...args: any[]) => {
 }
 
 export function VideoUpload({ userId }: VideoUploadProps) {
+  const t = useTranslations()
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -113,17 +115,17 @@ export function VideoUpload({ userId }: VideoUploadProps) {
   // Auto-stop recording after 1 minute (60 seconds)
   useEffect(() => {
     if (isRecording && recordingTime === 50) {
-      toast.warning('10 secondi al limite! ⏰', {
-        description: 'La registrazione si fermerà automaticamente tra 10 secondi'
+      toast.warning(t('upload.video.tenSecondWarningTitle'), {
+        description: t('upload.video.tenSecondWarningDescription')
       })
     }
     if (isRecording && recordingTime >= 60) {
       stopRecording()
-      toast.info('Limite di 1 minuto raggiunto! 🎬', {
-        description: 'Registrazione fermata automaticamente'
+      toast.info(t('upload.video.limitReachedTitle'), {
+        description: t('upload.video.limitReachedDescription')
       })
     }
-  }, [isRecording, recordingTime])
+  }, [isRecording, recordingTime, t])
 
   // Calculate estimated file size based on recording time and bitrate
   useEffect(() => {
@@ -143,29 +145,29 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     if (!file) return
 
     if (file.size > maxSize) {
-      toast.error('Video troppo grande! 📏', {
-        description: 'Il file supera i 20MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
+      toast.error(t('upload.video.fileTooLargeTitle'), {
+        description: t('upload.video.fileTooLargeDescription')
       })
       return
     }
 
     if (!file.type.startsWith('video/')) {
-      toast.error('Formato non supportato 🎥', {
-        description: 'Usa MP4 o MOV per il tuo video. Stiamo preparando tutto per Giuliana! ✨'
+      toast.error(t('upload.video.formatNotSupportedTitle'), {
+        description: t('upload.video.formatNotSupportedDescription')
       })
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.warning('Video grande rilevato! ⏳', {
-        description: 'Il caricamento potrebbe richiedere qualche momento in più. Vale la pena aspettare per un video così speciale! 🎬💝'
+      toast.warning(t('upload.video.largeVideoTitle'), {
+        description: t('upload.video.largeVideoDescription')
       })
     }
 
     setFile(file)
     const url = URL.createObjectURL(file)
     setPreview(url)
-  }, [])
+  }, [t])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -179,22 +181,22 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.size > maxSize) {
-      toast.error('Video troppo grande! 📏', {
-        description: 'Il file supera i 20MB. Prova a comprimere il video o scegline uno più piccolo. Aiuteremo Giuliana a vedere il tuo video più velocemente! 🎬'
+      toast.error(t('upload.video.fileTooLargeTitle'), {
+        description: t('upload.video.fileTooLargeDescription')
       })
       return
     }
 
     if (!selectedFile.type.startsWith('video/')) {
-      toast.error('Formato non supportato 🎥', {
-        description: 'Usa MP4 o MOV per il tuo video. Stiamo preparando tutto per Giuliana! ✨'
+      toast.error(t('upload.video.formatNotSupportedTitle'), {
+        description: t('upload.video.formatNotSupportedDescription')
       })
       return
     }
 
     if (selectedFile.size > 5 * 1024 * 1024) {
-      toast.warning('Video grande rilevato! ⏳', {
-        description: 'Il caricamento potrebbe richiedere qualche momento in più. Vale la pena aspettare per un video così speciale! 🎬💝'
+      toast.warning(t('upload.video.largeVideoTitle'), {
+        description: t('upload.video.largeVideoDescription')
       })
     }
 
@@ -245,8 +247,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       debugLog('[VideoUpload] Preview started successfully')
     } catch (error) {
       console.error('[VideoUpload] Error starting camera preview:', error)
-      toast.error('Errore accesso camera 📷', {
-        description: 'Assicurati di aver concesso i permessi per la camera'
+      toast.error(t('upload.video.cameraPermissionErrorTitle'), {
+        description: t('upload.video.cameraPermissionErrorDescription')
       })
     } finally {
       setIsInitializing(false)
@@ -263,8 +265,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     // Prevent switching camera during recording
     if (isRecording) {
       debugWarn('[VideoUpload] Cannot switch camera while recording')
-      toast.warning('Impossibile cambiare camera durante la registrazione', {
-        description: 'Ferma prima la registrazione'
+      toast.warning(t('upload.video.cannotSwitchTitle'), {
+        description: t('upload.video.cannotSwitchDescription')
       })
       return
     }
@@ -302,8 +304,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       }
     } catch (error) {
       console.error('[VideoUpload] Error switching camera:', error)
-      toast.error('Errore cambio camera 📷', {
-        description: 'Impossibile cambiare camera'
+      toast.error(t('upload.video.switchCameraErrorTitle'), {
+        description: t('upload.video.switchCameraErrorDescription')
       })
     } finally {
       setIsInitializing(false)
@@ -320,8 +322,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
     if (!mediaStreamRef.current) {
       console.error('[VideoUpload] No media stream available')
-      toast.error('Preview non disponibile', {
-        description: 'Avvia prima la preview della camera'
+      toast.error(t('upload.video.previewNotAvailableTitle'), {
+        description: t('upload.video.previewNotAvailableDescription')
       })
       return
     }
@@ -391,13 +393,13 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         setRecordingTime(prev => prev + 1)
       }, 1000)
 
-      toast.success('Registrazione iniziata! 🎬', {
-        description: 'Qualità ottimizzata per caricamento veloce'
+      toast.success(t('upload.video.recordingStartedTitle'), {
+        description: t('upload.video.recordingStartedDescription')
       })
     } catch (error) {
       console.error('[VideoUpload] Error starting video recording:', error)
-      toast.error('Errore avvio registrazione 📷', {
-        description: 'Riprova tra un momento'
+      toast.error(t('upload.video.recordingErrorTitle'), {
+        description: t('upload.video.recordingErrorDescription')
       })
     } finally {
       setIsInitializing(false)
@@ -485,8 +487,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     e.preventDefault()
 
     if (!file) {
-      toast.error('Seleziona un video 🎥', {
-        description: 'Scegli un video speciale per Giuliana! Sarà bellissimo vederlo! ✨'
+      toast.error(t('upload.video.selectVideoTitle'), {
+        description: t('upload.video.selectVideoDescription')
       })
       return
     }
@@ -494,8 +496,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
     // Check client-side rate limit
     const rateLimitCheck = checkUploadRateLimit(userId)
     if (!rateLimitCheck.allowed) {
-      toast.error(`Aspetta ancora un attimo! ⏱️`, {
-        description: `Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto. Stiamo preparando tutto per Giuliana! 🎁`
+      toast.error(t('upload.video.rateLimitTitle'), {
+        description: t('upload.video.rateLimitDescription', { remainingSeconds: rateLimitCheck.remainingSeconds || 60 })
       })
       return
     }
@@ -511,8 +513,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       setIsCompressing(true)
       setProgress(5)
 
-      toast.info('Compressione video... 🎬', {
-        description: 'Ottimizzazione in corso per Giuliana!'
+      toast.info(t('upload.video.compressingVideoTitle'), {
+        description: t('upload.video.compressingVideoDescription')
       })
 
       try {
@@ -532,15 +534,15 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         const originalMB = (file.size / 1024 / 1024).toFixed(2)
         const compressedMB = (fileToUpload.size / 1024 / 1024).toFixed(2)
 
-        toast.success('Video compresso! 📦', {
-          description: `${originalMB}MB → ${compressedMB}MB`
+        toast.success(t('upload.video.compressedTitle'), {
+          description: t('upload.video.compressedDescription', { originalMB, compressedMB })
         })
 
       } catch (compressionError) {
         console.error('[Video Upload] Compression failed:', compressionError)
 
-        toast.warning('Compressione fallita ⚠️', {
-          description: 'Continuo con video originale'
+        toast.warning(t('upload.video.compressionFailedTitle'), {
+          description: t('upload.video.compressionFailedDescription')
         })
 
         fileToUpload = file
@@ -554,10 +556,10 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
     // Validate file size after compression (must be < 20MB)
     if (fileToUpload.size > 20 * 1024 * 1024) {
-      toast.error('Video ancora troppo grande! 📏', {
+      toast.error(t('upload.video.stillTooLargeTitle'), {
         description: compressionSkipped
-          ? 'Compressione fallita. Riduci dimensioni manualmente o scegli un video più corto.'
-          : 'Video supera 20MB anche dopo compressione. Prova con un video più corto.'
+          ? t('upload.video.stillTooLargeDescription')
+          : t('upload.video.stillTooLargeDescriptionAfterCompress')
       })
       setLoading(false)
       setIsCompressing(false)
@@ -588,8 +590,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           maxRetries: 2,
           onRetry: (attempt) => {
             debugLog(`[Video Upload] Retry attempt ${attempt}/3...`)
-            toast.info('Riprovo il caricamento... 🔄', {
-              description: `Tentativo ${attempt} di 3`
+            toast.info(t('upload.video.uploadErrorDescription'), {
+              description: t('upload.video.uploadErrorAttempt', { attempt })
             })
           }
         }
@@ -598,7 +600,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       if (uploadResult.error) {
         console.error('[Video Upload] Storage upload error:', uploadResult.error)
         const errorInfo = analyzeNetworkError(uploadResult.error)
-        toast.error('Errore durante il caricamento del file 📤', {
+        toast.error(t('upload.video.uploadErrorTitle'), {
           description: errorInfo.userMessage
         })
         setProgress(0)
@@ -631,7 +633,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       } catch (error) {
         console.error('[Video Upload] Server action error:', error)
         const errorInfo = analyzeNetworkError(error)
-        toast.error('Errore durante il salvataggio 💾', {
+        toast.error(t('upload.video.saveErrorTitle'), {
           description: errorInfo.userMessage
         })
         // Clean up uploaded file
@@ -646,8 +648,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       if (result.success) {
         const count = result.contentCount || 0
         const countMessage = count === 1
-          ? 'Questo è il tuo primo video! 🎊'
-          : `Hai già caricato ${count} contenuti! Continua così! 🌟`
+          ? t('upload.video.firstVideoToast')
+          : t('upload.video.multipleContentToast', { count })
 
         // Celebration confetti!
         const colors = ['#FF69B4', '#9D4EDD', '#FFD700']
@@ -658,8 +660,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           colors,
         })
 
-        toast.success('🎉 Video caricato con successo!', {
-          description: `In attesa di approvazione dall'admin. Giuliana lo vedrà presto! ${countMessage}`,
+        toast.success(t('upload.video.successToast'), {
+          description: t('upload.video.successDescription', { countMessage }),
           duration: 6000
         })
         handleRemove()
@@ -668,8 +670,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         // If DB save fails, clean up the uploaded file
         await supabase.storage.from('content-media').remove([fileName])
 
-        toast.error('Ops! Qualcosa è andato storto 😔', {
-          description: result.error || 'Riprova tra un momento, stiamo sistemando tutto per te!',
+        toast.error(t('upload.video.errorToast'), {
+          description: result.error || t('upload.video.errorDescription'),
         })
         setProgress(0)
       }
@@ -686,7 +688,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
 
       console.error('[Video Upload] Unexpected error:', error)
       const errorInfo = analyzeNetworkError(error)
-      toast.error('Si è verificato un errore 😔', {
+      toast.error(t('upload.video.unexpectedErrorToast'), {
         description: errorInfo.userMessage
       })
       setProgress(0)
@@ -721,15 +723,15 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                 <div className="text-6xl">🎥</div>
                 {isDragActive ? (
                   <p className="text-lg font-medium text-birthday-purple">
-                    Rilascia qui il video!
+                    {t('upload.video.dragActive')}
                   </p>
                 ) : (
                   <>
                     <p className="text-lg font-medium">
-                      Trascina qui un video oppure clicca per selezionare
+                      {t('upload.video.dragDropLabel')}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Formati supportati: MP4, MOV • <strong className="text-foreground">Max 20MB</strong> • Compressione automatica per video grandi
+                      {t('upload.video.fileTypeHint')}
                     </p>
                   </>
                 )}
@@ -752,10 +754,10 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                       <Camera className="w-10 h-10 text-birthday-purple" />
                     </div>
                     <span className="text-base font-semibold text-foreground">
-                      {isInitializing ? 'Avvio camera...' : 'Anteprima Camera'}
+                      {isInitializing ? t('upload.video.previewLoading') : t('upload.video.previewTitle')}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      Vedi l'anteprima prima di registrare
+                      {t('upload.video.previewHint')}
                     </span>
                   </button>
                 </div>
@@ -783,11 +785,11 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                     {/* Camera Indicator - More prominent */}
                     <div className="absolute top-3 left-3 bg-birthday-purple/95 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg">
                       <Camera className="w-4 h-4" />
-                      {facingMode === 'user' ? 'Frontale' : 'Posteriore'}
+                      {facingMode === 'user' ? t('upload.video.frontCamera') : t('upload.video.backCamera')}
                     </div>
                     {/* Helper text at bottom */}
                     <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-xs text-center">
-                      Scegli la camera, poi clicca REC
+                      {t('upload.video.chooseCamera')}
                     </div>
                   </div>
 
@@ -801,7 +803,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                     >
                       <div className="w-4 h-4 bg-white rounded-full animate-pulse" />
                       <span className="text-base">
-                        {isInitializing ? 'Preparazione...' : 'REC - Inizia Registrazione'}
+                        {isInitializing ? t('upload.video.preparingButton') : t('upload.video.startRecordingButton')}
                       </span>
                     </button>
                     <button
@@ -810,7 +812,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                       disabled={isInitializing}
                       className="px-5 py-4 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50"
                     >
-                      Annulla
+                      {t('upload.video.cancelButton')}
                     </button>
                   </div>
                 </div>
@@ -835,7 +837,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                     {/* Camera Indicator During Recording - DISABLED switch camera button */}
                     <div className="absolute top-3 right-3 bg-gray-600/90 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg cursor-not-allowed">
                       <Camera className="w-4 h-4" />
-                      {facingMode === 'user' ? 'Frontale' : 'Posteriore'}
+                      {facingMode === 'user' ? t('upload.video.frontCamera') : t('upload.video.backCamera')}
                     </div>
                     {/* Estimated Size Indicator */}
                     <div className="absolute bottom-3 right-3 bg-black/80 text-white px-4 py-2 rounded-full shadow-lg">
@@ -855,14 +857,14 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                       <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                         <rect x="6" y="6" width="12" height="12" rx="2" />
                       </svg>
-                      <span className="text-base">Ferma Registrazione</span>
+                      <span className="text-base">{t('upload.video.stopRecordingButton')}</span>
                     </button>
                     <button
                       type="button"
                       onClick={cancelRecording}
                       className="px-5 py-4 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                     >
-                      Annulla
+                      {t('upload.video.cancelButton')}
                     </button>
                   </div>
 
@@ -870,13 +872,13 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                   <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 text-center space-y-2 border border-gray-200">
                     <p className="text-base font-semibold text-gray-800">
                       {recordingTime < 50 ? (
-                        <>Tempo rimasto: <span className="text-birthday-purple text-lg">{60 - recordingTime}s</span></>
+                        <>{t('upload.video.recordingTimeRemaining', { remainingSeconds: 60 - recordingTime })} <span className="text-birthday-purple text-lg"></span></>
                       ) : (
-                        <span className="text-orange-600 text-lg">⚠️ {60 - recordingTime}s al limite!</span>
+                        <span className="text-orange-600 text-lg">{t('upload.video.recordingTimeWarning', { remainingSeconds: 60 - recordingTime })}</span>
                       )}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Dimensione stimata: ~{(estimatedSize / 1024 / 1024).toFixed(1)} MB / 20 MB
+                      {t('upload.video.estimatedSize', { size: (estimatedSize / 1024 / 1024).toFixed(1) })}
                     </p>
                   </div>
                 </div>
@@ -900,8 +902,8 @@ export function VideoUpload({ userId }: VideoUploadProps) {
                 className="cursor-pointer flex flex-col items-center gap-2"
               >
                 <Video className="w-8 h-8 text-birthday-pink" />
-                <span className="text-sm font-medium">Scegli dalla galleria</span>
-                <span className="text-xs text-muted-foreground">Seleziona un video esistente</span>
+                <span className="text-sm font-medium">{t('upload.video.galleryButton')}</span>
+                <span className="text-xs text-muted-foreground">{t('upload.video.galleryHint')}</span>
               </label>
             </div>
           )}
@@ -916,13 +918,13 @@ export function VideoUpload({ userId }: VideoUploadProps) {
               className="w-full h-auto max-h-[400px]"
               playsInline
             >
-              Il tuo browser non supporta la riproduzione video.
+              {t('upload.video.videoNotSupported')}
             </video>
             <button
               type="button"
               onClick={handleRemove}
               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
-              aria-label="Rimuovi video"
+              aria-label={t('upload.video.removeVideoAriaLabel')}
             >
               <svg
                 className="w-5 h-5"
@@ -959,10 +961,10 @@ export function VideoUpload({ userId }: VideoUploadProps) {
             />
           </div>
           <p className="text-sm text-center text-foreground font-medium">
-            🎬 Compressione video: {compressionProgress}%
+            {t('upload.video.compressingTitle', { progress: compressionProgress })}
           </p>
           <p className="text-xs text-center text-muted-foreground">
-            La compressione può richiedere diversi minuti. Attendere prego...
+            {t('upload.video.compressingDescription')}
           </p>
         </div>
       )}
@@ -978,7 +980,7 @@ export function VideoUpload({ userId }: VideoUploadProps) {
           </div>
           <div className="flex items-center justify-between">
             <p className={`${isMobile ? 'text-base font-medium' : 'text-sm'} text-center text-foreground`}>
-              {progress < 30 ? '✨ Preparazione...' : progress < 70 ? '📤 Caricamento...' : '🎬 Finalizzazione...'}
+              {progress < 30 ? t('upload.video.preparingProgress') : progress < 70 ? t('upload.video.uploadingProgress') : t('upload.video.finalizingProgress')}
             </p>
             <p className={`${isMobile ? 'text-base font-semibold' : 'text-sm'} text-birthday-purple`}>
               {progress}%
@@ -993,11 +995,11 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         className="w-full h-14 rounded-md bg-gradient-to-r from-birthday-pink to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
-        {loading ? '✨ Caricamento in corso...' : '🎬 Carica Video'}
+        {loading ? t('upload.video.uploadingButton') : t('upload.video.submitButton')}
       </button>
 
       <p className="text-xs text-muted-foreground text-center">
-        📋 Il tuo contenuto sarà in attesa di approvazione dall'admin prima di essere visibile 💝✨
+        {t('upload.video.pendingApprovalNote')}
       </p>
     </form>
   )

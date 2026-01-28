@@ -3,33 +3,7 @@
 import { motion } from 'framer-motion'
 import { LogIn, Upload, Eye } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-
-const features = [
-  {
-    icon: LogIn,
-    title: 'Registrati',
-    description:
-      'Registrati, conferma la tua email cliccando sul link ricevuto e accedi alla piattaforma.',
-    gradient: 'from-birthday-pink to-birthday-purple',
-    iconColor: 'text-birthday-pink',
-  },
-  {
-    icon: Upload,
-    title: 'Carica',
-    description:
-      'Condividi messaggi, foto (max 10MB) e video (max 20MB) per augurare il meglio.',
-    gradient: 'from-birthday-purple to-birthday-gold',
-    iconColor: 'text-birthday-purple',
-  },
-  {
-    icon: Eye,
-    title: 'Visualizza',
-    description:
-      "L'admin approva i contenuti, che saranno poi visibili nella galleria.",
-    gradient: 'from-birthday-gold to-birthday-pink',
-    iconColor: 'text-birthday-gold',
-  },
-]
+import { useTranslations } from 'next-intl'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -54,6 +28,32 @@ const itemVariants = {
 }
 
 export function FeatureCards() {
+  const t = useTranslations()
+
+  const features = [
+    {
+      icon: LogIn,
+      title: t('features.register.title'),
+      description: t('features.register.description'),
+      gradient: 'from-birthday-pink to-birthday-purple',
+      iconColor: 'text-birthday-pink',
+    },
+    {
+      icon: Upload,
+      title: t('features.upload.title'),
+      description: t('features.upload.description'),
+      gradient: 'from-birthday-purple to-birthday-gold',
+      iconColor: 'text-birthday-purple',
+    },
+    {
+      icon: Eye,
+      title: t('features.view.title'),
+      description: t('features.view.description'),
+      gradient: 'from-birthday-gold to-birthday-pink',
+      iconColor: 'text-birthday-gold',
+    },
+  ]
+
   return (
     <section className="py-12 md:py-24 px-4 sm:px-6 lg:px-8" aria-labelledby="features-heading">
       <div className="max-w-7xl mx-auto">
@@ -68,10 +68,10 @@ export function FeatureCards() {
             id="features-heading"
             className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 md:mb-4 bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent px-4"
           >
-            Come Funziona
+            {t('features.heading')}
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-            Tre semplici passaggi per contribuire alla celebrazione
+            {t('features.subtitle')}
           </p>
         </motion.div>
 
@@ -120,7 +120,7 @@ export function FeatureCards() {
 
                     {/* Step number */}
                     <div className="text-sm font-semibold text-muted-foreground">
-                      Passo {index + 1}
+                      {t('features.step', { step: index + 1 })}
                     </div>
 
                     {/* Title */}

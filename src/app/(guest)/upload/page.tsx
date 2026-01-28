@@ -2,21 +2,27 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { UploadTabs } from '@/components/upload/UploadTabs'
 import { UploadErrorBoundary } from '@/components/errors/UploadErrorBoundary'
 import { Header } from '@/components/layout/Header'
 
-export const metadata: Metadata = {
-  title: 'Carica il tuo messaggio',
-  description: 'Condividi un messaggio, foto o video per il compleanno di Giuliana',
-  openGraph: {
-    title: 'Carica il tuo messaggio - Guestbook Giuliana 40',
-    description: 'Condividi i tuoi auguri con messaggi, foto e video',
-    type: 'website',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('upload.metadata')
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      type: 'website',
+    },
+  }
 }
 
 export default async function UploadPage() {
+  const t = await getTranslations('upload')
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -44,10 +50,10 @@ export default async function UploadPage() {
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple bg-clip-text text-transparent">
-            Lascia un segno speciale ✨
+            {t('pageTitle')}
           </h1>
           <p className="text-muted-foreground">
-            Ciao {profile?.full_name}! Regala un ricordo indimenticabile per i 40 anni di Giuliana 🎂💝
+            {t('pageSubtitle', { name: profile?.full_name || 'amico/a' })}
           </p>
         </div>
 
@@ -58,7 +64,7 @@ export default async function UploadPage() {
             className="inline-flex items-center text-birthday-purple hover:text-birthday-purple/80 transition-colors"
           >
             <span className="mr-2">←</span>
-            <span>Torna alla galleria</span>
+            <span>{t('backToGallery')}</span>
           </Link>
         </div>
 

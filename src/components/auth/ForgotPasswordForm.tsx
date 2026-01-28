@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2 } from 'lucide-react'
 
 export function ForgotPasswordForm() {
+  const t = useTranslations('auth.forgotPassword')
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -21,7 +23,7 @@ export function ForgotPasswordForm() {
   const handleEmailChange = (value: string) => {
     setEmail(value)
     if (value && !isValidEmail(value)) {
-      setEmailError('Email non valida')
+      setEmailError(t('emailInvalid'))
     } else {
       setEmailError('')
     }
@@ -53,7 +55,7 @@ export function ForgotPasswordForm() {
 
       setSuccess(true)
     } catch (err) {
-      setError('Si è verificato un errore. Riprova più tardi.')
+      setError(t('genericError'))
       console.error(err)
     } finally {
       setLoading(false)
@@ -67,19 +69,19 @@ export function ForgotPasswordForm() {
           <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold">Email inviata!</h3>
+          <h3 className="text-lg font-semibold">{t('successTitle')}</h3>
           <p className="text-sm text-muted-foreground">
-            Controlla la tua casella di posta. Ti abbiamo inviato un link per reimpostare la password.
+            {t('successMessage')}
           </p>
           <p className="text-xs text-muted-foreground mt-4">
-            Non hai ricevuto l&apos;email? Controlla anche nello spam.
+            {t('noEmailReceived')}
           </p>
         </div>
         <a
           href="/login"
           className="inline-block text-sm text-birthday-purple hover:underline"
         >
-          Torna al login
+          {t('backToLogin')}
         </a>
       </div>
     )
@@ -95,13 +97,13 @@ export function ForgotPasswordForm() {
 
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">
-          Inserisci il tuo indirizzo email e ti invieremo un link per reimpostare la password.
+          {t('description')}
         </p>
       </div>
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium mb-2">
-          Email
+          {t('emailLabel')}
         </label>
         <input
           id="email"
@@ -110,7 +112,7 @@ export function ForgotPasswordForm() {
           onChange={(e) => handleEmailChange(e.target.value)}
           required
           className={`w-full rounded-md border ${emailError ? 'border-destructive' : 'border-input'} bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
-          placeholder="mario@example.com"
+          placeholder={t('emailPlaceholder')}
         />
         {emailError && (
           <p className="mt-1 text-xs text-destructive">{emailError}</p>
@@ -122,12 +124,12 @@ export function ForgotPasswordForm() {
         disabled={loading || !isFormValid()}
         className="w-full rounded-md bg-birthday-purple px-4 py-2 text-sm font-medium text-white hover:bg-birthday-purple/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
       >
-        {loading ? 'Invio in corso...' : 'Invia link di reset'}
+        {loading ? t('submittingButton') : t('submitButton')}
       </button>
 
       <p className="text-center text-sm text-muted-foreground">
         <a href="/login" className="text-birthday-purple hover:underline">
-          Torna al login
+          {t('backToLogin')}
         </a>
       </p>
     </form>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { ContentCard } from './ContentCard'
 import { ContentCardSkeletonGrid } from '@/components/loading/ContentCardSkeleton'
 import confetti from 'canvas-confetti'
@@ -47,6 +48,7 @@ interface GalleryViewProps {
 }
 
 export function GalleryView({ initialContent, userId, userRole }: GalleryViewProps) {
+  const t = useTranslations('gallery')
   const [content, setContent] = useState<Content[]>(initialContent)
   const [filter, setFilter] = useState<'all' | 'text' | 'image' | 'video'>('all')
   const [lightboxContent, setLightboxContent] = useState<Content | null>(null)
@@ -117,8 +119,8 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
 
       if (result.error) {
         console.error('Error loading more content:', result.error)
-        toast.error('Errore nel caricamento 😔', {
-          description: 'Non è stato possibile caricare altri contenuti. Riprova tra poco!'
+        toast.error(t('loadingErrorTitle'), {
+          description: t('loadingErrorDescription')
         })
         setIsLoadingMore(false)
         return
@@ -133,8 +135,8 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       }
     } catch (error) {
       console.error('Error loading more content:', error)
-      toast.error('Errore nel caricamento 😔', {
-        description: 'Non è stato possibile caricare altri contenuti. Riprova tra poco!'
+      toast.error(t('loadingErrorTitle'), {
+        description: t('loadingErrorDescription')
       })
     } finally {
       setIsLoadingMore(false)
@@ -277,8 +279,8 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
           const contentType = newContent[0].type === 'text' ? 'messaggio' :
                              newContent[0].type === 'image' ? 'foto' : 'video'
           const message = newContent.length === 1
-            ? `Nuova ${contentType} aggiunta! 🎉`
-            : `${newContent.length} nuovi contenuti aggiunti! 🎉`
+            ? t('newContentNotification', { type: contentType })
+            : t('newContentMultiple', { count: newContent.length })
 
           triggerConfetti(message, 'new-content')
           setNewContentNotification(message)
@@ -293,8 +295,8 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
         }
       } catch (error) {
         console.error('Error checking for new content:', error)
-        toast.error('Errore nell\'aggiornamento', {
-          description: 'Impossibile verificare nuovi contenuti.'
+        toast.error(t('updateErrorTitle'), {
+          description: t('updateErrorDescription')
         })
       }
     }
@@ -317,26 +319,26 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
   })
 
   const filters = [
-    { id: 'all' as const, label: 'Tutti', icon: '🎁', count: content.length },
-    { id: 'text' as const, label: 'Testo', icon: '📝', count: content.filter(c => c.type === 'text').length },
-    { id: 'image' as const, label: 'Foto', icon: '📸', count: content.filter(c => c.type === 'image').length },
-    { id: 'video' as const, label: 'Video', icon: '🎥', count: content.filter(c => c.type === 'video').length },
+    { id: 'all' as const, label: t('filters.all'), icon: '🎁', count: content.length },
+    { id: 'text' as const, label: t('filters.text'), icon: '📝', count: content.filter(c => c.type === 'text').length },
+    { id: 'image' as const, label: t('filters.image'), icon: '📸', count: content.filter(c => c.type === 'image').length },
+    { id: 'video' as const, label: t('filters.video'), icon: '🎥', count: content.filter(c => c.type === 'video').length },
   ]
 
   if (content.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-12 text-center">
         <div className="text-6xl mb-4">🎈</div>
-        <h3 className="text-2xl font-bold mb-2">In arrivo...</h3>
+        <h3 className="text-2xl font-bold mb-2">{t('empty.noContentYet')}</h3>
         <p className="text-muted-foreground">
-          I tuoi amici stanno preparando i loro messaggi!
+          {t('empty.friendsPreparing')}
         </p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6" role="region" aria-label="Galleria dei contenuti">
+    <div className="space-y-6" role="region" aria-label={t('contentRegionAriaLabel')}>
       {/* Sound Toggle (only for VIP/Admin) */}
       {(userRole === 'vip' || userRole === 'admin') && (
         <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-3 md:p-4 flex items-center justify-end border border-white/20">
@@ -350,7 +352,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
               }}
               className="w-5 h-5 md:w-4 md:h-4 text-birthday-purple rounded focus:ring-birthday-purple"
             />
-            <span className="text-sm md:text-base text-gray-700">🔊 Effetti sonori</span>
+            <span className="text-sm md:text-base text-gray-700">{t('soundToggle')}</span>
           </label>
         </div>
       )}
@@ -410,8 +412,8 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
           className="text-center mt-4 text-sm text-muted-foreground"
         >
           {filteredContent.length === content.length
-            ? `${content.length} messaggi totali`
-            : `Mostrando ${filteredContent.length} di ${content.length}`}
+            ? t('totalCount', { count: content.length })
+            : t('filteredCount', { filtered: filteredContent.length, total: content.length })}
         </motion.p>
       </div>
 
@@ -433,14 +435,14 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
             {filter === 'video' && '🎥'}
           </div>
           <h3 className="text-2xl font-bold mb-2">
-            {filter === 'text' && 'Ancora nessun messaggio'}
-            {filter === 'image' && 'Ancora nessuna foto'}
-            {filter === 'video' && 'Ancora nessun video'}
+            {filter === 'text' && t('empty.noText')}
+            {filter === 'image' && t('empty.noImages')}
+            {filter === 'video' && t('empty.noVideos')}
           </h3>
           <p className="text-muted-foreground">
-            {filter === 'text' && 'Sii il primo a lasciare un messaggio! ✨'}
-            {filter === 'image' && 'Condividi i tuoi ricordi in foto! 📷'}
-            {filter === 'video' && 'Dai inizio alle danze con un video! 🎬'}
+            {filter === 'text' && t('empty.beFirstToUpload')}
+            {filter === 'image' && t('empty.shareMemories')}
+            {filter === 'video' && t('empty.startDances')}
           </p>
         </motion.div>
       ) : (
@@ -490,7 +492,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
               {isLoadingMore && (
                 <div className="flex flex-col items-center gap-2">
                   <ContentCardSkeletonGrid count={6} />
-                  <p className="text-sm text-muted-foreground">Caricamento altri contenuti...</p>
+                  <p className="text-sm text-muted-foreground">{t('loadingMore')}</p>
                 </div>
               )}
             </div>
@@ -499,7 +501,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
           {!hasMore && filteredContent.length > 0 && (
             <div className="mt-8 text-center">
               <p className="text-sm text-muted-foreground">
-                🎉 Hai visto tutti i {filteredContent.length} contenuti!
+                {t('allContentViewed', { count: filteredContent.length })}
               </p>
             </div>
           )}
@@ -539,7 +541,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
             <button
               onClick={() => setLightboxContent(null)}
               className="absolute top-4 right-4 text-white bg-black/70 rounded-full p-3 hover:bg-black/80 transition-colors"
-              aria-label="Chiudi"
+              aria-label={t('closeButton')}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -553,7 +555,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
               className="max-w-full max-h-[90vh] object-contain"
               onClick={(e) => e.stopPropagation()}
             >
-              Il tuo browser non supporta la riproduzione video.
+              {t('videoNotSupported')}
             </video>
           </motion.div>
         )}

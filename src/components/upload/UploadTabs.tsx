@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { TextUpload } from './TextUpload'
 import { ImageUpload } from './ImageUpload'
 import { VideoUpload } from './VideoUpload'
@@ -13,12 +14,13 @@ interface UploadTabsProps {
 }
 
 export function UploadTabs({ userId }: UploadTabsProps) {
+  const t = useTranslations('upload')
   const [activeTab, setActiveTab] = useState<Tab>('text')
 
   const tabs = [
-    { id: 'text' as Tab, label: '💬 Messaggio', icon: '📝' },
-    { id: 'image' as Tab, label: '📷 Foto', icon: '🖼️' },
-    { id: 'video' as Tab, label: '🎥 Video', icon: '🎬' },
+    { id: 'text' as Tab, label: t('tabs.message'), icon: '📝' },
+    { id: 'image' as Tab, label: t('tabs.photo'), icon: '🖼️' },
+    { id: 'video' as Tab, label: t('tabs.video'), icon: '🎬' },
   ]
 
   return (

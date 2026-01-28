@@ -4,11 +4,14 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import confetti from 'canvas-confetti'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { ChevronDown, Heart, Eye } from 'lucide-react'
 import { BirthdayDecorations } from '@/components/ui/BirthdayDecorations'
 
 export function HeroSection() {
+  const t = useTranslations()
+
   useEffect(() => {
     // Confetti animation on mount
     const duration = 3 * 1000
@@ -118,7 +121,7 @@ export function HeroSection() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Giuliana 40
+          {t('hero.title')}
         </motion.h1>
 
         {/* Subtitle */}
@@ -128,10 +131,10 @@ export function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          Il Libro dei Ricordi per i tuoi 40 anni ✨
+          {t('hero.subtitle')}
           <br />
           <span className="text-sm sm:text-base md:text-lg opacity-80 mt-2 block">
-            Un regalo digitale fatto di parole, sorrisi e momenti indimenticabili
+            {t('hero.description')}
           </span>
         </motion.p>
 
@@ -144,15 +147,15 @@ export function HeroSection() {
         >
           <div className="flex items-center gap-2">
             <span className="text-2xl">✍️</span>
-            <span className="text-muted-foreground">Messaggi</span>
+            <span className="text-muted-foreground">{t('hero.messages')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-2xl">📸</span>
-            <span className="text-muted-foreground">Foto</span>
+            <span className="text-muted-foreground">{t('hero.photos')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-2xl">🎥</span>
-            <span className="text-muted-foreground">Video</span>
+            <span className="text-muted-foreground">{t('hero.videos')}</span>
           </div>
         </motion.div>
 
@@ -167,7 +170,7 @@ export function HeroSection() {
           <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
             <Link
               href="/register"
-              aria-label="Regala un ricordo speciale"
+              aria-label={t('hero.cta.primaryAriaLabel')}
               className="group relative inline-flex items-center justify-center w-full sm:w-auto min-w-[200px] min-h-[44px] px-8 py-4 font-bold text-white transition-all duration-200 bg-birthday-pink rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-birthday-pink hover:bg-birthday-pink/90 touch-manipulation"
             >
               <span className="absolute inset-0 w-full h-full mt-1 ml-1 transition-all duration-300 ease-in-out bg-birthday-purple rounded-xl group-hover:mt-0 group-hover:ml-0 -z-10"></span>
@@ -178,17 +181,17 @@ export function HeroSection() {
                 fill="currentColor"
               />
 
-              Regala un ricordo
+              {t('hero.cta.primary')}
             </Link>
 
             {/* Sottotitolo discreto con link */}
             <p className="text-xs sm:text-sm text-muted-foreground text-center">
-              Hai già un account?{' '}
+              {t('hero.loginHint')}{' '}
               <Link
                 href="/login"
                 className="font-medium text-birthday-purple hover:text-birthday-purple/80 underline underline-offset-2 transition-colors"
               >
-                Clicca qui per accedere
+                {t('hero.loginLink')}
               </Link>
             </p>
           </div>
@@ -200,8 +203,8 @@ export function HeroSection() {
             variant="outline"
             className="w-full sm:w-auto min-w-[200px] min-h-[44px] border-2 border-birthday-purple hover:bg-birthday-purple/10 active:bg-birthday-purple/20 font-semibold text-base md:text-lg h-12 touch-manipulation"
           >
-            <Link href="/register" aria-label="Registrati al guestbook">
-              Registrati
+            <Link href="/register" aria-label={t('hero.cta.secondaryAriaLabel')}>
+              {t('hero.cta.secondary')}
             </Link>
           </Button>
 
@@ -211,9 +214,9 @@ export function HeroSection() {
             size="lg"
             className="w-full sm:w-auto min-w-[200px] min-h-[44px] bg-gradient-to-r from-birthday-pink to-birthday-purple hover:from-birthday-pink/90 hover:to-birthday-purple/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all touch-manipulation"
           >
-            <Link href="/gallery" aria-label="Visualizza la galleria">
+            <Link href="/gallery" aria-label={t('hero.cta.galleryAriaLabel')}>
               <Eye className="w-5 h-5 mr-2" />
-              Vai alla Galleria
+              {t('hero.cta.gallery')}
             </Link>
           </Button>
         </motion.div>

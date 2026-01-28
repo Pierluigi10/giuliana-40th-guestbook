@@ -1,20 +1,25 @@
-import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
+import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'In attesa di approvazione',
-  description: 'La tua registrazione è in attesa di approvazione da parte di un amministratore',
-  robots: {
-    index: false,
-    follow: false,
-  },
-  openGraph: {
-    title: 'In attesa di approvazione - Guestbook Giuliana 40',
-    description: 'Account in attesa di approvazione',
-    type: 'website',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('auth.pendingApproval.metadata')
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    robots: {
+      index: false,
+      follow: false,
+    },
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      type: 'website',
+    },
+  }
 }
 
 export default async function PendingApprovalPage({
@@ -23,6 +28,7 @@ export default async function PendingApprovalPage({
   searchParams: { mode?: string; email?: string }
 }) {
   const supabase = await createClient()
+  const t = await getTranslations('auth.pendingApproval')
 
   // Determine which message to show
   const isEmailConfirmation = searchParams.mode === 'email_confirmation'
@@ -88,10 +94,10 @@ export default async function PendingApprovalPage({
 
         <div>
           <h1 className="text-3xl font-bold">
-            {isEmailConfirmation ? 'Controlla la tua email' : 'In attesa di approvazione'}
+            {isEmailConfirmation ? t('emailConfirmationTitle') : t('waitingApprovalTitle')}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Ciao {profile?.full_name || 'ospite'}!
+            {t('greeting', { name: profile?.full_name || t('guestFallback') })}
           </p>
         </div>
 
@@ -99,25 +105,22 @@ export default async function PendingApprovalPage({
           {isEmailConfirmation ? (
             <>
               <p className="text-sm text-muted-foreground">
-                Ti abbiamo inviato un'email di conferma all'indirizzo{' '}
-                <strong>{searchParams.email || user?.email || 'la tua email'}</strong>.
+                {t('emailSentTo', { email: searchParams.email || user?.email || t('emailFallback') })}
               </p>
               <p className="text-sm text-muted-foreground">
-                Clicca sul link nella email per completare la registrazione e accedere
-                al guestbook.
+                {t('clickLinkInstructions')}
               </p>
               <p className="text-xs text-muted-foreground mt-4 border-t border-border pt-4">
-                Non hai ricevuto l'email? Controlla la cartella spam o attendi qualche minuto.
+                {t('noEmailReceived')}
               </p>
             </>
           ) : (
             <>
               <p className="text-sm text-muted-foreground">
-                La tua registrazione è stata ricevuta con successo.
-                Dopo aver confermato la tua email, potrai accedere al guestbook.
+                {t('registrationSuccess')}
               </p>
               <p className="text-sm text-muted-foreground">
-                Controlla la tua casella email e clicca sul link di conferma.
+                {t('checkEmailInstructions')}
               </p>
             </>
           )}
@@ -128,7 +131,7 @@ export default async function PendingApprovalPage({
             href="/login"
             className="text-sm text-birthday-purple hover:underline"
           >
-            Torna al login
+            {t('backToLogin')}
           </Link>
         </div>
       </div>

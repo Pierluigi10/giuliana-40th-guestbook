@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -12,18 +13,23 @@ import { BirthdayDecorations } from '@/components/ui/BirthdayDecorations'
 import { GalleryTutorial } from '@/components/onboarding/GalleryTutorial'
 import { getVIPStats } from '@/lib/supabase/queries'
 
-export const metadata: Metadata = {
-  title: 'Galleria',
-  description: 'Visualizza tutti i messaggi, foto e video per il compleanno di Giuliana',
-  openGraph: {
-    title: 'Galleria - Guestbook Giuliana 40',
-    description: 'Tutti i messaggi e gli auguri per il compleanno di Giuliana',
-    type: 'website',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('gallery')
+
+  return {
+    title: t('metadata.title'),
+    description: t('metadata.description'),
+    openGraph: {
+      title: t('metadata.ogTitle'),
+      description: t('metadata.ogDescription'),
+      type: 'website',
+    },
+  }
 }
 
 export default async function GalleryPage() {
   const supabase = await createClient()
+  const t = await getTranslations('gallery')
 
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -59,10 +65,10 @@ export default async function GalleryPage() {
       <div className="container mx-auto py-4 md:py-8 px-4">
         <div className="mb-6 md:mb-8 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 md:mb-3 bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent px-2">
-            🎉 Buon Compleanno Giuliana! 🎉
+            {t('pageTitle')}
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground px-2">
-            Messaggi, foto e video dai tuoi amici ✨
+            {t('pageSubtitle')}
           </p>
         </div>
 
@@ -79,10 +85,10 @@ export default async function GalleryPage() {
             <Link href="/upload">
               <div className="rounded-lg bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple p-6 text-center cursor-pointer hover:shadow-lg transition-shadow">
                 <h2 className="text-xl font-semibold text-white mb-2">
-                  Aggiungi il tuo messaggio
+                  {t('guestCtaTitle')}
                 </h2>
                 <p className="text-white/90">
-                  Condividi un messaggio, foto o video per rendere questo compleanno ancora più speciale
+                  {t('guestCtaDescription')}
                 </p>
               </div>
             </Link>

@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { LogOut, User, Menu, LayoutDashboard, CheckCircle, Users, Shield, Download } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
 import {
   Sheet,
   SheetContent,
@@ -29,6 +31,7 @@ interface HeaderProps {
 export function Header({ userName, userRole }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const t = useTranslations()
   const [loading, setLoading] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -54,10 +57,10 @@ export function Header({ userName, userRole }: HeaderProps) {
   const handleLogoClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.stopPropagation()
-    
+
     // Festive confetti colors matching the theme
     const colors = ['#FF69B4', '#9D4EDD', '#FFD700', '#FF6B9D', '#C44569']
-    
+
     // Center burst
     confetti({
       particleCount: 100,
@@ -65,7 +68,7 @@ export function Header({ userName, userRole }: HeaderProps) {
       origin: { x: 0.5, y: 0.5 },
       colors,
     })
-    
+
     // Side bursts for extra celebration
     setTimeout(() => {
       confetti({
@@ -98,10 +101,10 @@ export function Header({ userName, userRole }: HeaderProps) {
           type="button"
           onClick={handleLogoClick}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none p-0"
-          aria-label="Spara coriandoli festosi"
+          aria-label={t('hero.confettiAriaLabel')}
         >
           <h2 className="text-xl font-semibold bg-gradient-to-r from-birthday-pink to-birthday-purple bg-clip-text text-transparent">
-            Guestbook Giuliana
+            {t('hero.title')}
           </h2>
         </button>
 
@@ -113,7 +116,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                 href="/gallery"
                 className="text-base font-medium hover:text-birthday-purple transition-colors"
               >
-                Galleria
+                {t('nav.gallery')}
               </Link>
             )}
             {isGalleryPage && (
@@ -121,7 +124,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                 href="/upload"
                 className="text-base font-medium hover:text-birthday-pink transition-colors"
               >
-                Lascia un ricordo
+                {t('nav.upload')}
               </Link>
             )}
           </nav>
@@ -132,57 +135,57 @@ export function Header({ userName, userRole }: HeaderProps) {
           <nav
             className="hidden md:flex items-center gap-6"
             role="navigation"
-            aria-label="Menu principale"
+            aria-label={t('nav.mainMenu')}
           >
             <Link
               href="/gallery"
               className="text-sm font-medium hover:text-birthday-purple transition-colors"
             >
-              Galleria
+              {t('nav.gallery')}
             </Link>
             <Link
               href="/upload"
               className="text-sm font-medium hover:text-birthday-pink transition-colors"
             >
-              Lascia un ricordo
+              {t('nav.upload')}
             </Link>
             {userRole === 'admin' && (
               <DropdownMenu>
                 <DropdownMenuTrigger className="text-sm font-medium hover:text-birthday-gold transition-colors flex items-center gap-1">
-                  Admin
+                  {t('nav.admin')}
                   <Menu className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Pannello Admin</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t('admin.panel')}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
                       <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
+                      {t('nav.dashboard')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/approve-content" className="flex items-center gap-2 cursor-pointer">
                       <CheckCircle className="h-4 w-4" />
-                      Modera Contenuti
+                      {t('admin.approveContent.menuItem')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/manage-users" className="flex items-center gap-2 cursor-pointer">
                       <Users className="h-4 w-4" />
-                      Gestione Utenti
+                      {t('admin.manageUsers.menuItem')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/security-log" className="flex items-center gap-2 cursor-pointer">
                       <Shield className="h-4 w-4" />
-                      Log di Sicurezza
+                      {t('admin.securityLog.menuItem')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/export" className="flex items-center gap-2 cursor-pointer">
                       <Download className="h-4 w-4" />
-                      Esporta Dati
+                      {t('admin.export.menuItem')}
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -191,29 +194,32 @@ export function Header({ userName, userRole }: HeaderProps) {
           </nav>
         )}
 
-        {/* User Info + Logout - Right */}
-        <div className="flex items-center gap-4">
+        {/* User Info + Language Switcher + Logout - Right */}
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Hide user icon on mobile when in upload or gallery */}
           {userName && (
             <div
               className={`items-center gap-2 text-sm text-muted-foreground ${
                 (isUploadPage || isGalleryPage) ? 'hidden md:flex' : 'flex'
               }`}
-              aria-label={`Utente connesso: ${userName}`}
+              aria-label={t('nav.userConnected', { userName })}
             >
               <User className="h-4 w-4" aria-hidden="true" />
               <span className="hidden sm:inline">{userName}</span>
             </div>
           )}
 
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+
           <button
             onClick={handleLogout}
             disabled={loading}
             className="inline-flex items-center gap-2 rounded-md px-3 md:px-4 py-2 min-h-[44px] text-sm md:text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground active:bg-accent/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-            aria-label="Esci dall'applicazione"
+            aria-label={t('common.logout')}
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Esci</span>
+            <span className="hidden sm:inline">{t('common.logout')}</span>
           </button>
 
           {/* Mobile Menu Button - Hide on upload/gallery pages */}
@@ -222,7 +228,7 @@ export function Header({ userName, userRole }: HeaderProps) {
               <SheetTrigger asChild>
                 <button
                   className="md:hidden p-2 hover:bg-accent rounded-md transition-colors"
-                  aria-label="Apri menu di navigazione"
+                  aria-label={t('nav.openNav')}
                   aria-expanded={mobileMenuOpen}
                   aria-controls="mobile-nav-menu"
                 >
@@ -231,31 +237,31 @@ export function Header({ userName, userRole }: HeaderProps) {
                 </button>
               </SheetTrigger>
               <SheetContent side="left" className="w-64" id="mobile-nav-menu">
-                <SheetTitle>Menu di Navigazione</SheetTitle>
+                <SheetTitle>{t('nav.navigationMenu')}</SheetTitle>
                 <nav
                   className="flex flex-col gap-4 mt-8"
                   role="navigation"
-                  aria-label="Menu principale"
+                  aria-label={t('nav.mainMenu')}
                 >
                   <Link
                     href="/gallery"
                     onClick={() => setMobileMenuOpen(false)}
                     className="text-base font-medium hover:text-birthday-purple transition-colors py-2"
                   >
-                    Galleria
+                    {t('nav.gallery')}
                   </Link>
                   <Link
                     href="/upload"
                     onClick={() => setMobileMenuOpen(false)}
                     className="text-base font-medium hover:text-birthday-pink transition-colors py-2"
                   >
-                    Lascia un ricordo
+                    {t('nav.upload')}
                   </Link>
                   {userRole === 'admin' && (
                     <>
                       <div className="border-t pt-4 mt-2">
                         <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wide">
-                          Area Admin
+                          {t('admin.areaAdmin')}
                         </p>
                         <div className="flex flex-col gap-3">
                           <Link
@@ -264,7 +270,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                             className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
                           >
                             <LayoutDashboard className="h-5 w-5" />
-                            Dashboard
+                            {t('nav.dashboard')}
                           </Link>
                           <Link
                             href="/approve-content"
@@ -272,7 +278,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                             className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
                           >
                             <CheckCircle className="h-5 w-5" />
-                            Modera Contenuti
+                            {t('admin.approveContent.menuItem')}
                           </Link>
                           <Link
                             href="/manage-users"
@@ -280,7 +286,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                             className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
                           >
                             <Users className="h-5 w-5" />
-                            Gestione Utenti
+                            {t('admin.manageUsers.menuItem')}
                           </Link>
                           <Link
                             href="/security-log"
@@ -288,7 +294,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                             className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
                           >
                             <Shield className="h-5 w-5" />
-                            Log di Sicurezza
+                            {t('admin.securityLog.menuItem')}
                           </Link>
                           <Link
                             href="/export"
@@ -296,7 +302,7 @@ export function Header({ userName, userRole }: HeaderProps) {
                             className="flex items-center gap-3 text-base font-medium hover:text-birthday-purple transition-colors py-2"
                           >
                             <Download className="h-5 w-5" />
-                            Esporta Dati
+                            {t('admin.export.menuItem')}
                           </Link>
                         </div>
                       </div>

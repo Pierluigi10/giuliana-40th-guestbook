@@ -1,41 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const motivationalMessages = [
-  {
-    text: 'Il tuo messaggio renderà il compleanno di Giuliana ancora più speciale! ✨',
-    emoji: '💝',
-  },
-  {
-    text: 'Ogni parola conta - condividi i tuoi ricordi più belli! 🌟',
-    emoji: '📝',
-  },
-  {
-    text: 'Giuliana adorerà leggere il tuo messaggio! Continua così! 🎉',
-    emoji: '🎁',
-  },
-  {
-    text: 'Stai creando un ricordo indelebile per questo giorno speciale! 💖',
-    emoji: '✨',
-  },
-  {
-    text: 'I tuoi amici stanno già partecipando - unisciti a loro! 🎊',
-    emoji: '👥',
-  },
-  {
-    text: 'Ogni messaggio è un regalo prezioso per Giuliana! 🎈',
-    emoji: '🎂',
-  },
-  {
-    text: 'Stai facendo la differenza con le tue parole! Continua! 🌈',
-    emoji: '💌',
-  },
-]
+interface MotivationalMessage {
+  text: string
+  emoji: string
+}
 
 export function MotivationalMessages() {
+  const t = useTranslations('upload.motivational')
   const [currentMessage, setCurrentMessage] = useState(0)
+
+  // Get messages from translations
+  const motivationalMessages: MotivationalMessage[] = [
+    { text: t('messages.0.text'), emoji: t('messages.0.emoji') },
+    { text: t('messages.1.text'), emoji: t('messages.1.emoji') },
+    { text: t('messages.2.text'), emoji: t('messages.2.emoji') },
+    { text: t('messages.3.text'), emoji: t('messages.3.emoji') },
+    { text: t('messages.4.text'), emoji: t('messages.4.emoji') },
+    { text: t('messages.5.text'), emoji: t('messages.5.emoji') },
+    { text: t('messages.6.text'), emoji: t('messages.6.emoji') },
+  ]
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -43,7 +30,7 @@ export function MotivationalMessages() {
     }, 4000) // Change message every 4 seconds
 
     return () => clearInterval(interval)
-  }, [])
+  }, [motivationalMessages.length])
 
   const message = motivationalMessages[currentMessage]
 

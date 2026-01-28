@@ -5,10 +5,12 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { loginSchema } from '@/lib/validation/schemas'
+import { useTranslations } from 'next-intl'
 
 export function LoginForm() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || null
+  const t = useTranslations()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -40,7 +42,7 @@ export function LoginForm() {
     // Only show error if field has been touched
     if (touchedFields.email) {
       if (value && !isValidEmail(value)) {
-        setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
+        setFieldErrors(prev => ({ ...prev, email: t('validation.email.invalid') }))
       } else {
         setFieldErrors(prev => ({ ...prev, email: '' }))
       }
@@ -51,7 +53,7 @@ export function LoginForm() {
   const handleEmailBlur = () => {
     setTouchedFields(prev => ({ ...prev, email: true }))
     if (email && !isValidEmail(email)) {
-      setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
+      setFieldErrors(prev => ({ ...prev, email: t('validation.email.invalid') }))
     } else {
       setFieldErrors(prev => ({ ...prev, email: '' }))
     }
@@ -96,7 +98,7 @@ export function LoginForm() {
       })
 
       if (signInError) {
-        setError('Email o password non corretti')
+        setError(t('auth.login.errorCredentials'))
         setLoading(false)
         return
       }
@@ -110,7 +112,7 @@ export function LoginForm() {
           .single() as { data: { role: string } | null }
 
         if (!profile) {
-          setError('Profilo non trovato')
+          setError(t('auth.login.errorProfile'))
           setLoading(false)
           return
         }
@@ -124,7 +126,7 @@ export function LoginForm() {
         // Don't set loading to false here - let the page reload handle it
       }
     } catch (err) {
-      setError('Si è verificato un errore durante l\'accesso')
+      setError(t('auth.login.errorGeneric'))
       console.error(err)
       setLoading(false)
     }
@@ -140,7 +142,7 @@ export function LoginForm() {
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium mb-2">
-          Email
+          {t('auth.email.label')}
         </label>
         <input
           id="email"
@@ -150,7 +152,7 @@ export function LoginForm() {
           onBlur={handleEmailBlur}
           required
           className={`w-full min-h-[44px] rounded-md border ${fieldErrors.email ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
-          placeholder="mario@example.com"
+          placeholder={t('auth.email.placeholder')}
         />
         {fieldErrors.email && (
           <p className="mt-1 text-xs text-destructive">{fieldErrors.email}</p>
@@ -160,13 +162,13 @@ export function LoginForm() {
       <div>
         <div className="flex items-center justify-between mb-2">
           <label htmlFor="password" className="block text-sm font-medium">
-            Password
+            {t('auth.password.label')}
           </label>
           <a
             href="/forgot-password"
             className="text-xs text-birthday-purple hover:underline"
           >
-            Password dimenticata?
+            {t('auth.password.forgot')}
           </a>
         </div>
         <div className="relative">
@@ -177,7 +179,7 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             className="w-full min-h-[44px] rounded-md border border-input bg-background px-3 py-2.5 md:py-2 pr-10 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation"
-            placeholder="••••••••"
+            placeholder={t('auth.password.placeholder')}
           />
           <button
             type="button"
@@ -195,7 +197,7 @@ export function LoginForm() {
         className="w-full min-h-[44px] rounded-md bg-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-birthday-purple/90 active:bg-birthday-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-opacity touch-manipulation flex items-center justify-center gap-2"
       >
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {loading ? 'Accesso in corso...' : 'Accedi'}
+        {loading ? t('auth.login.submitting') : t('auth.login.submit')}
       </button>
     </form>
   )

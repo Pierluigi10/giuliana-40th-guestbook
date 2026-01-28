@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 import { motion } from 'framer-motion'
 import imageCompression from 'browser-image-compression'
+import { useTranslations } from 'next-intl'
 import { saveImageContentRecord } from '@/actions/content'
 import { Spinner } from '@/components/loading/Spinner'
 import Image from 'next/image'
@@ -20,6 +21,7 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ userId }: ImageUploadProps) {
+  const t = useTranslations()
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -53,16 +55,16 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     if (!file) return
 
     if (file.size > maxSize) {
-      toast.error('File troppo grande! 📏', {
-        description: 'Il file supera i 10MB. Prova a comprimere l\'immagine o scegline una più piccola. Aiuteremo Giuliana a vedere la tua foto più velocemente! 🖼️'
+      toast.error(t('upload.image.fileTooLargeTitle'), {
+        description: t('upload.image.fileTooLargeDescription')
       })
       return
     }
 
     const sizeMB = file.size / 1024 / 1024
     if (sizeMB > 2) {
-      toast.info('Ottimizzazione in corso! ⚡', {
-        description: 'Immagine grande rilevata, la comprimiamo automaticamente per un caricamento più veloce! 🎨'
+      toast.info(t('upload.image.optimizingTitle'), {
+        description: t('upload.image.optimizingDescription')
       })
     }
 
@@ -77,7 +79,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     fileReaderRef.current = reader
     reader.onload = () => setPreview(reader.result as string)
     reader.readAsDataURL(file)
-  }, [])
+  }, [t])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -98,16 +100,16 @@ export function ImageUpload({ userId }: ImageUploadProps) {
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.size > maxSize) {
-      toast.error('File troppo grande! 📏', {
-        description: 'Il file supera i 10MB. Prova a comprimere l\'immagine o scegline una più piccola. Aiuteremo Giuliana a vedere la tua foto più velocemente! 🖼️'
+      toast.error(t('upload.image.fileTooLargeTitle'), {
+        description: t('upload.image.fileTooLargeDescription')
       })
       return
     }
 
     const sizeMB = selectedFile.size / 1024 / 1024
     if (sizeMB > 2) {
-      toast.info('Ottimizzazione in corso! ⚡', {
-        description: 'Immagine grande rilevata, la comprimiamo automaticamente per un caricamento più veloce! 🎨'
+      toast.info(t('upload.image.optimizingTitle'), {
+        description: t('upload.image.optimizingDescription')
       })
     }
 
@@ -136,15 +138,17 @@ export function ImageUpload({ userId }: ImageUploadProps) {
     e.preventDefault()
 
     if (!file) {
-      toast.error('Seleziona un\'immagine')
+      toast.error(t('upload.image.fileNotSelected'))
       return
     }
 
     // Check client-side rate limit
     const rateLimitCheck = checkUploadRateLimit(userId)
     if (!rateLimitCheck.allowed) {
-      toast.error(`Aspetta ancora un attimo! ⏱️`, {
-        description: `Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto. Stiamo preparando tutto per Giuliana! 🎁`
+      toast.error(t('upload.image.rateLimitTitle'), {
+        description: t('upload.image.rateLimitDescription', {
+          remainingSeconds: String(rateLimitCheck.remainingSeconds)
+        })
       })
       return
     }
@@ -162,10 +166,10 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       const shouldCompress = isMobile || fileSizeMB > 2
 
       if (shouldCompress) {
-        toast.info('Ottimizzazione immagine in corso... 🎨', {
+        toast.info(t('upload.image.compressingImage'), {
           description: isMobile
-            ? 'Ottimizziamo la foto per il mobile! 📱'
-            : 'Stiamo preparando la tua foto per renderla perfetta per Giuliana!'
+            ? t('upload.image.compressingLargeImage')
+            : t('upload.image.compressingDesktopImage')
         })
 
         const options = getImageCompressionOptions(isMobile)
@@ -177,13 +181,16 @@ export function ImageUpload({ userId }: ImageUploadProps) {
           const originalSize = fileSizeMB.toFixed(2)
           const compressedSize = (compressedFile.size / 1024 / 1024).toFixed(2)
 
-          toast.success(`Perfetto! Immagine ottimizzata ✨`, {
-            description: `Ridotta da ${originalSize}MB a ${compressedSize}MB. Pronta per Giuliana! 📸`
+          toast.success(t('upload.image.optimizedTitle'), {
+            description: t('upload.image.optimizedDescription', {
+              originalMB: originalSize,
+              compressedMB: compressedSize
+            })
           })
         } catch (compressionError) {
           console.error('Compression failed:', compressionError)
-          toast.warning('Caricamento immagine originale', {
-            description: 'La compressione non è riuscita, ma caricheremo comunque la tua foto! 🖼️'
+          toast.warning(t('upload.image.uploadingOriginalTitle'), {
+            description: t('upload.image.uploadingOriginalDescription')
           })
           // Use original file as fallback
         }
@@ -213,8 +220,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
           maxRetries: 2,
           onRetry: (attempt, error) => {
             console.log(`[Image Upload] Retry attempt ${attempt}/3...`)
-            toast.info('Riprovo il caricamento... 🔄', {
-              description: `Tentativo ${attempt} di 3`
+            toast.info(t('upload.image.retryingUpload'), {
+              description: t('upload.image.retryAttempt', { attempt })
             })
           }
         }
@@ -223,7 +230,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       if (uploadResult.error) {
         console.error('[Image Upload] Storage upload error:', uploadResult.error)
         const errorInfo = analyzeNetworkError(uploadResult.error)
-        toast.error('Errore durante il caricamento del file 📤', {
+        toast.error(t('upload.image.uploadErrorTitle'), {
           description: errorInfo.userMessage
         })
         setProgress(0)
@@ -256,7 +263,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       } catch (error) {
         console.error('[Image Upload] Server action error:', error)
         const errorInfo = analyzeNetworkError(error)
-        toast.error('Errore durante il salvataggio 💾', {
+        toast.error(t('upload.image.uploadErrorTitle'), {
           description: errorInfo.userMessage
         })
         // Clean up uploaded file
@@ -271,8 +278,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
       if (result.success) {
         const count = result.contentCount || 0
         const countMessage = count === 1
-          ? 'Questa è la tua prima foto! 🎊'
-          : `Hai già caricato ${count} contenuti! Continua così! 🌟`
+          ? t('upload.image.firstPhotoToast')
+          : t('upload.image.multipleContentToast', { count })
 
         // Celebration confetti!
         const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
@@ -283,8 +290,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
           colors,
         })
 
-        toast.success('🎉 Foto caricata con successo!', {
-          description: `In attesa di approvazione dall'admin. Giuliana la vedrà presto! ${countMessage}`,
+        toast.success(t('upload.image.successToast'), {
+          description: `${t('upload.image.successDescription')} ${countMessage}`,
           duration: 6000
         })
         handleRemove()
@@ -293,8 +300,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
         // If DB save fails, clean up the uploaded file
         await supabase.storage.from('content-media').remove([fileName])
 
-        toast.error('Ops! Qualcosa è andato storto 😔', {
-          description: result.error || 'Riprova tra un momento, stiamo sistemando tutto per te!',
+        toast.error(t('upload.image.errorToast'), {
+          description: result.error || t('upload.image.errorDescription'),
         })
         setProgress(0)
       }
@@ -311,7 +318,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
 
       console.error('[Image Upload] Unexpected error:', error)
       const errorInfo = analyzeNetworkError(error)
-      toast.error('Si è verificato un errore 😔', {
+      toast.error(t('upload.image.unexpectedErrorToast'), {
         description: errorInfo.userMessage
       })
       setProgress(0)
@@ -359,15 +366,15 @@ export function ImageUpload({ userId }: ImageUploadProps) {
               </motion.div>
               {isDragActive ? (
                 <p className="text-lg font-medium text-birthday-purple">
-                  Rilascia qui la foto!
+                  {t('upload.image.dragActive')}
                 </p>
               ) : (
                 <>
                   <p className="text-lg font-medium">
-                    {isMobile ? 'Cattura un momento speciale ✨' : 'Cattura un ricordo indimenticabile per Giuliana'}
+                    {isMobile ? t('upload.image.dragDropLabelMobile') : t('upload.image.dragDropLabel')}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {isMobile ? 'Trascina o scegli una foto' : 'Trascina qui oppure clicca per selezionare'} • Max 10MB • Compressione automatica
+                    {isMobile ? t('upload.image.dragDropHintMobile') : t('upload.image.dragDropHint')} • Max 10MB • {t('upload.image.fileTypeHint')}
                   </p>
                 </>
               )}
@@ -402,8 +409,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
                 >
                   <Camera className="w-10 h-10 text-white" />
                 </motion.div>
-                <span className="text-base font-semibold text-birthday-purple">Cattura l'attimo 📸</span>
-                <span className="text-xs text-muted-foreground">Scatta una foto ora</span>
+                <span className="text-base font-semibold text-birthday-purple">{t('upload.image.cameraButton')}</span>
+                <span className="text-xs text-muted-foreground">{t('upload.image.cameraHint')}</span>
               </label>
             </motion.div>
           )}
@@ -437,8 +444,8 @@ export function ImageUpload({ userId }: ImageUploadProps) {
                 >
                   <ImageIcon className="w-10 h-10 text-white" />
                 </motion.div>
-                <span className="text-base font-semibold text-birthday-rose-gold">Sfoglia i ricordi 🖼️</span>
-                <span className="text-xs text-muted-foreground">Scegli dalla tua galleria</span>
+                <span className="text-base font-semibold text-birthday-rose-gold">{t('upload.image.filePickerButton')}</span>
+                <span className="text-xs text-muted-foreground">{t('upload.image.filePickerHint')}</span>
               </label>
             </motion.div>
           )}
@@ -458,7 +465,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
               type="button"
               onClick={handleRemove}
               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
-              aria-label="Rimuovi immagine"
+              aria-label={t('upload.image.removeImageAriaLabel')}
             >
               <svg
                 className="w-5 h-5"
@@ -496,7 +503,7 @@ export function ImageUpload({ userId }: ImageUploadProps) {
           </div>
           <div className="flex items-center justify-between">
             <p className={`${isMobile ? 'text-base font-medium' : 'text-sm'} text-center text-foreground`}>
-              {progress < 30 ? '✨ Preparazione...' : progress < 70 ? '📤 Caricamento...' : '🎨 Finalizzazione...'}
+              {progress < 30 ? t('upload.image.preparingProgress') : progress < 70 ? t('upload.image.uploadingProgress') : t('upload.image.finalizingProgress')}
             </p>
             <p className={`${isMobile ? 'text-base font-semibold' : 'text-sm'} text-birthday-purple`}>
               {progress}%
@@ -513,11 +520,11 @@ export function ImageUpload({ userId }: ImageUploadProps) {
         className="w-full h-14 rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
-        {loading ? '✨ Magia in corso...' : '✨ Regala un ricordo'}
+        {loading ? t('upload.image.submittingButton') : t('upload.image.submitButton')}
       </motion.button>
 
       <p className="text-xs text-muted-foreground text-center">
-        📋 Il tuo contenuto sarà in attesa di approvazione dall'admin prima di essere visibile 💝✨
+        {t('upload.image.pendingApprovalNote')}
       </p>
     </form>
   )

@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { registerSchema } from '@/lib/validation/schemas'
 
 export function RegisterForm() {
   const router = useRouter()
+  const t = useTranslations()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -48,7 +50,7 @@ export function RegisterForm() {
     // Only show error if field has been touched
     if (touchedFields.email) {
       if (value && !isValidEmail(value)) {
-        setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
+        setFieldErrors(prev => ({ ...prev, email: t('validation.email.invalid') }))
       } else {
         setFieldErrors(prev => ({ ...prev, email: '' }))
       }
@@ -59,7 +61,7 @@ export function RegisterForm() {
   const handleEmailBlur = () => {
     setTouchedFields(prev => ({ ...prev, email: true }))
     if (email && !isValidEmail(email)) {
-      setFieldErrors(prev => ({ ...prev, email: 'Email non valida' }))
+      setFieldErrors(prev => ({ ...prev, email: t('validation.email.invalid') }))
     } else {
       setFieldErrors(prev => ({ ...prev, email: '' }))
     }
@@ -71,7 +73,7 @@ export function RegisterForm() {
     // Only show error if field has been touched
     if (touchedFields.password) {
       if (value && value.length < 6) {
-        setFieldErrors(prev => ({ ...prev, password: 'Minimo 6 caratteri' }))
+        setFieldErrors(prev => ({ ...prev, password: t('validation.password.tooShort') }))
       } else {
         setFieldErrors(prev => ({ ...prev, password: '' }))
       }
@@ -79,7 +81,7 @@ export function RegisterForm() {
     // Also check confirm password match if it exists and has been touched
     if (touchedFields.confirmPassword && confirmPassword) {
       if (value !== confirmPassword) {
-        setFieldErrors(prev => ({ ...prev, confirmPassword: 'Le password non coincidono' }))
+        setFieldErrors(prev => ({ ...prev, confirmPassword: t('validation.password.mismatch') }))
       } else {
         setFieldErrors(prev => ({ ...prev, confirmPassword: '' }))
       }
@@ -90,7 +92,7 @@ export function RegisterForm() {
   const handlePasswordBlur = () => {
     setTouchedFields(prev => ({ ...prev, password: true }))
     if (password && password.length < 6) {
-      setFieldErrors(prev => ({ ...prev, password: 'Minimo 6 caratteri' }))
+      setFieldErrors(prev => ({ ...prev, password: t('validation.password.tooShort') }))
     } else {
       setFieldErrors(prev => ({ ...prev, password: '' }))
     }
@@ -102,7 +104,7 @@ export function RegisterForm() {
     // Only show error if field has been touched
     if (touchedFields.confirmPassword) {
       if (value && value !== password) {
-        setFieldErrors(prev => ({ ...prev, confirmPassword: 'Le password non coincidono' }))
+        setFieldErrors(prev => ({ ...prev, confirmPassword: t('validation.password.mismatch') }))
       } else {
         setFieldErrors(prev => ({ ...prev, confirmPassword: '' }))
       }
@@ -113,7 +115,7 @@ export function RegisterForm() {
   const handleConfirmPasswordBlur = () => {
     setTouchedFields(prev => ({ ...prev, confirmPassword: true }))
     if (confirmPassword && confirmPassword !== password) {
-      setFieldErrors(prev => ({ ...prev, confirmPassword: 'Le password non coincidono' }))
+      setFieldErrors(prev => ({ ...prev, confirmPassword: t('validation.password.mismatch') }))
     } else {
       setFieldErrors(prev => ({ ...prev, confirmPassword: '' }))
     }
@@ -125,7 +127,7 @@ export function RegisterForm() {
     // Only show error if field has been touched
     if (touchedFields.fullName) {
       if (value && value.trim().length < 2) {
-        setFieldErrors(prev => ({ ...prev, fullName: 'Inserisci nome e cognome' }))
+        setFieldErrors(prev => ({ ...prev, fullName: t('validation.fullName.tooShort') }))
       } else {
         setFieldErrors(prev => ({ ...prev, fullName: '' }))
       }
@@ -136,7 +138,7 @@ export function RegisterForm() {
   const handleFullNameBlur = () => {
     setTouchedFields(prev => ({ ...prev, fullName: true }))
     if (fullName && fullName.trim().length < 2) {
-      setFieldErrors(prev => ({ ...prev, fullName: 'Inserisci nome e cognome' }))
+      setFieldErrors(prev => ({ ...prev, fullName: t('validation.fullName.tooShort') }))
     } else {
       setFieldErrors(prev => ({ ...prev, fullName: '' }))
     }
@@ -184,7 +186,7 @@ export function RegisterForm() {
 
     // Additional check: confirm password match (not in registerSchema)
     if (password !== confirmPassword) {
-      setError('Le password non coincidono')
+      setError(t('validation.password.mismatch'))
       return
     }
 
@@ -208,7 +210,7 @@ export function RegisterForm() {
       const result = await response.json()
 
       if (!response.ok) {
-        setError(result.error || 'Si è verificato un errore durante la registrazione')
+        setError(result.error || t('auth.register.errorGeneric'))
         setLoading(false)
         return
       }
@@ -221,7 +223,7 @@ export function RegisterForm() {
       })
 
       if (signInError) {
-        setError('Registrazione completata, ma errore durante l\'accesso automatico. Prova ad accedere manualmente.')
+        setError(t('auth.register.errorAutoLogin'))
         setLoading(false)
         return
       }
@@ -235,7 +237,7 @@ export function RegisterForm() {
       router.refresh()
       // Don't set loading to false here - let the page reload handle it
     } catch (err) {
-      setError('Si è verificato un errore durante la registrazione')
+      setError(t('auth.register.errorGeneric'))
       console.error(err)
       setLoading(false)
     }
@@ -265,7 +267,7 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="fullName" className="block text-sm font-medium mb-2">
-          Nome completo
+          {t('auth.fullName.label')}
         </label>
         <input
           id="fullName"
@@ -275,7 +277,7 @@ export function RegisterForm() {
           onBlur={handleFullNameBlur}
           required
           className={`w-full min-h-[44px] rounded-md border ${fieldErrors.fullName ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
-          placeholder="Mario Rossi"
+          placeholder={t('auth.fullName.placeholder')}
         />
         {fieldErrors.fullName && (
           <p className="mt-1 text-xs text-destructive">{fieldErrors.fullName}</p>
@@ -284,7 +286,7 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium mb-2">
-          Email
+          {t('auth.email.label')}
         </label>
         <input
           id="email"
@@ -294,7 +296,7 @@ export function RegisterForm() {
           onBlur={handleEmailBlur}
           required
           className={`w-full min-h-[44px] rounded-md border ${fieldErrors.email ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
-          placeholder="mario@example.com"
+          placeholder={t('auth.email.placeholder')}
         />
         {fieldErrors.email && (
           <p className="mt-1 text-xs text-destructive">{fieldErrors.email}</p>
@@ -303,7 +305,7 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium mb-2">
-          Password
+          {t('auth.password.label')}
         </label>
         <div className="relative">
           <input
@@ -316,7 +318,7 @@ export function RegisterForm() {
             minLength={6}
             autoComplete="new-password"
             className={`w-full min-h-[44px] rounded-md border ${fieldErrors.password ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 pr-10 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
-            placeholder="••••••••"
+            placeholder={t('auth.password.placeholder')}
           />
           <button
             type="button"
@@ -329,13 +331,13 @@ export function RegisterForm() {
         {fieldErrors.password ? (
           <p className="mt-1 text-xs text-destructive">{fieldErrors.password}</p>
         ) : (
-          <p className="mt-1 text-xs text-muted-foreground">Almeno 6 caratteri</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t('auth.password.hint')}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-          Conferma Password
+          {t('auth.confirmPassword.label')}
         </label>
         <div className="relative">
           <input
@@ -348,7 +350,7 @@ export function RegisterForm() {
             minLength={6}
             autoComplete="new-password"
             className={`w-full min-h-[44px] rounded-md border ${fieldErrors.confirmPassword ? 'border-destructive' : 'border-input'} bg-background px-3 py-2.5 md:py-2 pr-10 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring touch-manipulation`}
-            placeholder="••••••••"
+            placeholder={t('auth.password.placeholder')}
           />
           <button
             type="button"
@@ -369,7 +371,7 @@ export function RegisterForm() {
         className="w-full min-h-[44px] rounded-md bg-birthday-purple px-4 py-2.5 md:py-2 text-base md:text-sm font-medium text-white hover:bg-birthday-purple/90 active:bg-birthday-purple/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation flex items-center justify-center gap-2"
       >
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {loading ? 'Registrazione in corso...' : 'Registrati'}
+        {loading ? t('auth.register.submitting') : t('auth.register.submit')}
       </button>
     </form>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import confetti from 'canvas-confetti'
@@ -23,6 +24,7 @@ const shakeAnimation = {
 }
 
 export function TextUpload({ userId }: TextUploadProps) {
+  const t = useTranslations('upload.text')
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [touched, setTouched] = useState(false)
@@ -51,7 +53,7 @@ export function TextUpload({ userId }: TextUploadProps) {
       }
 
       toast.error(firstError.message, {
-        description: 'Aggiungi qualche parola in più per rendere il messaggio ancora più speciale! 💝'
+        description: t('addMoreToast')
       })
       return
     }
@@ -59,8 +61,8 @@ export function TextUpload({ userId }: TextUploadProps) {
     // Check client-side rate limit
     const rateLimitCheck = checkUploadRateLimit(userId)
     if (!rateLimitCheck.allowed) {
-      toast.error(`Aspetta ancora un attimo! ⏱️`, {
-        description: `Attendi ${rateLimitCheck.remainingSeconds} secondi prima di caricare un altro contenuto. Stiamo preparando tutto per Giuliana! 🎁`
+      toast.error(t('rateLimitTitle'), {
+        description: t('rateLimitDescription', { remainingSeconds: rateLimitCheck.remainingSeconds || 60 })
       })
       return
     }
@@ -73,8 +75,8 @@ export function TextUpload({ userId }: TextUploadProps) {
       if (result.success) {
         const count = result.contentCount || 0
         const countMessage = count === 1
-          ? 'Questo è il tuo primo messaggio! 🎊'
-          : `Hai già caricato ${count} contenuti! Continua così! 🌟`
+          ? t('firstMessageToast')
+          : t('multipleContentToast', { count })
 
         // Celebration confetti!
         const colors = ['#D4A5A5', '#FFB6C1', '#9D4EDD', '#FFD700']
@@ -85,20 +87,20 @@ export function TextUpload({ userId }: TextUploadProps) {
           colors,
         })
 
-        toast.success('🎉 Messaggio inviato con successo!', {
-          description: `In attesa di approvazione dall'admin. Giuliana lo vedrà presto! ${countMessage}`,
+        toast.success(t('successToast'), {
+          description: t('successDescription', { message: countMessage }),
           duration: 6000
         })
         setText('')
       } else {
-        toast.error('Ops! Qualcosa è andato storto 😔', {
-          description: result.error || 'Riprova tra un momento, stiamo sistemando tutto per te!',
+        toast.error(t('errorToast'), {
+          description: result.error || t('errorDescription'),
         })
       }
     } catch (error) {
       console.error('[Text Upload] Unexpected error:', error)
       const errorInfo = analyzeNetworkError(error)
-      toast.error('Si è verificato un errore 😔', {
+      toast.error(t('unexpectedErrorToast'), {
         description: errorInfo.userMessage
       })
     } finally {
@@ -123,14 +125,14 @@ export function TextUpload({ userId }: TextUploadProps) {
         variants={shakeAnimation}
       >
         <label htmlFor="text" className="block text-sm font-medium mb-2">
-          Scrivi qualcosa di speciale ✨
+          {t('label')}
         </label>
         <textarea
           id="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           onBlur={() => setTouched(true)}
-          placeholder="Scrivi un pensiero speciale per Giuliana..."
+          placeholder={t('placeholder')}
           className={`w-full min-h-[200px] rounded-md border bg-background px-4 py-3 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple resize-none touch-manipulation transition-colors ${
             showError ? 'border-red-500 focus-visible:ring-red-500' : 'border-input'
           }`}
@@ -139,16 +141,17 @@ export function TextUpload({ userId }: TextUploadProps) {
         />
         <div className="flex justify-between items-center mt-2">
           <p className={`text-sm ${charCountColor}`}>
-            {charCount} / {maxLength} caratteri
-            {charCount < minLength && ` (minimo ${minLength})`}
+            {charCount < minLength
+              ? t('charCountMin', { count: charCount, max: maxLength, min: minLength })
+              : t('charCount', { count: charCount, max: maxLength })}
           </p>
           {charCount >= minLength && (
-            <p className="text-sm text-green-500">✓ Pronto per l'invio</p>
+            <p className="text-sm text-green-500">{t('readyToSend')}</p>
           )}
         </div>
         {showError && (
           <p className="text-sm text-red-500 mt-1">
-            ⚠️ Il messaggio deve avere almeno {minLength} caratteri
+            {t('minCharError', { min: minLength })}
           </p>
         )}
       </motion.div>
@@ -161,11 +164,11 @@ export function TextUpload({ userId }: TextUploadProps) {
         className="w-full h-14 rounded-md bg-gradient-to-r from-birthday-rose-gold via-birthday-blush to-birthday-purple px-6 py-3 text-base font-medium text-white hover:opacity-90 active:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 touch-manipulation"
       >
         {loading && <Spinner size="sm" className="text-white" />}
-        {loading ? '✨ Magia in corso...' : '💝 Regala le tue parole'}
+        {loading ? t('submittingButton') : t('submitButton')}
       </motion.button>
 
       <p className="text-xs text-muted-foreground text-center">
-        📋 Il tuo contenuto sarà in attesa di approvazione dall'admin prima di essere visibile 💝✨
+        {t('pendingApprovalNote')}
       </p>
     </form>
   )
