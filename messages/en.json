@@ -22,8 +22,8 @@
   },
   "hero": {
     "title": "Giuliana 40",
-    "subtitle": "The Memory Book for your 40th birthday ✨",
-    "description": "A digital gift made of words, smiles and unforgettable moments",
+    "subtitle": "Guestbook for your 40th birthday ✨",
+    "description": "Celebrate 40 years of Giuliana! Leave a message to make her day unforgettable. ✨",
     "messages": "Messages",
     "photos": "Photos",
     "videos": "Videos",
@@ -238,8 +238,8 @@
       "video": "🎥 Video"
     },
     "text": {
-      "label": "Write something special ✨",
-      "placeholder": "Write a special thought for Giuliana...",
+      "label": "Your message ✨",
+      "placeholder": "Write your wishes here...",
       "charCount": "{count} / {max} characters",
       "charCountMin": "{count} / {max} characters (minimum {min})",
       "readyToSend": "✓ Ready to send",
@@ -247,7 +247,7 @@
       "submitButton": "💝 Gift your words",
       "submittingButton": "✨ Magic in progress...",
       "addMoreToast": "Keep it up! 🌟",
-      "successToast": "🎉 Message sent successfully!",
+      "successToast": "🎉 Thank you! Your message has been saved.",
       "successDescription": "Awaiting admin approval. Giuliana will see it soon! {message}",
       "firstMessageToast": "This is your first message! 🎊",
       "multipleContentToast": "You've already uploaded {count} items! Keep it up! 🌟",

@@ -22,8 +22,8 @@
   },
   "hero": {
     "title": "Giuliana 40",
-    "subtitle": "Il Libro dei Ricordi per i tuoi 40 anni ✨",
-    "description": "Un regalo digitale fatto di parole, sorrisi e momenti indimenticabili",
+    "subtitle": "Guestbook per i tuoi 40 anni ✨",
+    "description": "Festeggia i 40 anni di Giuliana! Lascia un messaggio per rendere il suo giorno indimenticabile. ✨",
     "messages": "Messaggi",
     "photos": "Foto",
     "videos": "Video",
@@ -238,8 +238,8 @@
       "video": "🎥 Video"
     },
     "text": {
-      "label": "Scrivi qualcosa di speciale ✨",
-      "placeholder": "Scrivi un pensiero speciale per Giuliana...",
+      "label": "Il tuo messaggio ✨",
+      "placeholder": "Scrivi qui i tuoi auguri...",
       "charCount": "{count} / {max} caratteri",
       "charCountMin": "{count} / {max} caratteri (minimo {min})",
       "readyToSend": "✓ Pronto per l'invio",
@@ -247,7 +247,7 @@
       "submitButton": "💝 Regala le tue parole",
       "submittingButton": "✨ Magia in corso...",
       "addMoreToast": "Continua così! 🌟",
-      "successToast": "🎉 Messaggio inviato con successo!",
+      "successToast": "🎉 Grazie! Il tuo messaggio è stato salvato.",
       "successDescription": "In attesa di approvazione dall'admin. Giuliana lo vedrà presto! {message}",
       "firstMessageToast": "Questo è il tuo primo messaggio! 🎊",
       "multipleContentToast": "Hai già caricato {count} contenuti! Continua così! 🌟",
