@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from '@/i18n/config'
@@ -20,13 +20,12 @@ const intlMiddleware = createIntlMiddleware({
 })
 
 export async function middleware(request: NextRequest) {
-  // Debug: Log incoming cookie
+  // Get locale from cookie
   const incomingLocale = request.cookies.get('NEXT_LOCALE')
-  console.log(`[Middleware] ${request.nextUrl.pathname} - Incoming cookie:`, incomingLocale?.value || 'none')
 
-  // Create a new request with locale header if cookie exists
+  // Create modified request with locale header if needed
   let modifiedRequest = request
-  if (incomingLocale) {
+  if (incomingLocale?.value) {
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-next-intl-locale', incomingLocale.value)
     modifiedRequest = new NextRequest(request, {
@@ -34,38 +33,36 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // 1. Handle locale detection and set cookie
-  const intlResponse = intlMiddleware(modifiedRequest)
-
-  // 2. Handle auth and route protection
+  // Handle auth and route protection first (security priority)
   const authResponse = await updateSession(modifiedRequest)
 
-  // 3. Start with intl response to preserve locale handling
-  const response = NextResponse.next({
-    request: {
-      headers: intlResponse.headers,
-    },
-  })
+  // If auth requires redirect (e.g., unauthorized access), preserve locale and redirect
+  if (authResponse.status === 307 || authResponse.status === 308) {
+    // Preserve locale cookie during redirect
+    if (incomingLocale?.value) {
+      authResponse.cookies.set('NEXT_LOCALE', incomingLocale.value, {
+        path: '/',
+        maxAge: 31536000,
+        sameSite: 'lax',
+      })
+    }
+    return authResponse
+  }
 
-  // Copy ALL cookies from intl response (to preserve NEXT_LOCALE)
-  intlResponse.cookies.getAll().forEach((cookie) => {
-    response.cookies.set(cookie.name, cookie.value, {
-      path: cookie.path,
-      maxAge: cookie.maxAge,
-      sameSite: cookie.sameSite,
-      secure: cookie.secure,
-      httpOnly: cookie.httpOnly,
+  // Handle locale detection
+  const intlResponse = intlMiddleware(modifiedRequest)
+
+  // Copy locale cookie from intl response to auth response
+  const localeCookie = intlResponse.cookies.get('NEXT_LOCALE')
+  if (localeCookie) {
+    authResponse.cookies.set('NEXT_LOCALE', localeCookie.value, {
+      path: '/',
+      maxAge: 31536000, // 1 year
+      sameSite: 'lax',
     })
-  })
+  }
 
-  // Copy auth cookies (these take precedence over any duplicate names)
-  authResponse.cookies.getAll().forEach((cookie) => {
-    response.cookies.set(cookie.name, cookie.value, cookie)
-  })
-
-  console.log(`[Middleware] ${request.nextUrl.pathname} - Outgoing cookie:`, response.cookies.get('NEXT_LOCALE')?.value || 'none')
-
-  return response
+  return authResponse
 }
 
 export const config = {
