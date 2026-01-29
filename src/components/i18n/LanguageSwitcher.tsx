@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react'
 import { useLocale } from 'next-intl'
-import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { locales, localeNames, localeEmojis, type Locale } from '@/i18n/config'
 import {
   DropdownMenu,
@@ -16,12 +16,13 @@ import { setLocaleAction } from '@/app/reset-locale/actions'
 
 export function LanguageSwitcher() {
   const currentLocale = useLocale() as Locale
-  const pathname = usePathname()
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   const handleLocaleChange = (newLocale: Locale) => {
     startTransition(async () => {
-      await setLocaleAction(newLocale, pathname)
+      await setLocaleAction(newLocale)
+      router.refresh()
     })
   }
 

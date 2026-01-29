@@ -1,10 +1,9 @@
 'use server'
 
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { type Locale } from '@/i18n/config'
 
-export async function setLocaleAction(locale: Locale, currentPath: string) {
+export async function setLocaleAction(locale: Locale) {
   const cookieStore = await cookies()
 
   // Set the locale cookie with 1-year expiration
@@ -14,6 +13,6 @@ export async function setLocaleAction(locale: Locale, currentPath: string) {
     sameSite: 'lax',
   })
 
-  // Redirect to the current path to trigger a server re-render
-  redirect(currentPath)
+  // Return success - the client will handle the refresh
+  return { success: true }
 }
