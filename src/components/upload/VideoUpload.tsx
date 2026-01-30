@@ -998,9 +998,10 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         {loading ? t('upload.video.uploadingButton') : t('upload.video.submitButton')}
       </button>
 
-      <p className="text-xs text-muted-foreground text-center">
-        {t('upload.video.pendingApprovalNote')}
-      </p>
+      <div className="text-xs text-muted-foreground text-center space-y-1">
+        <p>{t('upload.video.pendingApprovalNote')}</p>
+        <p>{t('upload.infoMessage.contact', { email: 'pierluigibaiano@gmail.com' })}</p>
+      </div>
     </form>
   )
 }

@@ -167,9 +167,10 @@ export function TextUpload({ userId }: TextUploadProps) {
         {loading ? t('submittingButton') : t('submitButton')}
       </motion.button>
 
-      <p className="text-xs text-muted-foreground text-center">
-        {t('pendingApprovalNote')}
-      </p>
+      <div className="text-xs text-muted-foreground text-center space-y-1">
+        <p>{t('pendingApprovalNote')}</p>
+        <p>{t('infoMessage.contact', { email: 'pierluigibaiano@gmail.com' })}</p>
+      </div>
     </form>
   )
 }

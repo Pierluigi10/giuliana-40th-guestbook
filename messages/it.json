@@ -213,6 +213,10 @@
     "poweredBy": "Powered by Next.js, Supabase, and Shadcn/ui"
   },
   "upload": {
+    "infoMessage": {
+      "approval": "📋 I tuoi contenuti saranno in attesa di approvazione da parte dell'admin prima di essere visibili 💝✨",
+      "contact": "Se hai problemi a caricare i tuoi contenuti, contattami qui: {email}"
+    },
     "imageTextOverlay": {
       "title": "Aggiungi testo alla foto",
       "textLabel": "Testo",

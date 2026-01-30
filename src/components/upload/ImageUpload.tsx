@@ -523,9 +523,10 @@ export function ImageUpload({ userId }: ImageUploadProps) {
         {loading ? t('upload.image.submittingButton') : t('upload.image.submitButton')}
       </motion.button>
 
-      <p className="text-xs text-muted-foreground text-center">
-        {t('upload.image.pendingApprovalNote')}
-      </p>
+      <div className="text-xs text-muted-foreground text-center space-y-1">
+        <p>{t('upload.image.pendingApprovalNote')}</p>
+        <p>{t('upload.infoMessage.contact', { email: 'pierluigibaiano@gmail.com' })}</p>
+      </div>
     </form>
   )
 }

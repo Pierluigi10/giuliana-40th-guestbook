@@ -35,8 +35,8 @@ export function Header({ userName, userRole }: HeaderProps) {
   const [loading, setLoading] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const isUploadPage = pathname === '/upload'
   const isGalleryPage = pathname === '/gallery'
+  const isUploadPage = pathname === '/upload'
 
   const handleLogout = async () => {
     if (loading) return
@@ -104,31 +104,10 @@ export function Header({ userName, userRole }: HeaderProps) {
           aria-label={t('hero.confettiAriaLabel')}
         >
           <h2 className="text-xl font-semibold bg-gradient-to-r from-birthday-pink to-birthday-purple bg-clip-text text-transparent">
-            {t('hero.title')}
+            Guestbook
           </h2>
         </button>
 
-        {/* Mobile Simple Navigation - Only on upload/gallery pages */}
-        {userName && (isUploadPage || isGalleryPage) && (
-          <nav className="md:hidden flex items-center gap-4">
-            {isUploadPage && (
-              <Link
-                href="/gallery"
-                className="text-base font-medium hover:text-birthday-purple transition-colors"
-              >
-                {t('nav.gallery')}
-              </Link>
-            )}
-            {isGalleryPage && (
-              <Link
-                href="/upload"
-                className="text-base font-medium hover:text-birthday-pink transition-colors"
-              >
-                {t('nav.upload')}
-              </Link>
-            )}
-          </nav>
-        )}
 
         {/* Desktop Navigation - Center */}
         {userName && (
@@ -196,12 +175,10 @@ export function Header({ userName, userRole }: HeaderProps) {
 
         {/* User Info + Language Switcher + Logout - Right */}
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Hide user icon on mobile when in upload or gallery */}
+          {/* User Info - Desktop only */}
           {userName && (
             <div
-              className={`items-center gap-2 text-sm text-muted-foreground ${
-                (isUploadPage || isGalleryPage) ? 'hidden md:flex' : 'flex'
-              }`}
+              className="hidden md:flex items-center gap-2 text-sm text-muted-foreground"
               aria-label={t('nav.userConnected', { userName })}
             >
               <User className="h-4 w-4" aria-hidden="true" />
@@ -209,21 +186,24 @@ export function Header({ userName, userRole }: HeaderProps) {
             </div>
           )}
 
-          {/* Language Switcher */}
-          <LanguageSwitcher />
+          {/* Language Switcher - Desktop only */}
+          <div className="hidden md:block">
+            <LanguageSwitcher />
+          </div>
 
+          {/* Logout Button - Desktop only */}
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-md px-3 md:px-4 py-2 min-h-[44px] text-sm md:text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground active:bg-accent/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+            className="hidden md:inline-flex items-center gap-2 rounded-md px-3 md:px-4 py-2 min-h-[44px] text-sm md:text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground active:bg-accent/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-birthday-purple focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             aria-label={t('common.logout')}
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
             <span className="hidden sm:inline">{t('common.logout')}</span>
           </button>
 
-          {/* Mobile Menu Button - Hide on upload/gallery pages */}
-          {userName && !(isUploadPage || isGalleryPage) && (
+          {/* Mobile Menu Button - Always visible on mobile when logged in */}
+          {userName && (
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <button
@@ -238,25 +218,38 @@ export function Header({ userName, userRole }: HeaderProps) {
               </SheetTrigger>
               <SheetContent side="left" className="w-64" id="mobile-nav-menu">
                 <SheetTitle>{t('nav.navigationMenu')}</SheetTitle>
+
+                {/* User Info */}
+                <div className="flex items-center gap-2 mt-4 pb-4 border-b">
+                  <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                  <span className="text-sm text-muted-foreground">{userName}</span>
+                </div>
+
                 <nav
-                  className="flex flex-col gap-4 mt-8"
+                  className="flex flex-col gap-4 mt-6"
                   role="navigation"
                   aria-label={t('nav.mainMenu')}
                 >
-                  <Link
-                    href="/gallery"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-base font-medium hover:text-birthday-purple transition-colors py-2"
-                  >
-                    {t('nav.gallery')}
-                  </Link>
-                  <Link
-                    href="/upload"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-base font-medium hover:text-birthday-pink transition-colors py-2"
-                  >
-                    {t('nav.upload')}
-                  </Link>
+                  {/* Show Gallery link only if not on gallery page */}
+                  {!isGalleryPage && (
+                    <Link
+                      href="/gallery"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-base font-medium hover:text-birthday-purple transition-colors py-2"
+                    >
+                      {t('nav.gallery')}
+                    </Link>
+                  )}
+                  {/* Show Upload link only if not on upload page */}
+                  {!isUploadPage && (
+                    <Link
+                      href="/upload"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-base font-medium hover:text-birthday-pink transition-colors py-2"
+                    >
+                      {t('nav.upload')}
+                    </Link>
+                  )}
                   {userRole === 'admin' && (
                     <>
                       <div className="border-t pt-4 mt-2">
@@ -308,6 +301,24 @@ export function Header({ userName, userRole }: HeaderProps) {
                       </div>
                     </>
                   )}
+
+                  {/* Language Switcher in mobile menu */}
+                  <div className="border-t pt-4 mt-4">
+                    <LanguageSwitcher />
+                  </div>
+
+                  {/* Logout button in mobile menu */}
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      handleLogout()
+                    }}
+                    disabled={loading}
+                    className="flex items-center gap-2 text-base font-medium text-left hover:text-birthday-purple transition-colors py-2 disabled:opacity-50"
+                  >
+                    <LogOut className="h-5 w-5" aria-hidden="true" />
+                    {t('common.logout')}
+                  </button>
                 </nav>
               </SheetContent>
             </Sheet>
