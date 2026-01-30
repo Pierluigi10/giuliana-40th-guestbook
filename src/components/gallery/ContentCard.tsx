@@ -64,6 +64,8 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showFullText, setShowFullText] = useState(false)
+  const videoRef = useRef<HTMLDivElement>(null)
+  const [isVideoVisible, setIsVideoVisible] = useState(false)
 
   // Determina se il testo è troppo lungo (più di 150 caratteri o 4 righe circa)
   const isLongText = content.text_content && content.text_content.length > 150
@@ -87,6 +89,24 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, []) // Empty dependency array - only mount/unmount
+
+  // Lazy load video with Intersection Observer
+  useEffect(() => {
+    if (content.type !== 'video' || !videoRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVideoVisible(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '100px' }
+    )
+
+    observer.observe(videoRef.current)
+    return () => observer.disconnect()
+  }, [content.type])
 
   // Count reactions by emoji
   const reactionCounts = reactions.reduce((acc, r) => {
@@ -276,6 +296,7 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
                 width={800}
                 height={600}
                 loading="lazy"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <motion.div
@@ -309,31 +330,33 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         )}
 
         {content.type === 'video' && content.media_url && (
-          <div>
+          <div ref={videoRef}>
             <motion.div
               className="relative overflow-hidden cursor-pointer bg-black"
               onClick={onOpenLightbox}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.3 }}
             >
-              <video
-                src={content.media_url}
-                className="w-full h-48 object-cover"
-                preload="metadata"
-              />
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center bg-black/30"
-                whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-                transition={{ duration: 0.2 }}
-              >
-                <motion.div
-                  className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg"
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 1)' }}
-                  transition={{ duration: 0.2 }}
-                >
+              {isVideoVisible ? (
+                <video
+                  src={content.media_url}
+                  className="w-full h-48 object-cover"
+                  preload="none"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gradient-to-br from-purple-900/20 to-pink-900/20 flex items-center justify-center">
+                  <svg className="w-16 h-16 text-white/50" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              )}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
                   <svg className="w-8 h-8 text-birthday-purple ml-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             </motion.div>
             {/* Caption se presente text_content */}
             {content.text_content && (

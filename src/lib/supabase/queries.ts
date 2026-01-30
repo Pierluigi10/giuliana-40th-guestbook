@@ -215,7 +215,7 @@ export async function getApprovedContentPaginated(
 ): Promise<PaginatedContentResult> {
   try {
     const from = page * pageSize
-    const to = from + pageSize - 1
+    const to = from + pageSize  // Fetch one extra item (N+1)
 
     const { data, error } = await supabase
       .from('content')
@@ -245,17 +245,12 @@ export async function getApprovedContentPaginated(
       return { data: [], hasMore: false, error }
     }
 
-    // Check if there are more items by fetching one more
-    const { count } = await supabase
-      .from('content')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved')
-
-    const totalItems = count || 0
-    const hasMore = (from + (data?.length || 0)) < totalItems
+    // If we got more than pageSize, there's another page (N+1 technique)
+    const hasMore = (data?.length || 0) > pageSize
+    const items = hasMore ? data.slice(0, pageSize) : data  // Return only pageSize items
 
     return {
-      data: (data || []) as PaginatedContentResult['data'],
+      data: (items || []) as PaginatedContentResult['data'],
       hasMore,
       error: null,
     }

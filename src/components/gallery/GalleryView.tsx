@@ -301,9 +301,9 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       }
     }
 
-    // Check immediately, then every 10 seconds
+    // Check immediately, then every 30 seconds
     checkForNewContent()
-    const interval = setInterval(checkForNewContent, 10000)
+    const interval = setInterval(checkForNewContent, 30000)
 
     return () => clearInterval(interval)
   }, [userRole, soundEnabled, triggerConfetti, playCelebrationSound])
@@ -469,7 +469,7 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
                     key={item.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    transition={{ duration: 0.4, delay: index < 8 ? index * 0.02 : 0 }}
                     className="mb-8"
                   >
                     <ContentCard
