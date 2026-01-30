@@ -116,7 +116,7 @@ export function HeroSection() {
       >
         {/* Title */}
         <motion.h1
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent leading-tight px-4"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-birthday-pink via-birthday-purple to-birthday-gold bg-clip-text text-transparent leading-tight px-4"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -124,18 +124,14 @@ export function HeroSection() {
           {t('hero.title')}
         </motion.h1>
 
-        {/* Subtitle */}
+        {/* Description */}
         <motion.p
-          className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4"
+          className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          {t('hero.subtitle')}
-          <br />
-          <span className="text-sm sm:text-base md:text-lg opacity-80 mt-2 block">
-            {t('hero.description')}
-          </span>
+          {t('hero.description')}
         </motion.p>
 
         {/* Icon indicators */}

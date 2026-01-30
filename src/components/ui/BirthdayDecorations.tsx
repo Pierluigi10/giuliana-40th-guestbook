@@ -215,9 +215,9 @@ export function BirthdayDecorations({
         <motion.div
           className="absolute will-change-transform"
           style={{
-            left: isHero ? '50%' : '85%',
-            top: isHero ? '10%' : '5%',
-            transform: 'translateX(-50%)',
+            left: isHero ? '85%' : '85%',
+            top: isHero ? '15%' : '5%',
+            transform: isHero ? 'none' : 'translateX(-50%)',
           }}
           initial={{ scale: 1, rotate: 0 }}
           animate={{

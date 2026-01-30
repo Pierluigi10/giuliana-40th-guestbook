@@ -24,8 +24,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    template: 'Guestbook Giuliana 40 | %s',
-    default: 'Guestbook Giuliana 40 - Auguri per i tuoi 40 Anni',
+    template: 'Guestbook dei 40 anni di Giuliana | %s',
+    default: 'Guestbook dei 40 anni di Giuliana - Auguri per i tuoi 40 Anni',
   },
   description: 'Guestbook privato per il 40esimo compleanno di Giuliana. Condividi messaggi, foto e video con i tuoi amici.',
   keywords: ['guestbook', 'compleanno', '40 anni', 'Giuliana', 'messaggi', 'festa'],
@@ -60,29 +60,29 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'it_IT',
     url: baseUrl,
-    siteName: 'Guestbook Giuliana 40',
-    title: 'Guestbook Giuliana 40 - Auguri per i tuoi 40 Anni',
+    siteName: 'Guestbook dei 40 anni di Giuliana',
+    title: 'Guestbook dei 40 anni di Giuliana - Auguri per i tuoi 40 Anni',
     description: 'Guestbook privato per il 40esimo compleanno di Giuliana. Condividi messaggi, foto e video.',
     images: [
       {
         url: `${baseUrl}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'Guestbook Giuliana 40',
+        alt: 'Guestbook dei 40 anni di Giuliana',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Guestbook Giuliana 40 - Auguri per i tuoi 40 Anni',
+    title: 'Guestbook dei 40 anni di Giuliana - Auguri per i tuoi 40 Anni',
     description: 'Condividi i tuoi auguri per il compleanno di Giuliana',
     images: [`${baseUrl}/og-image.png`],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Guestbook Giuliana 40',
+    title: 'Guestbook dei 40 anni di Giuliana',
   },
 }
 
