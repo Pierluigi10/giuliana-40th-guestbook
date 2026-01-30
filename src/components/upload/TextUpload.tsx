@@ -25,6 +25,7 @@ const shakeAnimation = {
 
 export function TextUpload({ userId }: TextUploadProps) {
   const t = useTranslations('upload.text')
+  const tUpload = useTranslations('upload')
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
   const [touched, setTouched] = useState(false)
@@ -169,7 +170,7 @@ export function TextUpload({ userId }: TextUploadProps) {
 
       <div className="text-xs text-muted-foreground text-center space-y-1">
         <p>{t('pendingApprovalNote')}</p>
-        <p>{t('infoMessage.contact', { email: 'pierluigibaiano@gmail.com' })}</p>
+        <p>{tUpload('infoMessage.contact', { email: 'pierluigibaiano@gmail.com' })}</p>
       </div>
     </form>
   )
