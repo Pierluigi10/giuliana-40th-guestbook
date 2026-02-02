@@ -390,6 +390,8 @@
       "compressingVideoDescription": "Ottimizzazione in corso per Giuliana!",
       "compressedTitle": "Video compresso! 📦",
       "compressedDescription": "{originalMB}MB → {compressedMB}MB",
+      "generatingThumbnailTitle": "Creazione anteprima... 🖼️",
+      "generatingThumbnailDescription": "Generazione miniatura del video",
       "compressionFailedTitle": "Compressione fallita ⚠️",
       "compressionFailedDescription": "Continuo con video originale",
       "stillTooLargeTitle": "Video ancora troppo grande! 📏",

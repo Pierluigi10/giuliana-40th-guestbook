@@ -309,7 +309,7 @@ export async function uploadImageContent(formData: FormData) {
 }
 
 // New: Save video content record (client uploads file directly to Supabase Storage)
-export async function saveVideoContentRecord(mediaUrl: string) {
+export async function saveVideoContentRecord(mediaUrl: string, thumbnailUrl?: string) {
   try {
     const supabase = await createClient()
 
@@ -361,6 +361,7 @@ export async function saveVideoContentRecord(mediaUrl: string) {
       user_id: user.id,
       type: 'video',
       media_url: mediaUrl,
+      thumbnail_url: thumbnailUrl,
       status: 'pending',
     }
     console.log('[Video Upload] Inserting content record...')

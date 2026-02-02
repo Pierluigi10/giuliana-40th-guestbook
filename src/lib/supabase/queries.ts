@@ -189,6 +189,7 @@ export interface PaginatedContentResult {
     type: 'text' | 'image' | 'video'
     text_content: string | null
     media_url: string | null
+    thumbnail_url: string | null
     approved_at: string | null
     created_at: string
     user_id: string
@@ -224,6 +225,7 @@ export async function getApprovedContentPaginated(
         type,
         text_content,
         media_url,
+        thumbnail_url,
         approved_at,
         created_at,
         user_id,

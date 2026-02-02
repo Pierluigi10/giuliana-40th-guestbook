@@ -42,6 +42,7 @@ export type Database = {
           type: 'text' | 'image' | 'video'
           text_content: string | null
           media_url: string | null
+          thumbnail_url: string | null
           status: 'pending' | 'approved' | 'rejected'
           approved_at: string | null
           created_at: string
@@ -52,6 +53,7 @@ export type Database = {
           type: 'text' | 'image' | 'video'
           text_content?: string | null
           media_url?: string | null
+          thumbnail_url?: string | null
           status?: 'pending' | 'approved' | 'rejected'
           approved_at?: string | null
           created_at?: string
@@ -62,6 +64,7 @@ export type Database = {
           type?: 'text' | 'image' | 'video'
           text_content?: string | null
           media_url?: string | null
+          thumbnail_url?: string | null
           status?: 'pending' | 'approved' | 'rejected'
           approved_at?: string | null
           created_at?: string

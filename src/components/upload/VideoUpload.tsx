@@ -13,6 +13,7 @@ import { Camera, Video, RotateCcw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { analyzeNetworkError, uploadWithRetry } from '@/lib/network-errors'
 import { compressVideo } from '@/lib/video-compression'
+import { generateVideoThumbnail } from '@/lib/video-thumbnail'
 
 interface VideoUploadProps {
   userId: string
@@ -554,6 +555,27 @@ export function VideoUpload({ userId }: VideoUploadProps) {
       setProgress(10)
     }
 
+    // STEP 1.5: Generate video thumbnail (NON-BLOCKING)
+    let thumbnailFile: File | null = null
+    try {
+      toast.info(t('upload.video.generatingThumbnailTitle'), {
+        description: t('upload.video.generatingThumbnailDescription')
+      })
+
+      thumbnailFile = await generateVideoThumbnail(fileToUpload, {
+        seekTime: 1,
+        width: 800,
+        quality: 2
+      })
+
+      setProgress(55)
+      debugLog('[Video Upload] Thumbnail generated:', thumbnailFile.size, 'bytes')
+    } catch (thumbError) {
+      // Error is NON-BLOCKING: continue upload without thumbnail (graceful degradation)
+      debugWarn('[Video Upload] Thumbnail generation failed (graceful degradation):', thumbError)
+      // Don't show error toast - thumbnail is optional, video upload continues
+    }
+
     // Validate file size after compression (must be < 20MB)
     if (fileToUpload.size > 20 * 1024 * 1024) {
       toast.error(t('upload.video.stillTooLargeTitle'), {
@@ -624,12 +646,45 @@ export function VideoUpload({ userId }: VideoUploadProps) {
         .getPublicUrl(fileName)
 
       debugLog('[Video Upload] Public URL:', publicUrl)
+      setProgress(70)
+
+      // STEP 2.5: Upload thumbnail (if generated)
+      let thumbnailUrl: string | undefined
+      if (thumbnailFile) {
+        try {
+          const thumbFileName = `${userId}/${crypto.randomUUID()}_thumb.jpg`
+
+          const { error: thumbUploadError } = await supabase.storage
+            .from('content-media')
+            .upload(thumbFileName, thumbnailFile, {
+              contentType: 'image/jpeg',
+              upsert: false,
+            })
+
+          if (!thumbUploadError) {
+            const { data: { publicUrl: thumbPublicUrl } } = supabase.storage
+              .from('content-media')
+              .getPublicUrl(thumbFileName)
+
+            thumbnailUrl = thumbPublicUrl
+            debugLog('[Video Upload] Thumbnail uploaded:', thumbnailUrl)
+          } else {
+            debugWarn('[Video Upload] Thumbnail upload error (non-blocking):', thumbUploadError)
+          }
+
+          setProgress(75)
+        } catch (thumbError) {
+          // Error is NON-BLOCKING: continue without thumbnail
+          debugWarn('[Video Upload] Thumbnail upload failed (non-blocking):', thumbError)
+        }
+      }
+
       setProgress(80)
 
       // Save content record to database via server action
       let result
       try {
-        result = await saveVideoContentRecord(publicUrl)
+        result = await saveVideoContentRecord(publicUrl, thumbnailUrl)
       } catch (error) {
         console.error('[Video Upload] Server action error:', error)
         const errorInfo = analyzeNetworkError(error)

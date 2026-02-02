@@ -20,6 +20,14 @@ export async function initFFmpeg(): Promise<FFmpeg> {
   return ffmpegInstance
 }
 
+/**
+ * Check if FFmpeg is already loaded
+ * Useful for UI feedback (show loader if still loading)
+ */
+export function isFFmpegLoaded(): boolean {
+  return ffmpegInstance?.loaded ?? false
+}
+
 interface CompressionOptions {
   quality?: 'low' | 'medium' | 'high'
   onProgress?: (progress: number) => void

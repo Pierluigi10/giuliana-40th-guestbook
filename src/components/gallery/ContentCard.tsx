@@ -39,6 +39,7 @@ interface Content {
   type: ContentRow['type']
   text_content: ContentRow['text_content']
   media_url: ContentRow['media_url']
+  thumbnail_url: ContentRow['thumbnail_url']
   approved_at: ContentRow['approved_at']
   user_id: ContentRow['user_id']
   profiles: { full_name: string | null } | null
@@ -64,8 +65,6 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showFullText, setShowFullText] = useState(false)
-  const videoRef = useRef<HTMLDivElement>(null)
-  const [isVideoVisible, setIsVideoVisible] = useState(false)
 
   // Determina se il testo è troppo lungo (più di 150 caratteri o 4 righe circa)
   const isLongText = content.text_content && content.text_content.length > 150
@@ -89,24 +88,6 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, []) // Empty dependency array - only mount/unmount
-
-  // Lazy load video with Intersection Observer
-  useEffect(() => {
-    if (content.type !== 'video' || !videoRef.current) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsVideoVisible(true)
-          observer.disconnect()
-        }
-      },
-      { rootMargin: '100px' }
-    )
-
-    observer.observe(videoRef.current)
-    return () => observer.disconnect()
-  }, [content.type])
 
   // Count reactions by emoji
   const reactionCounts = reactions.reduce((acc, r) => {
@@ -330,28 +311,44 @@ export function ContentCard({ content, userId, userRole, onOpenLightbox, onDelet
         )}
 
         {content.type === 'video' && content.media_url && (
-          <div ref={videoRef}>
+          <div>
             <motion.div
-              className="relative overflow-hidden cursor-pointer bg-black"
+              className="group relative overflow-hidden cursor-pointer w-full h-48"
               onClick={onOpenLightbox}
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.3 }}
             >
-              {isVideoVisible ? (
-                <video
-                  src={content.media_url}
-                  className="w-full h-48 object-cover"
-                  preload="none"
-                />
+              {/* Thumbnail se disponibile, altrimenti gradiente fallback */}
+              {content.thumbnail_url ? (
+                <>
+                  <Image
+                    src={content.thumbnail_url}
+                    alt="Video thumbnail"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                    loading="lazy"
+                  />
+                  {/* Overlay scuro leggero per contrasto play button */}
+                  <div className="absolute inset-0 bg-black/20" />
+                </>
               ) : (
-                <div className="w-full h-48 bg-gradient-to-br from-purple-900/20 to-pink-900/20 flex items-center justify-center">
-                  <svg className="w-16 h-16 text-white/50" fill="currentColor" viewBox="0 0 24 24">
+                // Fallback: gradiente esistente per video senza thumbnail
+                <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-pink-900/20" />
+              )}
+
+              {/* Play button overlay - sempre visibile */}
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg ring-2 ring-white/50" aria-hidden>
+                  <svg className="w-6 h-6 text-birthday-purple ml-1 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </div>
-              )}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+              </div>
+
+              {/* Hover effect - play button più grande */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-lg">
                   <svg className="w-8 h-8 text-birthday-purple ml-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>

@@ -32,6 +32,7 @@ interface Content {
   type: ContentRow['type']
   text_content: ContentRow['text_content']
   media_url: ContentRow['media_url']
+  thumbnail_url: ContentRow['thumbnail_url']
   approved_at: ContentRow['approved_at']
   created_at: ContentRow['created_at']
   user_id: ContentRow['user_id']
@@ -319,10 +320,10 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
   })
 
   const filters = [
-    { id: 'all' as const, label: t('filters.all'), icon: '🎁', count: content.length },
-    { id: 'text' as const, label: t('filters.text'), icon: '📝', count: content.filter(c => c.type === 'text').length },
-    { id: 'image' as const, label: t('filters.image'), icon: '📸', count: content.filter(c => c.type === 'image').length },
-    { id: 'video' as const, label: t('filters.video'), icon: '🎥', count: content.filter(c => c.type === 'video').length },
+    { id: 'all' as const, label: t('filters.all'), icon: '🎁' },
+    { id: 'text' as const, label: t('filters.text'), icon: '📝' },
+    { id: 'image' as const, label: t('filters.image'), icon: '📸' },
+    { id: 'video' as const, label: t('filters.video'), icon: '🎥' },
   ]
 
   if (content.length === 0) {
@@ -383,38 +384,27 @@ export function GalleryView({ initialContent, userId, userRole }: GalleryViewPro
       )}
 
       {/* Filters */}
-      <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-lg p-3 md:p-4 border border-white/20">
+      <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg p-3 md:p-4 border border-white/40">
         <div className="flex flex-wrap justify-center gap-2 md:gap-3">
           {filters.map((f) => (
             <motion.button
               key={f.id}
               onClick={() => handleFilterChange(f.id)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`min-h-[44px] px-4 md:px-6 py-2.5 md:py-3 rounded-full text-sm md:text-base font-medium transition-all touch-manipulation ${
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              aria-label={f.label}
+              title={f.label}
+              className={`min-h-[44px] px-3 sm:px-4 md:px-5 py-2.5 md:py-3 rounded-full text-xs sm:text-sm md:text-base font-medium transition-all duration-200 touch-manipulation flex items-center gap-1.5 ${
                 filter === f.id
-                  ? 'bg-gradient-to-r from-birthday-pink to-birthday-purple text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
+                  ? 'bg-gradient-to-r from-birthday-pink to-birthday-purple text-white shadow-md ring-2 ring-white/30'
+                  : 'bg-white/60 text-gray-600 hover:bg-white hover:text-gray-800 hover:shadow-sm border border-gray-200/60'
               }`}
             >
-              <span className="mr-1 md:mr-2 text-base md:text-lg">{f.icon}</span>
-              <span className="hidden sm:inline">{f.label}</span>
-              <span className="sm:ml-2 opacity-75">({f.count})</span>
+              <span className="text-base sm:text-lg md:text-xl shrink-0" aria-hidden>{f.icon}</span>
+              <span>{f.label}</span>
             </motion.button>
           ))}
         </div>
-
-        <motion.p
-          key={filter}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center mt-4 text-sm text-muted-foreground"
-        >
-          {filteredContent.length === content.length
-            ? t('totalCount', { count: content.length })
-            : t('filteredCount', { filtered: filteredContent.length, total: content.length })}
-        </motion.p>
       </div>
 
       {/* Masonry Grid */}
